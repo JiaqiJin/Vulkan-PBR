@@ -1,64 +1,27 @@
 #include <iostream>
-// https://github.com/vblanco20-1/vulkan-guide/tree/all-chapters
-// https://vkguide.dev/docs/chapter-2/passing_data/
-#define GLFW_INCLUDE_VULKAN
+#include <stdexcept>
+
+#include "RHI/VulkanApplication.h"
+
 #include <GLFW/glfw3.h>
 
-#include <iostream>
-#include <stdexcept>
-#include <cstdlib>
+int main(void)
+{
+	if (!glfwInit())
+		return EXIT_FAILURE;
 
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
+	try
+	{
+		Application app;
+		app.run();
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		glfwTerminate();
+		return EXIT_FAILURE;
+	}
 
-class HelloTriangleApplication {
-public:
-    void run() {
-        initWindow();
-        initVulkan();
-        mainLoop();
-        cleanup();
-    }
-
-private:
-    GLFWwindow* window;
-
-    void initWindow() {
-        glfwInit();
-
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-    }
-
-    void initVulkan() {
-
-    }
-
-    void mainLoop() {
-        while (!glfwWindowShouldClose(window)) {
-            glfwPollEvents();
-        }
-    }
-
-    void cleanup() {
-        glfwDestroyWindow(window);
-
-        glfwTerminate();
-    }
-};
-
-int main() {
-    HelloTriangleApplication app;
-
-    try {
-        app.run();
-    }
-    catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
+	glfwTerminate();
+	return EXIT_SUCCESS;
 }
