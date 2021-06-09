@@ -70,6 +70,23 @@ public:
 		uint32_t height
 	);
 
+	static void bindUniformBuffer(
+		const VulkanRendererContext& context,
+		VkDescriptorSet descriptorSet,
+		int binding,
+		VkBuffer buffer,
+		VkDeviceSize offset,
+		VkDeviceSize size
+	);
+
+	static void bindCombinedImageSampler(
+		const VulkanRendererContext& context,
+		VkDescriptorSet descriptorSet,
+		int binding,
+		VkImageView imageView,
+		VkSampler sampler
+	);
+
 	static void transitionImageLayout(
 		const VulkanRendererContext& context,
 		VkImage image,

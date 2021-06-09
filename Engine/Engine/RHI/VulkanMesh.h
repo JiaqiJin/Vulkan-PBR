@@ -22,7 +22,7 @@ public:
 	inline uint32_t getNumIndices() const { return static_cast<uint32_t>(indices.size()); }
 
 	static VkVertexInputBindingDescription getVertexInputBindingDescription();
-	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
+	static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions();
 
 	bool loadFromFile(const std::string& path);
 
@@ -40,6 +40,9 @@ private:
 	struct Vertex
 	{
 		glm::vec3 position;
+		glm::vec3 tangent;
+		glm::vec3 binormal;
+		glm::vec3 normal;
 		glm::vec3 color;
 		glm::vec2 uv;
 	};
