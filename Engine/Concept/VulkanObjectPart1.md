@@ -2,7 +2,9 @@
 
 ## Vulkan objects diagram
 
-![Image](https://github.com/Jiaqidesune/PBRTStudy/blob/master/example/result.jpg)
+![Image](https://github.com/Jiaqidesune/Vulkan-Engine/blob/main/Engine/Concept/Vulkan-Diagram-568x1024.png)
+
+Basic concepts(https://gpuopen.com/learn/understanding-vulkan-objects/).
 
 ## Vulkan Objects descriptions and creations
 
