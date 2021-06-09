@@ -1,5 +1,5 @@
+#include "VulkanRenderer.h"	
 #include "VulkanMesh.h"
-#include "VulkanRenderer.h"
 #include "VulkanUtils.h"
 
 #include "RenderScene.h"
@@ -13,9 +13,10 @@
 
 struct UniformBufferObject
 {
-	glm::mat4 model;
+	glm::mat4 world;
 	glm::mat4 view;
 	glm::mat4 proj;
+	glm::vec3 cameraPos;
 };
 
 
@@ -166,21 +167,13 @@ void Renderer::init(const RenderScene* scene)
 	dynamicStateInfo.pDynamicStates = dynamicStates;
 
 	// Create descriptor set layout
-	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-	uboLayoutBinding.binding = 0;
-	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.descriptorCount = 1;
-	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+	std::array<VkDescriptorSetLayoutBinding, 6> bindings;
 
-	VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
-	samplerLayoutBinding.binding = 1;
-	samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	samplerLayoutBinding.descriptorCount = 1;
-	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	samplerLayoutBinding.pImmutableSamplers = nullptr; // Optional
+	VkShaderStageFlags stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	bindings[0] = { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, stage, nullptr };
 
-	std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+	for (uint32_t i = 1; i < 6; i++)
+		bindings[i] = { i, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, stage, nullptr };
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -205,42 +198,59 @@ void Renderer::init(const RenderScene* scene)
 
 	for (size_t i = 0; i < imageCount; i++)
 	{
-		const VulkanTexture& texture = scene->getTexture();
-
-		VkDescriptorBufferInfo descriptorBufferInfo = {};
-		descriptorBufferInfo.buffer = uniformBuffers[i];
-		descriptorBufferInfo.offset = 0;
-		descriptorBufferInfo.range = sizeof(UniformBufferObject);
-
-		VkDescriptorImageInfo descriptorImageInfo = {};
-		descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		descriptorImageInfo.imageView = texture.getImageView();
-		descriptorImageInfo.sampler = texture.getSampler();
-
-		std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};
-
-		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[0].dstSet = descriptorSets[i];
-		descriptorWrites[0].dstBinding = 0;
-		descriptorWrites[0].dstArrayElement = 0;
-		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorWrites[0].descriptorCount = 1;
-		descriptorWrites[0].pBufferInfo = &descriptorBufferInfo;
-
-		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[1].dstSet = descriptorSets[i];
-		descriptorWrites[1].dstBinding = 1;
-		descriptorWrites[1].dstArrayElement = 0;
-		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[1].descriptorCount = 1;
-		descriptorWrites[1].pImageInfo = &descriptorImageInfo;
-
-		vkUpdateDescriptorSets(
-			context.device,
-			static_cast<uint32_t>(descriptorWrites.size()),
-			descriptorWrites.data(),
+		const VulkanTexture& albedoTexture = scene->getAlbedoTexture();
+		const VulkanTexture& normalTexture = scene->getNormalTexture();
+		const VulkanTexture& aoTexture = scene->getAOTexture();
+		const VulkanTexture& shadingTexture = scene->getShadingTexture();
+		const VulkanTexture& emissionTexture = scene->getEmissionTexture();
+		
+		VulkanUtils::bindUniformBuffer(
+			context,
+			descriptorSets[i],
 			0,
-			nullptr
+			uniformBuffers[i],
+			0,
+			sizeof(UniformBufferObject)
+		);
+
+		VulkanUtils::bindCombinedImageSampler(
+			context,
+			descriptorSets[i],
+			1,
+			albedoTexture.getImageView(),
+			albedoTexture.getSampler()
+		);
+
+		VulkanUtils::bindCombinedImageSampler(
+			context,
+			descriptorSets[i],
+			2,
+			normalTexture.getImageView(),
+			normalTexture.getSampler()
+		);
+
+		VulkanUtils::bindCombinedImageSampler(
+			context,
+			descriptorSets[i],
+			3,
+			aoTexture.getImageView(),
+			aoTexture.getSampler()
+		);
+
+		VulkanUtils::bindCombinedImageSampler(
+			context,
+			descriptorSets[i],
+			4,
+			shadingTexture.getImageView(),
+			shadingTexture.getSampler()
+		);
+
+		VulkanUtils::bindCombinedImageSampler(
+			context,
+			descriptorSets[i],
+			5,
+			emissionTexture.getImageView(),
+			emissionTexture.getSampler()
 		);
 	}
 
@@ -451,10 +461,11 @@ VkCommandBuffer Renderer::render(uint32_t imageIndex)
 	const float zFar = 10.0f;
 
 	UniformBufferObject ubo = {};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
+	ubo.world = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), zero, up);
 	ubo.proj = glm::perspective(glm::radians(45.0f), aspect, zNear, zFar);
 	ubo.proj[1][1] *= -1;
+	ubo.cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
 
 	void* data;
 	vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(ubo), 0, &data);

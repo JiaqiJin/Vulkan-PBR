@@ -17,8 +17,12 @@
 
 static std::string vertex_shader_path = "Assert/Shader/shader.vert";
 static std::string fragment_shader_path = "Assert/Shader/shader.frag";
-static std::string texture_path = "Assert/Texture/viking_room.png";
-static std::string model_path = "Assert/Model/viking_room.obj";
+static std::string albedoTexturePath = "Assert/Texture/Default_albedo.jpg";
+static std::string normalTexturePath = "Assert/Texture/Default_normal.jpg";
+static std::string aoTexturePath = "Assert/Texture/Default_AO.jpg";
+static std::string shadingTexturePath = "Assert/Texture/Default_metalRoughness.jpg";
+static std::string emissionTexturePath = "Assert/Texture/Default_emissive.jpg";
+static std::string model_path = "Assert/Model/DamagedHelmet.fbx";
 
 static std::vector<const char*> requiredPhysicalDeviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
@@ -169,7 +173,16 @@ void Application::onFramebufferResize(GLFWwindow* window, int width, int height)
 void Application::initRenderScene()
 {
 	scene = new RenderScene(context);
-	scene->init(vertex_shader_path, fragment_shader_path, texture_path, model_path);
+	scene->init(
+		vertex_shader_path,
+		fragment_shader_path,
+		albedoTexturePath,
+		normalTexturePath,
+		aoTexturePath,
+		shadingTexturePath,
+		emissionTexturePath,
+		model_path
+	);
 }
 
 void Application::shutdownRenderScene()
@@ -538,7 +551,7 @@ void Application::initVulkan()
 	instanceInfo.ppEnabledExtensionNames = extensions.data();
 	instanceInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
 	instanceInfo.ppEnabledLayerNames = layers.data();
-	instanceInfo.pNext = &debugMessengerInfo;
+	//instanceInfo.pNext = &debugMessengerInfo;
 
 	// Create Vulkan instance
 	VkResult result = vkCreateInstance(&instanceInfo, nullptr, &instance);
