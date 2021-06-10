@@ -123,7 +123,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\lib-vc2019;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\lib\Release\x64;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\lib;C:\VulkanSDK\1.2.154.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,7 +143,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\lib-vc2019;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\lib\Release\x64;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\lib;C:\VulkanSDK\1.2.154.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
