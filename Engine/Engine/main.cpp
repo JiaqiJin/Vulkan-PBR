@@ -25,3 +25,5 @@ int main(void)
 	glfwTerminate();
 	return EXIT_SUCCESS;
 }
+
+// https://github.com/Drawoceans/vulkan_tutorial_zhcn

@@ -63,6 +63,11 @@ private:
 	void initVulkan();
 	void shutdownVulkan();
 
+	void initVulkanSwapChain();
+	void shutdownVulkanSwapChain();
+	void recreateVulkanSwapChain();
+
+
 	void initRenderer();
 	void shutdownRenderer();
 
@@ -90,6 +95,9 @@ private:
 	VkSwapchainKHR swapChain{ VK_NULL_HANDLE };
 	std::vector<VkImage> swapChainImages;
 	std::vector<VkImageView> swapChainImageViews;
+
+	VkFormat swapChainImageFormat;
+	VkExtent2D swapChainExtent;
 
 	VkImage colorImage{ VK_NULL_HANDLE };
 	VkImageView colorImageView{ VK_NULL_HANDLE };

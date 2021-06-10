@@ -291,12 +291,152 @@ void Application::shutdownVulkan()
 
 void Application::initRenderer()
 {
-
+	VulkanSwapChainContext swapChainContext = {};
+	swapChainContext.descriptorPool = descriptorPool;
+	swapChainContext.colorFormat = swapChainImageFormat;
+	swapChainContext.depthFormat = depthFormat;
+	swapChainContext.extent = swapChainExtent;
+	swapChainContext.swapChainImageViews = swapChainImageViews;
+	swapChainContext.depthImageView = depthImageView;
+	swapChainContext.colorImageView = colorImageView;
 }
 
 void Application::shutdownRenderer()
 {
 	
+}
+
+void Application::initVulkanSwapChain()
+{
+	// Create swap chain
+	QueueFamilyIndices indices = fetchQueueFamilyIndices(physicalDevice);
+	SwapChainSupportDetails details = fetchSwapChainSupportDetails(physicalDevice, surface);
+	SwapChainSettings settings = selectOptimalSwapChainSettings(details);
+
+	uint32_t imageCount = details.capabilities.minImageCount + 1;
+
+	if (details.capabilities.maxImageCount > 0)
+		imageCount = std::min(imageCount, details.capabilities.maxImageCount);
+
+	VkSwapchainCreateInfoKHR swapChainInfo = {};
+	swapChainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	swapChainInfo.surface = surface;
+	swapChainInfo.minImageCount = imageCount;
+	swapChainInfo.imageFormat = settings.format.format;
+	swapChainInfo.imageColorSpace = settings.format.colorSpace;
+	swapChainInfo.imageExtent = settings.extent;
+	swapChainInfo.imageArrayLayers = 1;
+	swapChainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+	if (indices.graphicsFamily.value() != indices.presentFamily.value())
+	{
+		uint32_t queueFamilies[] = { indices.graphicsFamily.value() , indices.presentFamily.value() };
+		swapChainInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		swapChainInfo.queueFamilyIndexCount = 2;
+		swapChainInfo.pQueueFamilyIndices = queueFamilies;
+	}
+	else
+	{
+		swapChainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		swapChainInfo.queueFamilyIndexCount = 0;
+		swapChainInfo.pQueueFamilyIndices = nullptr;
+	}
+
+	swapChainInfo.preTransform = details.capabilities.currentTransform;
+	swapChainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	swapChainInfo.presentMode = settings.presentMode;
+	swapChainInfo.clipped = VK_TRUE;
+	swapChainInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	if (vkCreateSwapchainKHR(device, &swapChainInfo, nullptr, &swapChain) != VK_SUCCESS)
+		throw std::runtime_error("Can't create swapchain");
+
+	uint32_t swapChainImageCount = 0;
+	vkGetSwapchainImagesKHR(device, swapChain, &swapChainImageCount, nullptr);
+	assert(swapChainImageCount != 0);
+
+	swapChainImages.resize(swapChainImageCount);
+	vkGetSwapchainImagesKHR(device, swapChain, &swapChainImageCount, swapChainImages.data());
+
+	swapChainImageFormat = settings.format.format;
+	swapChainExtent = settings.extent;
+
+	// Create swap chain image views
+	swapChainImageViews.resize(swapChainImageCount);
+	for (size_t i = 0; i < swapChainImageViews.size(); i++)
+	{
+		swapChainImageViews[i] = VulkanUtils::createImage2DView(context, swapChainImages[i], 1, 
+			swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+
+		// Create color buffer & image view
+	}
+
+	// Create descriptor pools
+	std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
+	descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSizes[0].descriptorCount = swapChainImageCount;
+	descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptorPoolSizes[1].descriptorCount = swapChainImageCount;
+
+	VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
+	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
+	descriptorPoolInfo.pPoolSizes = descriptorPoolSizes.data();
+	descriptorPoolInfo.maxSets = swapChainImageCount;
+	descriptorPoolInfo.flags = 0; // Optional
+
+	if (vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+		throw std::runtime_error("Can't create descriptor pool");
+}
+
+void Application::shutdownVulkanSwapChain()
+{
+	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+	descriptorPool = VK_NULL_HANDLE;
+
+	vkDestroyImageView(device, colorImageView, nullptr);
+	colorImageView = VK_NULL_HANDLE;
+
+	vkDestroyImage(device, colorImage, nullptr);
+	colorImage = VK_NULL_HANDLE;
+
+	vkFreeMemory(device, colorImageMemory, nullptr);
+	colorImageMemory = VK_NULL_HANDLE;
+
+	vkDestroyImageView(device, depthImageView, nullptr);
+	depthImageView = VK_NULL_HANDLE;
+
+	vkDestroyImage(device, depthImage, nullptr);
+	depthImage = VK_NULL_HANDLE;
+
+	vkFreeMemory(device, depthImageMemory, nullptr);
+	depthImageMemory = VK_NULL_HANDLE;
+
+	for (auto imageView : swapChainImageViews)
+		vkDestroyImageView(device, imageView, nullptr);
+
+	swapChainImageViews.clear();
+	swapChainImages.clear();
+
+	vkDestroySwapchainKHR(device, swapChain, nullptr);
+	swapChain = VK_NULL_HANDLE;
+}
+
+void Application::recreateVulkanSwapChain()
+{
+	int width = 0, height = 0;
+	while (width == 0 || height == 0)
+	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+	}
+	vkDeviceWaitIdle(device);
+
+	shutdownRenderer();
+	shutdownVulkanSwapChain();
+
+	initVulkanSwapChain();
+	initRenderer();
 }
 
 // ----------------------------- Helper Functions ---------------------------------------
