@@ -60,6 +60,12 @@ private:
 
 	VkFormat selectOptimalDepthFormat() const;
 
+	void initVulkan();
+	void shutdownVulkan();
+
+	void initRenderer();
+	void shutdownRenderer();
+
 	void mainloop();
 	void render();
 

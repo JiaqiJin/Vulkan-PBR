@@ -24,6 +24,8 @@ static std::string shadingTexturePath = "Assert/Texture/Default_metalRoughness.j
 static std::string emissionTexturePath = "Assert/Texture/Default_emissive.jpg";
 static std::string model_path = "Assert/Model/DamagedHelmet.fbx";
 
+using namespace RHI;
+
 static std::vector<const char*> requiredPhysicalDeviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
@@ -46,6 +48,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 void Application::run()
 {
 	initWindow();
+
+	mainloop();
 }
 
 void Application::initWindow()
@@ -89,7 +93,210 @@ void Application::onFramebufferResize(GLFWwindow* window, int width, int height)
 
 void Application::render()
 {
+	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
+
+}
+
+void Application::initVulkan()
+{
+	// Check required extensions & layers
+	std::vector<const char*> extensions;
+	if (!checkRequiredExtensions(extensions))
+		throw std::runtime_error("This device doesn't have required Vulkan extensions");
+
+	std::vector<const char*> layers;
+	if (!checkRequiredValidationLayers(layers))
+		throw std::runtime_error("This device doesn't have required Vulkan validation layers");
+
+	// Fill instance structures
+	VkApplicationInfo appInfo = {};
+	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	appInfo.pApplicationName = "PBR Sandbox";
+	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+	appInfo.pEngineName = "No Engine";
+	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+	appInfo.apiVersion = VK_API_VERSION_1_0;
+
+	VkDebugUtilsMessengerCreateInfoEXT debugMessengerInfo = {};
+	debugMessengerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	debugMessengerInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	debugMessengerInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	debugMessengerInfo.pfnUserCallback = debugCallback;
+	debugMessengerInfo.pUserData = nullptr;
+
+	VkInstanceCreateInfo instanceInfo = {};
+	instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	instanceInfo.pApplicationInfo = &appInfo;
+	instanceInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+	instanceInfo.ppEnabledExtensionNames = extensions.data();
+	instanceInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+	instanceInfo.ppEnabledLayerNames = layers.data();
+	//instanceInfo.pNext = &debugMessengerInfo;
+
+	// Create Vulkan instance
+	VkResult result = vkCreateInstance(&instanceInfo, nullptr, &instance);
+	if (result != VK_SUCCESS)
+		throw std::runtime_error("Failed to create Vulkan instance");
+
+	// Create Vulkan win32 surface
+	VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
+	surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+	surfaceInfo.hwnd = glfwGetWin32Window(window);
+	surfaceInfo.hinstance = GetModuleHandle(nullptr);
+
+	result = vkCreateWin32SurfaceKHR(instance, &surfaceInfo, nullptr, &surface);
+	if (result != VK_SUCCESS)
+		throw std::runtime_error("Can't create Vulkan win32 surface KHR");
+
+	// Enumerate physical devices
+	uint32_t deviceCount = 0;
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+	if (deviceCount == 0)
+		throw std::runtime_error("Failed to find GPUs with Vulkan support");
+
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+	// TODO: pick the best physical device
+	for (const auto& device : devices)
+	{
+		if (checkPhysicalDevice(device, surface))
+		{
+			physicalDevice = device;
+			break;
+		}
+	}
+
+	if (physicalDevice == VK_NULL_HANDLE)
+		throw std::runtime_error("Failed to find a suitable GPU");
+
+	// Create logical device
+	QueueFamilyIndices indices = fetchQueueFamilyIndices(physicalDevice);
+
+	const float queuePriority = 1.0f;
+
+	std::vector<VkDeviceQueueCreateInfo> queuesInfo;
+	VkDeviceQueueCreateInfo queueCreateInfo = {};
+	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+	for (uint32_t queueFamilyIndex : uniqueQueueFamilies)
+	{
+		VkDeviceQueueCreateInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		info.queueFamilyIndex = queueFamilyIndex;
+		info.queueCount = 1;
+		info.pQueuePriorities = &queuePriority;
+		queuesInfo.push_back(info);
+	}
+
+	VkPhysicalDeviceFeatures deviceFeatures = {};
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
+
+	VkDeviceCreateInfo deviceCreateInfo = {};
+	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+	deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queuesInfo.size());
+	deviceCreateInfo.pQueueCreateInfos = queuesInfo.data();
+	deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(requiredPhysicalDeviceExtensions.size());
+	deviceCreateInfo.ppEnabledExtensionNames = requiredPhysicalDeviceExtensions.data();
+
+	// next two parameters are ignored, but it's still good to pass layers for backward compatibility
+	deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+	deviceCreateInfo.ppEnabledLayerNames = layers.data();
+
+	result = vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device);
+	if (result != VK_SUCCESS)
+		throw std::runtime_error("Can't create logical device");
+
+	// Get logical device queues
+	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	if (graphicsQueue == VK_NULL_HANDLE)
+		throw std::runtime_error("Can't get graphics queue from logical device");
+
+	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+	if (presentQueue == VK_NULL_HANDLE)
+		throw std::runtime_error("Can't get present queue from logical device");
+
+	// Create command pool
+	VkCommandPoolCreateInfo commandPoolInfo = {};
+	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	commandPoolInfo.flags = 0; // Optional
+
+	if (vkCreateCommandPool(device, &commandPoolInfo, nullptr, &commandPool) != VK_SUCCESS)
+		throw std::runtime_error("Can't create command pool");
+
+	// Create sync objects
+	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		VkSemaphoreCreateInfo semaphoreInfo = {};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+		result = vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]);
+		if (result != VK_SUCCESS)
+			throw std::runtime_error("Can't create 'image available' semaphore");
+
+		result = vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]);
+		if (result != VK_SUCCESS)
+			throw std::runtime_error("Can't create 'render finished' semaphore");
+
+		VkFenceCreateInfo fenceInfo = {};
+		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		result = vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]);
+		if (result != VK_SUCCESS)
+			throw std::runtime_error("Can't create in flight frame fence");
+	}
+
+	context.device = device;
+	context.physicalDevice = physicalDevice;
+	context.commandPool = commandPool;
+	context.graphicsQueue = graphicsQueue;
+	context.presentQueue = presentQueue;
+	context.msaaSamples = VulkanUtils::getMaxUsableSampleCount(context);
+}
+
+void Application::shutdownVulkan()
+{
+	vkDestroyCommandPool(device, commandPool, nullptr);
+	commandPool = VK_NULL_HANDLE;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(device, inFlightFences[i], nullptr);
+	}
+
+	renderFinishedSemaphores.clear();
+	imageAvailableSemaphores.clear();
+	inFlightFences.clear();
+
+	vkDestroyDevice(device, nullptr);
+	device = VK_NULL_HANDLE;
+
+	vkDestroySurfaceKHR(instance, surface, nullptr);
+	surface = VK_NULL_HANDLE;
+
+	vkDestroyInstance(instance, nullptr);
+	instance = VK_NULL_HANDLE;
+}
+
+void Application::initRenderer()
+{
+
+}
+
+void Application::shutdownRenderer()
+{
+	
 }
 
 // ----------------------------- Helper Functions ---------------------------------------
