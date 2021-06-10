@@ -4,7 +4,7 @@
 
 ![Image](https://github.com/Jiaqidesune/Vulkan-Engine/blob/main/Engine/Concept/Vulkan-Diagram-568x1024.png)
 
-Basic concepts(https://gpuopen.com/learn/understanding-vulkan-objects/).
+[Basic concepts](https://gpuopen.com/learn/understanding-vulkan-objects/).
 
 ## Vulkan Objects descriptions and creations
 
@@ -16,12 +16,12 @@ VkInstance instance;
 
 ### PhysicalDevice
 Represents a specific Vulkan-compatible device, like a graphics card.
-> Note: We need enumerate the physical device and check device is suitable.
+> Note: We need enumerate the physical device and check if the device is suitable.
 ```c++
 VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 ```
 
-### Queue families
+### Queue 
 Queue is a objects represent a queue of commands to be excute on device. Anything from drawing to uploading texture, requiered commands to be submitted to a "queue" using the function vkQueueSubmit. There are different types of queues (compute queue, graphic queue ...)that originate from different queue families and each family of queues allows only a subset of commands (computer commands ...).
 
 ```c++

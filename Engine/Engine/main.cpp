@@ -13,7 +13,7 @@ int main(void)
 	try
 	{
 		Application app;
-		app.run();
+		
 	}
 	catch (const std::exception& e)
 	{
