@@ -364,12 +364,72 @@ void Application::initVulkanSwapChain()
 	// Create swap chain image views
 	swapChainImageViews.resize(swapChainImageCount);
 	for (size_t i = 0; i < swapChainImageViews.size(); i++)
-	{
-		swapChainImageViews[i] = VulkanUtils::createImage2DView(context, swapChainImages[i], 1, 
-			swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+		swapChainImageViews[i] = VulkanUtils::createImage2DView(
+			context,
+			swapChainImages[i],
+			1,
+			swapChainImageFormat,
+			VK_IMAGE_ASPECT_COLOR_BIT);
 
-		// Create color buffer & image view
-	}
+	// Create color buffer & image view
+	VulkanUtils::createImage2D(
+		context,
+		swapChainExtent.width,
+		swapChainExtent.height,
+		1,
+		context.msaaSamples,
+		swapChainImageFormat,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		colorImage,
+		colorImageMemory);
+
+	colorImageView = VulkanUtils::createImage2DView(
+		context,
+		colorImage,
+		1,
+		swapChainImageFormat,
+		VK_IMAGE_ASPECT_COLOR_BIT);
+
+	VulkanUtils::transitionImageLayout(
+		context,
+		colorImage,
+		1,
+		swapChainImageFormat,
+		VK_IMAGE_LAYOUT_UNDEFINED,
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	// Create depth buffer & image view
+	depthFormat = selectOptimalDepthFormat();
+
+	VulkanUtils::createImage2D(
+		context,
+		swapChainExtent.width,
+		swapChainExtent.height,
+		1,
+		context.msaaSamples,
+		depthFormat,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		depthImage,
+		depthImageMemory);
+
+	depthImageView = VulkanUtils::createImage2DView(
+		context,
+		depthImage,
+		1,
+		depthFormat,
+		VK_IMAGE_ASPECT_DEPTH_BIT);
+
+	VulkanUtils::transitionImageLayout(
+		context,
+		depthImage,
+		1,
+		depthFormat,
+		VK_IMAGE_LAYOUT_UNDEFINED,
+		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
 	// Create descriptor pools
 	std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
