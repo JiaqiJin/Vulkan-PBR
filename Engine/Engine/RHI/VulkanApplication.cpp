@@ -15,6 +15,8 @@
 #include <set>
 #include <limits>
 
+using namespace RHI;
+
 static std::string vertex_shader_path = "Assert/Shader/shader.vert";
 static std::string fragment_shader_path = "Assert/Shader/shader.frag";
 static std::string albedoTexturePath = "Assert/Texture/Default_albedo.jpg";
@@ -48,8 +50,16 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 void Application::run()
 {
 	initWindow();
-
+	initVulkan();
+	initVulkanSwapChain();
+	initRenderScene();
+	initRenderer();
 	mainloop();
+	shutdownRenderer();
+	shutdownRenderScene();
+	shutdownVulkanSwapChain();
+	shutdownVulkan();
+	shutdownWindow();
 }
 
 void Application::initWindow()
@@ -95,7 +105,65 @@ void Application::render()
 {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
+	uint32_t imageIndex = 0;
+	VkResult result = vkAcquireNextImageKHR(
+		device,
+		swapChain,
+		std::numeric_limits<uint64_t>::max(),
+		imageAvailableSemaphores[currentFrame],
+		VK_NULL_HANDLE,
+		&imageIndex);
 
+	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		recreateVulkanSwapChain();
+		return;
+	}
+
+	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		throw std::runtime_error("Can't aquire swap chain image");
+
+	VkCommandBuffer commandBuffer = renderer->render(imageIndex);
+
+	VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+	VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+
+	VkSubmitInfo submitInfo = {};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBuffer;
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	vkResetFences(device, 1, &inFlightFences[currentFrame]);
+	if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+		throw std::runtime_error("Can't submit command buffer");
+
+	VkSwapchainKHR swapChains[] = { swapChain };
+	VkPresentInfoKHR presentInfo = {};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+	presentInfo.pImageIndices = &imageIndex;
+	presentInfo.pResults = nullptr; // Optional
+
+	result = vkQueuePresentKHR(presentQueue, &presentInfo);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
+	{
+		framebufferResized = false;
+		recreateVulkanSwapChain();
+	}
+	else if (result != VK_SUCCESS)
+		throw std::runtime_error("Can't aquire swap chain image");
+
+	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void Application::initVulkan()
@@ -289,6 +357,28 @@ void Application::shutdownVulkan()
 	instance = VK_NULL_HANDLE;
 }
 
+void Application::initRenderScene()
+{
+	scene = new RenderScene(context);
+	scene->init(
+		vertex_shader_path,
+		fragment_shader_path,
+		albedoTexturePath,
+		normalTexturePath,
+		aoTexturePath,
+		shadingTexturePath,
+		emissionTexturePath,
+		model_path);
+}
+
+void Application::shutdownRenderScene()
+{
+	scene->shutdown();
+
+	delete scene;
+	scene = nullptr;
+}
+
 void Application::initRenderer()
 {
 	VulkanSwapChainContext swapChainContext = {};
@@ -299,11 +389,17 @@ void Application::initRenderer()
 	swapChainContext.swapChainImageViews = swapChainImageViews;
 	swapChainContext.depthImageView = depthImageView;
 	swapChainContext.colorImageView = colorImageView;
+
+	renderer = new Renderer(context, swapChainContext);
+	renderer->init(scene);
 }
 
 void Application::shutdownRenderer()
 {
-	
+	renderer->shutdown();
+
+	delete renderer;
+	renderer = nullptr;
 }
 
 void Application::initVulkanSwapChain()
