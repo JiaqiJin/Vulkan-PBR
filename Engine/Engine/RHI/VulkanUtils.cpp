@@ -24,6 +24,23 @@ namespace RHI
 		throw std::runtime_error("Can't find suitable memory type");
 	}
 
+	VkShaderModule VulkanUtils::createShaderModule(
+		const VulkanRendererContext& context,
+		const uint32_t* bytecode,
+		size_t bytecodeSize)
+	{
+		VkShaderModuleCreateInfo shaderInfo = {};
+		shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		shaderInfo.codeSize = bytecodeSize;
+		shaderInfo.pCode = bytecode;
+
+		VkShaderModule shader;
+		if (vkCreateShaderModule(context.device, &shaderInfo, nullptr, &shader) != VK_SUCCESS)
+			throw std::runtime_error("Can't create shader module");
+
+		return shader;
+	}
+
 	VkSampler VulkanUtils::createSampler(
 		const VulkanRendererContext& context,
 		uint32_t mipLevels)

@@ -19,6 +19,11 @@ namespace RHI
 			const VulkanRendererContext& context,
 			uint32_t mipLevels);
 
+		static VkShaderModule createShaderModule(
+			const VulkanRendererContext& context,
+			const uint32_t* bytecode,
+			size_t bytecodeSize);
+
 		static VkImageView createImage2DView(
 			const VulkanRendererContext& context,
 			VkImage image,
