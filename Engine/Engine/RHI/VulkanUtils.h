@@ -15,6 +15,10 @@ namespace RHI
 			uint32_t typeFilter,
 			VkMemoryPropertyFlags properties);
 
+		static VkSampler createSampler(
+			const VulkanRendererContext& context,
+			uint32_t mipLevels);
+
 		static VkImageView createImage2DView(
 			const VulkanRendererContext& context,
 			VkImage image,
@@ -63,6 +67,15 @@ namespace RHI
 			VkImage dst,
 			uint32_t width,
 			uint32_t height);
+
+		static void generateImage2DMipmaps(
+			const VulkanRendererContext& context,
+			VkImage image,
+			uint32_t width,
+			uint32_t height,
+			uint32_t mipLevels,
+			VkFormat format,
+			VkFilter filter);
 
 		static VkSampleCountFlagBits getMaxUsableSampleCount(const VulkanRendererContext& context);
 	private:
