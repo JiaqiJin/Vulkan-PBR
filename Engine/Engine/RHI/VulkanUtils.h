@@ -82,6 +82,21 @@ namespace RHI
 			VkFormat format,
 			VkFilter filter);
 
+		static void bindCombinedImageSampler(
+			const VulkanRendererContext& context,
+			VkDescriptorSet descriptorSet,
+			int binding,
+			VkImageView imageView,
+			VkSampler sampler);
+
+		static void bindUniformBuffer(
+			const VulkanRendererContext& context,
+			VkDescriptorSet descriptorSet,
+			int binding,
+			VkBuffer buffer,
+			VkDeviceSize offset,
+			VkDeviceSize size);
+
 		static VkSampleCountFlagBits getMaxUsableSampleCount(const VulkanRendererContext& context);
 	private:
 		static bool hasStencilComponent(VkFormat format);

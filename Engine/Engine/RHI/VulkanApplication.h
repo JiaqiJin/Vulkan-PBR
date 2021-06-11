@@ -8,8 +8,8 @@
 
 // Forward declaration
 struct GLFWwindow;
-class Renderer;
-class RenderScene;
+class RHI::Renderer;
+class RHI::RenderScene;
 
 // Queu family indices
 struct QueueFamilyIndices
@@ -78,6 +78,8 @@ private:
 
 private:
 	GLFWwindow* window{ nullptr };
+	RHI::Renderer* renderer{ nullptr };
+	RHI::RenderScene* scene{ nullptr };
 
 	VulkanRendererContext context = {};
 

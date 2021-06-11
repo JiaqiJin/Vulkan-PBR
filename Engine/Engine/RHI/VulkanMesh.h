@@ -23,6 +23,10 @@ namespace RHI
 		static VkVertexInputBindingDescription getVertexInputBindingDescription();
 		static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions();
 
+		inline VkBuffer getVertexBuffer() const { return vertexBuffer; }
+		inline VkBuffer getIndexBuffer() const { return indexBuffer; }
+		inline uint32_t getNumIndices() const { return static_cast<uint32_t>(indices.size()); }
+
 		bool loadFromFile(const std::string& filename);
 
 		void uploadToGPU();
