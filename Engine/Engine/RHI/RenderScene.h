@@ -39,6 +39,8 @@ namespace RHI
 		inline const VulkanShader& getVertexShader() const { return vertexShader; }
 		inline const VulkanShader& getFragmentShader() const { return fragmentShader; }
 
+		VkShaderModule createShader(const std::string& path) const;
+
 	private:
 		VulkanRendererContext context;
 

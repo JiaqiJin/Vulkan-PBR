@@ -23,6 +23,126 @@ layout(location = 5) in vec3 fragPositionWS;
 
 layout(location = 0) out vec4 outColor;
 
+const float PI = 3.141592653589798979f;
+const float iPI = 0.31830988618379f;
+
+float sqr(float a)
+{
+	return a * a;
+}
+
+float lerp(float a, float b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
+vec3 lerp(vec3 a, vec3 b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
+struct Surface
+{
+	vec3 light;
+	vec3 view;
+	vec3 normal;
+	vec3 halfVector;
+};
+
+// ---------- PBR ---------------------
+
+struct MicrofacetMaterial
+{
+	vec3 albeto;
+	float roughness;
+	float metalness;
+};
+
+// relative surface area of microfacete aligned with to the half vector h
+// D = alpha^2 / pi((n · h)^2 (alpha^2 - 1) + 1)^2
+
+float DistributionGGX(Surface surface, float roughness)
+{
+	float alpha2 = roughness * roughness;
+	float dotNH = dot(surface.normal, surface.halfVector);
+
+	return iPI * alpha2 / sqr(1.0f + dotNH * dotNH * (alpha2 - 1.0f));
+}
+
+// Geometry function approximates the relative surface area where it micro surface-detail overshadow each other
+// G = n · v / (n · v) (1 - k) + k
+// G(n,v,l,k) = Gsub(n,v,k) Gsub(n,l,k)
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+	float nom = NdotV;
+	float denom = NdotV * (1.0f - roughness) + roughness;
+
+	return nom / denom;
+}
+
+float G_SmithGGX(Surface surface, float roughness)
+{
+	float NdotL = max(dot(surface.normal, surface.light), 0.0f);
+	float NdotV = max(dot(surface.normal, surface.view), 0.0f);
+
+	float ggx1 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx2 = GeometrySchlickGGX(NdotL, roughness);
+
+	return ggx1 * ggx2;
+}
+
+// Fresnel equation describe ratio of ligth that get reflected over the light get refracted
+// which varies over all angle we`re looking at a surface
+
+vec3 F_Shlick(Surface surface, vec3 f0)
+{
+	// cosTheta = dot(normal, halfVector)
+	float dotHV = max(dot(surface.halfVector, surface.view), 0.0f);
+
+	return f0 + (vec3(1.0f, 1.0f, 1.0f) - f0) * pow(1.0f - dotHV, 5);
+}
+
+// Cook-Torrance reflectance equation
+// f_cookTorrance = DFG / 4(wo · n)(wi · n)
+
+vec3 MicrofacetMetalBRDF(Surface surface, MicrofacetMaterial material)
+{
+	float dotNL = max(dot(surface.normal, surface.light), 0.0f);
+	float dotNV = max(dot(surface.normal, surface.view), 0.0f);
+	
+	float D = DistributionGGX(surface, material.roughness);
+	float G = G_SmithGGX(surface, material.roughness);
+	vec3  F = F_Shlick(surface, material.albeto);
+
+	return D * G * F / 4.0f * (dotNL) * dotNV;
+}
+
 void main() {
-    outColor = vec4(fragColor, 1.0) * texture(albedoSampler, fragTexCoord);
+	vec3 lightPos = ubo.cameraPos;
+	vec3 lightDirWS = normalize(lightPos - fragPositionWS);
+	vec3 cameraDirWS = normalize(ubo.cameraPos - fragPositionWS);
+
+	vec3 normal = texture(normalSampler, fragTexCoord).xyz * 2.0f - vec3(1.0f, 1.0f, 1.0f);
+
+	mat3 TBN;
+	TBN[0] = normalize(fragTangentWS);
+	TBN[1] = normalize(fragBinormalWS);
+	TBN[2] = normalize(fragNormalWS);
+
+	Surface surface;
+	surface.light = lightDirWS;
+	surface.view = cameraDirWS;
+	surface.normal = normalize(TBN * normal);
+	surface.halfVector = normalize(lightDirWS + cameraDirWS);
+
+	MicrofacetMaterial microfacet_material;
+	microfacet_material.albeto = texture(albedoSampler, fragTexCoord).rgb;
+	microfacet_material.roughness = texture(shadingSampler, fragTexCoord).b;
+	microfacet_material.metalness  = texture(emissionSampler, fragTexCoord).g;
+
+	vec3 microfacet_bdrf = MicrofacetMetalBRDF(surface, microfacet_material);
+	outColor = vec4(microfacet_bdrf, 1.0f);
+
+    //outColor = vec4(fragColor, 1.0) * texture(albedoSampler, fragTexCoord);
 }
