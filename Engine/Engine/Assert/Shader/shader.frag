@@ -53,7 +53,7 @@ struct Surface
 
 struct MicrofacetMaterial
 {
-	vec3 albeto;
+	vec3 albedo;
 	float roughness;
 	float metalness;
 };
@@ -110,12 +110,34 @@ vec3 MicrofacetMetalBRDF(Surface surface, MicrofacetMaterial material)
 {
 	float dotNL = max(dot(surface.normal, surface.light), 0.0f);
 	float dotNV = max(dot(surface.normal, surface.view), 0.0f);
-	
+
 	float D = DistributionGGX(surface, material.roughness);
 	float G = G_SmithGGX(surface, material.roughness);
-	vec3  F = F_Shlick(surface, material.albeto);
+	vec3 F = F_Shlick(surface, material.albedo);
 
-	return D * G * F / 4.0f * (dotNL) * dotNV;
+	return D * G * F / (4.0f * dotNL * dotNV);
+}
+
+vec3 MicrofacetDielectricBDRF(Surface surface, MicrofacetMaterial material)
+{
+	vec3 f0_dielectric = vec3(0.04f, 0.04f, 0.04f);
+
+	float dotNL = max(dot(surface.normal, surface.light), 0.0f);
+	float dotNV = max(dot(surface.normal, surface.view), 0.0f);
+
+	float D = DistributionGGX(surface, material.roughness);
+	float G = G_SmithGGX(surface, material.roughness);
+	vec3 F = F_Shlick(surface, f0_dielectric);
+
+	return D * G * F / (4.0f * dotNL * dotNV) + material.albedo * iPI;
+}
+
+vec3 MicrofacetBRDF(Surface surface, MicrofacetMaterial material)
+{
+	vec3 metal = MicrofacetMetalBRDF(surface, material);
+	vec3 dielectric = MicrofacetDielectricBDRF(surface, material);
+
+	return lerp(metal, dielectric, material.metalness);
 }
 
 void main() {
@@ -125,24 +147,26 @@ void main() {
 
 	vec3 normal = texture(normalSampler, fragTexCoord).xyz * 2.0f - vec3(1.0f, 1.0f, 1.0f);
 
-	mat3 TBN;
-	TBN[0] = normalize(fragTangentWS);
-	TBN[1] = normalize(fragBinormalWS);
-	TBN[2] = normalize(fragNormalWS);
+	mat3 m;
+	m[0] = normalize(fragTangentWS);
+	m[1] = normalize(fragBinormalWS);
+	m[2] = normalize(fragNormalWS);
 
 	Surface surface;
 	surface.light = lightDirWS;
 	surface.view = cameraDirWS;
-	surface.normal = normalize(TBN * normal);
+	surface.normal = normalize(m * normal);
 	surface.halfVector = normalize(lightDirWS + cameraDirWS);
 
-	MicrofacetMaterial microfacet_material;
-	microfacet_material.albeto = texture(albedoSampler, fragTexCoord).rgb;
-	microfacet_material.roughness = texture(shadingSampler, fragTexCoord).b;
-	microfacet_material.metalness  = texture(emissionSampler, fragTexCoord).g;
 
-	vec3 microfacet_bdrf = MicrofacetMetalBRDF(surface, microfacet_material);
+	MicrofacetMaterial microfacet_material;
+	microfacet_material.albedo = texture(albedoSampler, fragTexCoord).rgb;
+	microfacet_material.roughness = texture(shadingSampler, fragTexCoord).b;
+	microfacet_material.metalness = texture(shadingSampler, fragTexCoord).g;
+
+	vec3 microfacet_bdrf = MicrofacetBRDF(surface, microfacet_material);
 	outColor = vec4(microfacet_bdrf, 1.0f);
 
-    //outColor = vec4(fragColor, 1.0) * texture(albedoSampler, fragTexCoord);
+	outColor *= texture(aoSampler, fragTexCoord);
+	outColor += texture(emissionSampler, fragTexCoord);
 }
