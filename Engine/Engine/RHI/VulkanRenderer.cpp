@@ -451,7 +451,7 @@ namespace RHI
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
-		const float rotationSpeed = 0.1f;
+		const float rotationSpeed = 0.3f;
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 		VkBuffer uniformBuffer = uniformBuffers[imageIndex];

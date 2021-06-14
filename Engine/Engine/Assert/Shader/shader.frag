@@ -47,6 +47,10 @@ struct Surface
 	vec3 view;
 	vec3 normal;
 	vec3 halfVector;
+	float dotNH;
+	float dotNL;
+	float dotNV;
+	float dotHV;
 };
 
 // ---------- PBR ---------------------
@@ -106,38 +110,20 @@ vec3 F_Shlick(Surface surface, vec3 f0)
 // Cook-Torrance reflectance equation
 // f_cookTorrance = DFG / 4(wo · n)(wi · n)
 
-vec3 MicrofacetMetalBRDF(Surface surface, MicrofacetMaterial material)
-{
-	float dotNL = max(dot(surface.normal, surface.light), 0.0f);
-	float dotNV = max(dot(surface.normal, surface.view), 0.0f);
-
-	float D = DistributionGGX(surface, material.roughness);
-	float G = G_SmithGGX(surface, material.roughness);
-	vec3 F = F_Shlick(surface, material.albedo);
-
-	return D * G * F / (4.0f * dotNL * dotNV);
-}
-
-vec3 MicrofacetDielectricBDRF(Surface surface, MicrofacetMaterial material)
-{
-	vec3 f0_dielectric = vec3(0.04f, 0.04f, 0.04f);
-
-	float dotNL = max(dot(surface.normal, surface.light), 0.0f);
-	float dotNV = max(dot(surface.normal, surface.view), 0.0f);
-
-	float D = DistributionGGX(surface, material.roughness);
-	float G = G_SmithGGX(surface, material.roughness);
-	vec3 F = F_Shlick(surface, f0_dielectric);
-
-	return D * G * F / (4.0f * dotNL * dotNV) + material.albedo * iPI;
-}
-
 vec3 MicrofacetBRDF(Surface surface, MicrofacetMaterial material)
 {
-	vec3 metal = MicrofacetMetalBRDF(surface, material);
-	vec3 dielectric = MicrofacetDielectricBDRF(surface, material);
+	// simplifying assumption that most dielectric surfaces look visually correct with a constant F0 0.04.
+	// while do specify f0 for metallic surfaces as then given by the albedo value.
+	vec3 f0 = lerp(vec3(0.04f), material.albedo, material.metalness);
 
-	return lerp(metal, dielectric, material.metalness);
+	float D = DistributionGGX(surface, material.roughness);
+	vec3 F = F_Shlick(surface, f0);
+	float G= G_SmithGGX(surface, material.roughness);
+
+	vec3 specular_reflection = D * F * G;
+	vec3 diffuse_reflection = material.albedo * lerp(vec3(1.0f) - F, vec3(0.0f), material.metalness);
+	
+	return (diffuse_reflection * iPI + specular_reflection);
 }
 
 void main() {
@@ -157,16 +143,32 @@ void main() {
 	surface.view = cameraDirWS;
 	surface.normal = normalize(m * normal);
 	surface.halfVector = normalize(lightDirWS + cameraDirWS);
-
+	surface.dotNH = max(0.0f, dot(surface.normal, surface.halfVector));
+	surface.dotNL = max(0.0f, dot(surface.normal, surface.light));
+	surface.dotNV = max(0.0f, dot(surface.normal, surface.view));
+	surface.dotHV = max(0.0f, dot(surface.halfVector, surface.view));
 
 	MicrofacetMaterial microfacet_material;
 	microfacet_material.albedo = texture(albedoSampler, fragTexCoord).rgb;
-	microfacet_material.roughness = texture(shadingSampler, fragTexCoord).b;
-	microfacet_material.metalness = texture(shadingSampler, fragTexCoord).g;
+	microfacet_material.roughness = texture(shadingSampler, fragTexCoord).g;
+	microfacet_material.metalness = texture(shadingSampler, fragTexCoord).b;
 
-	vec3 microfacet_bdrf = MicrofacetBRDF(surface, microfacet_material);
-	outColor = vec4(microfacet_bdrf, 1.0f);
+	// Direct light
+	float dotNL = max(0.0f, dot(surface.normal, surface.light));
+	float attenuation = 1.0f / dot(lightPos - fragPositionWS, lightPos - fragPositionWS);
 
-	outColor *= texture(aoSampler, fragTexCoord);
-	outColor += texture(emissionSampler, fragTexCoord);
+	vec3 light = MicrofacetBRDF(surface, microfacet_material) * attenuation * 2.0f * dotNL;
+
+	vec3 ambient = vec3(0.03) * microfacet_material.albedo * texture(aoSampler, fragTexCoord).r;
+
+	// Result
+	vec3 color = vec3(0.0f);
+	color += light;// + ambient 
+	color += texture(emissionSampler, fragTexCoord).rgb;
+
+	// Tonemapping + gamma correction
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0/2.2));
+
+	outColor = vec4(color, 1.0f);
 }
