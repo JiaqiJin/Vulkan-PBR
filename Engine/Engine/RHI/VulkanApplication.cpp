@@ -25,6 +25,7 @@ static std::string aoTexturePath = "Assert/Texture/Default_AO.jpg";
 static std::string shadingTexturePath = "Assert/Texture/Default_metalRoughness.jpg";
 static std::string emissionTexturePath = "Assert/Texture/Default_emissive.jpg";
 static std::string hdrTexturePath = "Assert/Texture/Ice_Lake/Ice_Lake_Env.hdr";
+static std::string hdrDefaultTexturePath = "Assert/Texture/Default_environment.hdr";
 static std::string model_path = "Assert/Model/DamagedHelmet.fbx";
 
 using namespace RHI;
@@ -364,7 +365,7 @@ void Application::initRenderScene()
 	scene->init(
 		vertex_shader_path,
 		fragment_shader_path,
-		hdrTexturePath,
+		hdrDefaultTexturePath,
 		albedoTexturePath,
 		normalTexturePath,
 		aoTexturePath,

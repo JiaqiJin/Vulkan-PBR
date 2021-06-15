@@ -54,6 +54,17 @@ struct Surface
 	float dotHV;
 };
 
+// HDR
+const vec2 invAtan = vec2(0.1591, 0.3183);
+vec2 SampleSphericalMap(vec3 v)
+{
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv *= invAtan;
+    uv += 0.5;
+    return uv;
+}
+
+
 // ---------- PBR ---------------------
 
 struct MicrofacetMaterial
@@ -162,6 +173,9 @@ void main() {
 
 	vec3 ambient = vec3(0.03) * microfacet_material.albedo * texture(aoSampler, fragTexCoord).r;
 
+	vec3 r = reflect(-surface.view, surface.normal);
+	vec3 enviroment = texture(hdrSampler, SampleSphericalMap(r)).rgb;
+
 	// Result
 	vec3 color = vec3(0.0f);
 	color += light;// + ambient 
@@ -171,5 +185,5 @@ void main() {
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));
 
-	outColor = vec4(color, 1.0f);
+	outColor = vec4(enviroment, 1.0f);
 }
