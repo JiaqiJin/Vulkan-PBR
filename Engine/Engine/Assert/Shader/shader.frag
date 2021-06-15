@@ -13,6 +13,7 @@ layout(binding = 2) uniform sampler2D normalSampler;
 layout(binding = 3) uniform sampler2D aoSampler;
 layout(binding = 4) uniform sampler2D shadingSampler;
 layout(binding = 5) uniform sampler2D emissionSampler;
+layout(binding = 6) uniform sampler2D hdrSampler;
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;

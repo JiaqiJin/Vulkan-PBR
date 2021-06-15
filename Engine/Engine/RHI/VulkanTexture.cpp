@@ -18,7 +18,8 @@ namespace RHI
 	bool VulkanTexture::loadFromFile(const std::string& path)
 	{
 		// TODO: support other image formats
-		stbi_uc* stb_pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		stbi_uc* stb_pixels = stbi_load(path.c_str(), &width, &height, nullptr, STBI_rgb_alpha);
+		channels = 4;
 
 		if (!stb_pixels)
 		{
@@ -27,8 +28,10 @@ namespace RHI
 		}
 
 		mipLevels = static_cast<int>(std::floor(std::log2(std::max(width, height))) + 1);
+		layers = 1;
 
-		size_t imageSize = width * height * 4;
+		size_t pixelSize = channels * sizeof(stbi_uc);
+		size_t imageSize = width * height * pixelSize;
 		if (pixels != nullptr)
 			delete[] pixels;
 
@@ -40,18 +43,58 @@ namespace RHI
 
 		// Upload CPU data to GPU
 		clearGPUData();
-		uploadToGPU();
+		uploadToGPU(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, pixelSize);
 
 		// TODO: should we clear CPU data after uploading it to the GPU?
 
 		return true;
 	}
 
-	void VulkanTexture::uploadToGPU()
+	bool VulkanTexture::loadHDRFromFile(const std::string& path)
 	{
-		format = VK_FORMAT_R8G8B8A8_UNORM;
+		float* stb_pixels = stbi_loadf(path.c_str(), &width, &height, &channels, 0);
 
-		VkDeviceSize imageSize = width * height * 4;
+		if (!stb_pixels)
+		{
+			std::cerr << "VulkanTexture::loadHDRFromFile(): " << stbi_failure_reason() << std::endl;
+			return false;
+		}
+
+		mipLevels = 1;
+		layers = 1;
+
+		size_t pixelSize = channels * sizeof(float);
+		size_t imageSize = width * height * channels * sizeof(float);
+		if (pixels != nullptr)
+			delete[] pixels;
+
+		pixels = new unsigned char[imageSize];
+		memcpy(pixels, stb_pixels, imageSize);
+
+		stbi_image_free(stb_pixels);
+		stb_pixels = nullptr;
+
+		// Upload CPU data to GPU
+		clearGPUData();
+
+		VkFormat format = VK_FORMAT_UNDEFINED;
+		switch (channels)
+		{
+			case 1: format = VK_FORMAT_R32_SFLOAT;
+			case 2: format = VK_FORMAT_R32G32_SFLOAT;
+			case 3: format = VK_FORMAT_R32G32B32_SFLOAT;
+		}
+
+		uploadToGPU(format, VK_IMAGE_TILING_LINEAR, pixelSize);
+
+		return true;
+	}
+
+	void VulkanTexture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t pixelSize)
+	{
+		imageFormat = format;
+
+		VkDeviceSize imageSize = width * height * pixelSize;
 
 		VkBuffer stagingBuffer = VK_NULL_HANDLE;
 		VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
@@ -62,9 +105,11 @@ namespace RHI
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			stagingBuffer,
-			stagingBufferMemory);
+			stagingBufferMemory
+		);
 
-		void* data;
+		// Fill staging buffer
+		void* data = nullptr;
 		vkMapMemory(context.device, stagingBufferMemory, 0, imageSize, 0, &data);
 		memcpy(data, pixels, static_cast<size_t>(imageSize));
 		vkUnmapMemory(context.device, stagingBufferMemory);
@@ -75,54 +120,70 @@ namespace RHI
 			height,
 			mipLevels,
 			VK_SAMPLE_COUNT_1_BIT,
-			format,
-			VK_IMAGE_TILING_OPTIMAL,
+			imageFormat,
+			tiling,
 			VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			image,
-			imageMemory);
+			imageMemory
+		);
 
-		// Prepare image for transition
+		// Prepare the image for transfer
 		VulkanUtils::transitionImageLayout(
 			context,
 			image,
-			mipLevels,
-			format,
+			imageFormat,
 			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			0,
+			mipLevels
+		);
 
-		// Copy the image to the buffer
+		// Copy to the image memory on GPU
 		VulkanUtils::copyBufferToImage(
 			context,
-			stagingBuffer, // note
+			stagingBuffer,
 			image,
 			width,
-			height);
+			height
+		);
 
+		// Generate mipmaps on GPU with linear filtering
 		VulkanUtils::generateImage2DMipmaps(
 			context,
 			image,
 			width,
 			height,
 			mipLevels,
-			format,
-			VK_FILTER_LINEAR);
+			imageFormat,
+			VK_FILTER_LINEAR
+		);
 
 		// Prepare the image for shader access
 		VulkanUtils::transitionImageLayout(
 			context,
 			image,
-			mipLevels,
-			format,
+			imageFormat,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			0,
+			mipLevels
+		);
 
 		// Destroy staging buffer
 		vkDestroyBuffer(context.device, stagingBuffer, nullptr);
 		vkFreeMemory(context.device, stagingBufferMemory, nullptr);
 
 		// Create image view & sampler
-		imageView = VulkanUtils::createImage2DView(context, image, mipLevels, format, VK_IMAGE_ASPECT_COLOR_BIT);
+		imageView = VulkanUtils::createImageView(
+			context,
+			image,
+			imageFormat,
+			VK_IMAGE_ASPECT_COLOR_BIT,
+			VK_IMAGE_VIEW_TYPE_2D,
+			0, mipLevels,
+			0, layers
+		);
 		imageSampler = VulkanUtils::createSampler(context, mipLevels);
 	}
 
@@ -139,6 +200,8 @@ namespace RHI
 
 		vkFreeMemory(context.device, imageMemory, nullptr);
 		imageMemory = nullptr;
+
+		imageFormat = VK_FORMAT_UNDEFINED;
 	}
 
 	void VulkanTexture::clearCPUData()

@@ -69,26 +69,30 @@ namespace RHI
 		return sampler;
 	}
 
-	VkImageView VulkanUtils::createImage2DView(
+	VkImageView VulkanUtils::createImageView(
 		const VulkanRendererContext& context,
 		VkImage image,
-		uint32_t mipLevels,
 		VkFormat format,
-		VkImageAspectFlags aspectFlags)
+		VkImageAspectFlags aspectFlags,
+		VkImageViewType viewType,
+		uint32_t baseMipLevel,
+		uint32_t numMipLevels,
+		uint32_t baseLayer,
+		uint32_t numLayers)
 	{
-		VkImageViewCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		createInfo.image = image;
-		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		createInfo.format = format;
-		createInfo.subresourceRange.aspectMask = aspectFlags;
-		createInfo.subresourceRange.baseMipLevel = 0;
-		createInfo.subresourceRange.levelCount = mipLevels;
-		createInfo.subresourceRange.baseArrayLayer = 0;
-		createInfo.subresourceRange.layerCount = 1;
+		VkImageViewCreateInfo viewInfo = {};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = image;
+		viewInfo.viewType = viewType;
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = aspectFlags;
+		viewInfo.subresourceRange.baseMipLevel = baseMipLevel;
+		viewInfo.subresourceRange.levelCount = numMipLevels;
+		viewInfo.subresourceRange.baseArrayLayer = baseLayer;
+		viewInfo.subresourceRange.layerCount = numLayers;
 
 		VkImageView imageView;
-		if (vkCreateImageView(context.device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
+		if (vkCreateImageView(context.device, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
 			throw std::runtime_error("Can't create image view!");
 
 		return imageView;
@@ -106,6 +110,7 @@ namespace RHI
 		VkImage& image,
 		VkDeviceMemory& memory)
 	{
+		// Create buffer
 		VkImageCreateInfo imageInfo = {};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -223,10 +228,13 @@ namespace RHI
 	void VulkanUtils::transitionImageLayout(
 		const VulkanRendererContext& context,
 		VkImage image,
-		uint32_t mipLevels,
 		VkFormat format,
 		VkImageLayout oldLayout,
-		VkImageLayout newLayout)
+		VkImageLayout newLayout,
+		uint32_t baseMipLevel,
+		uint32_t numMipLevels,
+		uint32_t baseLayer,
+		uint32_t numLayers)
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands(context);
 
@@ -240,10 +248,10 @@ namespace RHI
 
 		barrier.image = image;
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = mipLevels;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.baseMipLevel = baseMipLevel;
+		barrier.subresourceRange.levelCount = numMipLevels;
+		barrier.subresourceRange.baseArrayLayer = baseLayer;
+		barrier.subresourceRange.layerCount = numLayers;
 
 		if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
 		{
@@ -281,6 +289,30 @@ namespace RHI
 			srcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 			dstStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		{
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			srcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+		{
+			barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+			dstStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			srcStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		{
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			srcStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
 		else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 		{
 			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -288,6 +320,14 @@ namespace RHI
 
 			srcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+		{
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = 0;
+
+			srcStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dstStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 		}
 		else
 			throw std::runtime_error("Unsupported layout transition");
@@ -368,6 +408,9 @@ namespace RHI
 		VkFormat format,
 		VkFilter filter)
 	{
+		if (mipLevels == 1)
+			return;
+
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties(context.physicalDevice, format, &formatProperties);
 

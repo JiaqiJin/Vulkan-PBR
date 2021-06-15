@@ -26,6 +26,7 @@ namespace RHI
 	void RenderScene::init(
 		const std::string& vertexShaderFile,
 		const std::string& fragmentShaderFile,
+		const std::string& hdrFile,
 		const std::string& albedoFile,
 		const std::string& normalFile,
 		const std::string& aoFile,
@@ -41,6 +42,7 @@ namespace RHI
 		aoTexture.loadFromFile(aoFile);
 		shadingTexture.loadFromFile(shadingFile);
 		emissionTexture.loadFromFile(emissionFile);
+		hdrTexture.loadHDRFromFile(hdrFile);
 	}
 
 	void RenderScene::shutdown()
@@ -48,6 +50,7 @@ namespace RHI
 		albedoTexture.clearGPUData();
 		normalTexture.clearGPUData();
 		aoTexture.clearGPUData();
+		hdrTexture.clearGPUData();
 		shadingTexture.clearGPUData();
 		emissionTexture.clearGPUData();
 		mesh.clearGPUData();

@@ -24,12 +24,16 @@ namespace RHI
 			const uint32_t* bytecode,
 			size_t bytecodeSize);
 
-		static VkImageView createImage2DView(
+		static VkImageView createImageView(
 			const VulkanRendererContext& context,
 			VkImage image,
-			uint32_t mipLevels,
 			VkFormat format,
-			VkImageAspectFlags aspectFlags);
+			VkImageAspectFlags aspectFlags,
+			VkImageViewType viewType,
+			uint32_t baseMipLevel = 0,
+			uint32_t numMipLevels = 1,
+			uint32_t baseLayer = 0,
+			uint32_t numLayers = 1);
 
 		static void createImage2D(const VulkanRendererContext& context,
 			uint32_t width,
@@ -54,10 +58,13 @@ namespace RHI
 		static void transitionImageLayout(
 			const VulkanRendererContext& context,
 			VkImage image,
-			uint32_t mipLevels,
 			VkFormat format,
 			VkImageLayout oldLayout,
-			VkImageLayout newLayout);
+			VkImageLayout newLayout,
+			uint32_t baseMipLevel = 0,
+			uint32_t numMipLevels = 1,
+			uint32_t baseLayer = 0,
+			uint32_t numLayers = 1);
 
 		static void copyBuffer(
 			const VulkanRendererContext& context,
