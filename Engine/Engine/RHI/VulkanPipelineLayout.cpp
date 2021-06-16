@@ -4,11 +4,9 @@
 
 namespace RHI
 {
-	VulkanPipelineLayout& VulkanPipelineLayout::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+	void VulkanPipelineLayout::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
 	{
 		descriptorSetLayouts.push_back(descriptorSetLayout);
-
-		return *this;
 	}
 
 	VkPipelineLayout VulkanPipelineLayout::build()

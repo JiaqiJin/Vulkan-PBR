@@ -15,7 +15,7 @@ namespace RHI
 
 		inline VkPipelineLayout getPipelineLayout() const { return pipelineLayout; }
 
-		VulkanPipelineLayout& addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+		void addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
 
 		VkPipelineLayout build();
 	private:
