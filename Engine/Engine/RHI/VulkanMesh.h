@@ -21,7 +21,7 @@ namespace RHI
 
 		// How passing model data format to vertex shader
 		static VkVertexInputBindingDescription getVertexInputBindingDescription();
-		static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions();
+		static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 
 		inline VkBuffer getVertexBuffer() const { return vertexBuffer; }
 		inline VkBuffer getIndexBuffer() const { return indexBuffer; }
