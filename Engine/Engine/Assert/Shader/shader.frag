@@ -160,30 +160,38 @@ void main() {
 	surface.dotNV = max(0.0f, dot(surface.normal, surface.view));
 	surface.dotHV = max(0.0f, dot(surface.halfVector, surface.view));
 
+	Surface ibl;
+	ibl.light = reflect(-surface.view, surface.normal);
+	ibl.view = cameraDirWS;
+	ibl.normal = normalize(m * normal);
+	ibl.halfVector = normalize(lightDirWS + cameraDirWS);
+	ibl.dotNH = max(0.0f, dot(ibl.normal, ibl.halfVector));
+	ibl.dotNL = max(0.0f, dot(ibl.normal, ibl.light));
+	ibl.dotNV = max(0.0f, dot(ibl.normal, ibl.view));
+	ibl.dotHV = max(0.0f, dot(ibl.halfVector, ibl.view));
+
 	MicrofacetMaterial microfacet_material;
 	microfacet_material.albedo = texture(albedoSampler, fragTexCoord).rgb;
 	microfacet_material.roughness = texture(shadingSampler, fragTexCoord).g;
 	microfacet_material.metalness = texture(shadingSampler, fragTexCoord).b;
 
 	// Direct light
-	float dotNL = max(0.0f, dot(surface.normal, surface.light));
 	float attenuation = 1.0f / dot(lightPos - fragPositionWS, lightPos - fragPositionWS);
 
-	vec3 light = MicrofacetBRDF(surface, microfacet_material) * attenuation * 2.0f * dotNL;
-
-	vec3 ambient = vec3(0.03) * microfacet_material.albedo * texture(aoSampler, fragTexCoord).r;
-
-	vec3 r = reflect(-surface.view, surface.normal);
-	vec3 enviroment = texture(hdrSampler, SampleSphericalMap(r)).rgb;
+	vec3 light = MicrofacetBRDF(surface, microfacet_material) * attenuation * 2.0f * surface.dotNL;
+	
+	// Ambient light (IBL)
+	vec3 ambient = MicrofacetBRDF(ibl, microfacet_material) * texture(hdrSampler, SampleSphericalMap(ibl.light)).rgb;
+	ambient *= texture(aoSampler, fragTexCoord).r;
 
 	// Result
-	vec3 color = vec3(0.0f);
-	color += light;// + ambient 
-	color += texture(emissionSampler, fragTexCoord).rgb;
+	vec3 color = ambient;
+	// color += light;
+	// color += texture(emissionSampler, fragTexCoord).rgb;
 
 	// Tonemapping + gamma correction
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));
 
-	outColor = vec4(enviroment, 1.0f);
+	outColor = vec4(color, 1.0f);
 }

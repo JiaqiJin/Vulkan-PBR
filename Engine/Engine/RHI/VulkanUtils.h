@@ -35,6 +35,19 @@ namespace RHI
 			uint32_t baseLayer = 0,
 			uint32_t numLayers = 1);
 
+		static void createImageCube(
+			const VulkanRendererContext& context,
+			uint32_t width,
+			uint32_t height,
+			uint32_t mipLevels,
+			VkSampleCountFlagBits numSamples,
+			VkFormat format,
+			VkImageTiling tiling,
+			VkImageUsageFlags usage,
+			VkMemoryPropertyFlags memoryProperties,
+			VkImage& image,
+			VkDeviceMemory& memory);
+
 		static void createImage2D(const VulkanRendererContext& context,
 			uint32_t width,
 			uint32_t height,
