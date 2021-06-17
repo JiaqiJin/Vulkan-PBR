@@ -31,8 +31,6 @@ static std::string model_path = "Assert/Model/DamagedHelmet.fbx";
 static int maxCombinedImageSamplers = 32;
 static int maxUniformBuffers = 32;
 
-using namespace RHI;
-
 static std::vector<const char*> requiredPhysicalDeviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
@@ -293,6 +291,24 @@ void Application::initVulkan()
 	if (presentQueue == VK_NULL_HANDLE)
 		throw std::runtime_error("Can't get present queue from logical device");
 
+	// Create descriptor pools
+	std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
+	descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorPoolSizes[0].descriptorCount = maxUniformBuffers;
+	descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptorPoolSizes[1].descriptorCount = maxCombinedImageSamplers;
+
+	VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
+	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
+	descriptorPoolInfo.pPoolSizes = descriptorPoolSizes.data();
+	descriptorPoolInfo.maxSets = maxCombinedImageSamplers + maxUniformBuffers;
+	descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+
+
+	if (vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+		throw std::runtime_error("Can't create descriptor pool");
+
 	// Create command pool
 	VkCommandPoolCreateInfo commandPoolInfo = {};
 	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -334,6 +350,7 @@ void Application::initVulkan()
 	context.commandPool = commandPool;
 	context.graphicsQueue = graphicsQueue;
 	context.presentQueue = presentQueue;
+	context.descriptorPool = descriptorPool;
 	context.msaaSamples = VulkanUtils::getMaxUsableSampleCount(context);
 }
 
@@ -389,7 +406,6 @@ void Application::shutdownRenderScene()
 void Application::initRenderer()
 {
 	VulkanSwapChainContext swapChainContext = {};
-	swapChainContext.descriptorPool = descriptorPool;
 	swapChainContext.colorFormat = swapChainImageFormat;
 	swapChainContext.depthFormat = depthFormat;
 	swapChainContext.extent = swapChainExtent;
@@ -531,23 +547,6 @@ void Application::initVulkanSwapChain()
 		depthFormat,
 		VK_IMAGE_LAYOUT_UNDEFINED,
 		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-
-	// Create descriptor pools
-	std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
-	descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorPoolSizes[0].descriptorCount = maxUniformBuffers;
-	descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorPoolSizes[1].descriptorCount = maxCombinedImageSamplers;
-
-	VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
-	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
-	descriptorPoolInfo.pPoolSizes = descriptorPoolSizes.data();
-	descriptorPoolInfo.maxSets = maxCombinedImageSamplers + maxUniformBuffers;
-	descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-	if (vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-		throw std::runtime_error("Can't create descriptor pool");
 }
 
 void Application::shutdownVulkanSwapChain()

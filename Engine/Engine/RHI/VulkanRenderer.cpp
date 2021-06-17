@@ -61,7 +61,7 @@ namespace RHI
 
 		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
 		descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocInfo.descriptorPool = swapChainContext.descriptorPool;
+		descriptorSetAllocInfo.descriptorPool = context.descriptorPool;
 		descriptorSetAllocInfo.descriptorSetCount = imageCount;
 		descriptorSetAllocInfo.pSetLayouts = layouts.data();
 
