@@ -156,6 +156,7 @@
     <ClCompile Include="RHI\VulkanMesh.cpp" />
     <ClCompile Include="RHI\VulkanPipelineLayout.cpp" />
     <ClCompile Include="RHI\VulkanRenderer.cpp" />
+    <ClCompile Include="RHI\VulkanRenderPass.cpp" />
     <ClCompile Include="RHI\VulkanShader.cpp" />
     <ClCompile Include="RHI\VulkanTexture.cpp" />
     <ClCompile Include="RHI\VulkanUtils.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="RHI\VulkanPipelineLayout.h" />
     <ClInclude Include="RHI\VulkanRenderer.h" />
     <ClInclude Include="RHI\VulkanRendererContext.h" />
+    <ClInclude Include="RHI\VulkanRenderPass.h" />
     <ClInclude Include="RHI\VulkanShader.h" />
     <ClInclude Include="RHI\VulkanTexture.h" />
     <ClInclude Include="RHI\VulkanUtils.h" />

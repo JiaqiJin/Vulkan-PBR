@@ -4,6 +4,7 @@
 #include "VulkanPipelineLayout.h"
 #include "VulkanDescriptorSetLayout.h"
 #include "VulkanDescriptorSet.h"
+#include "VulkanRenderPass.h"
 #include "VulkanUtils.h"
 
 #include "RenderScene.h"
@@ -94,11 +95,6 @@ namespace RHI
 			}
 		}
 
-		// Pipeline layout
-		VulkanPipelineLayout pipelineLayoutBuild(context);
-		pipelineLayoutBuild.addDescriptorSetLayout(descriptorSetLayout);
-		pipelineLayout = pipelineLayoutBuild.build();
-
 		// Create render pass
 		VkAttachmentDescription colorAttachment = {};
 		colorAttachment.format = swapChainContext.colorFormat;
@@ -174,6 +170,11 @@ namespace RHI
 
 		if (vkCreateRenderPass(context.device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
 			throw std::runtime_error("Can't create render pass");
+
+		// Pipeline layout
+		VulkanPipelineLayout pipelineLayoutBuild(context);
+		pipelineLayoutBuild.addDescriptorSetLayout(descriptorSetLayout);
+		pipelineLayout = pipelineLayoutBuild.build();
 
 		// Create shader stages
 		const VulkanShader& vertexShader = scene->getVertexShader();
