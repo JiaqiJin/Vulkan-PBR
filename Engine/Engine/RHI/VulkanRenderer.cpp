@@ -3,6 +3,7 @@
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanPipelineLayout.h"
 #include "VulkanDescriptorSetLayout.h"
+#include "VulkanDescriptorSet.h"
 #include "VulkanUtils.h"
 
 #include "RenderScene.h"
@@ -56,18 +57,9 @@ namespace RHI
 
 		descriptorSetLayout = descriptorSetLayoutBuild.build();
 		
-		// Create descriptor set
-		std::vector<VkDescriptorSetLayout> layouts(imageCount, descriptorSetLayout);
-
-		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
-		descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocInfo.descriptorPool = context.descriptorPool;
-		descriptorSetAllocInfo.descriptorSetCount = imageCount;
-		descriptorSetAllocInfo.pSetLayouts = layouts.data();
-
-		descriptorSets.resize(imageCount);
-		if (vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, descriptorSets.data()) != VK_SUCCESS)
-			throw std::runtime_error("Can't allocate descriptor sets");
+		// Create Descriptor set
+		VulkanDescriptorSet descriptorSetBuil(context, imageCount);
+		descriptorSets = descriptorSetBuil.build(descriptorSetLayout);
 
 		// Populate every descriptor
 		for (size_t i = 0; i < imageCount; i++)
@@ -102,16 +94,10 @@ namespace RHI
 			}
 		}
 
-		// Create pipeline layout(Pipeline layout contain list of descriptor set layout)
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 1;
-		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
-		pipelineLayoutInfo.pPushConstantRanges = nullptr;
-
-		if (vkCreatePipelineLayout(context.device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
-			throw std::runtime_error("Can't create pipeline layout");
+		// Pipeline layout
+		VulkanPipelineLayout pipelineLayoutBuild(context);
+		pipelineLayoutBuild.addDescriptorSetLayout(descriptorSetLayout);
+		pipelineLayout = pipelineLayoutBuild.build();
 
 		// Create render pass
 		VkAttachmentDescription colorAttachment = {};

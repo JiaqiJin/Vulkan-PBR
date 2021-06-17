@@ -150,6 +150,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RHI\RenderScene.cpp" />
     <ClCompile Include="RHI\VulkanApplication.cpp" />
+    <ClCompile Include="RHI\VulkanDescriptorSet.cpp" />
     <ClCompile Include="RHI\VulkanDescriptorSetLayout.cpp" />
     <ClCompile Include="RHI\VulkanGraphicsPipeline.cpp" />
     <ClCompile Include="RHI\VulkanMesh.cpp" />
@@ -162,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="RHI\RenderScene.h" />
     <ClInclude Include="RHI\VulkanApplication.h" />
+    <ClInclude Include="RHI\VulkanDescriptorSet.h" />
     <ClInclude Include="RHI\VulkanDescriptorSetLayout.h" />
     <ClInclude Include="RHI\VulkanGraphicsPipeline.h" />
     <ClInclude Include="RHI\VulkanMesh.h" />
