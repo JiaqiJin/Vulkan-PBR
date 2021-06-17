@@ -28,6 +28,9 @@ static std::string hdrTexturePath = "Assert/Texture/Ice_Lake/Ice_Lake_Env.hdr";
 static std::string hdrDefaultTexturePath = "Assert/Texture/Default_environment.hdr";
 static std::string model_path = "Assert/Model/DamagedHelmet.fbx";
 
+static int maxCombinedImageSamplers = 32;
+static int maxUniformBuffers = 32;
+
 using namespace RHI;
 
 static std::vector<const char*> requiredPhysicalDeviceExtensions = {
@@ -532,16 +535,16 @@ void Application::initVulkanSwapChain()
 	// Create descriptor pools
 	std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
 	descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorPoolSizes[0].descriptorCount = swapChainImageCount;
+	descriptorPoolSizes[0].descriptorCount = maxUniformBuffers;
 	descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorPoolSizes[1].descriptorCount = swapChainImageCount;
+	descriptorPoolSizes[1].descriptorCount = maxCombinedImageSamplers;
 
 	VkDescriptorPoolCreateInfo descriptorPoolInfo = {};
 	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(descriptorPoolSizes.size());
 	descriptorPoolInfo.pPoolSizes = descriptorPoolSizes.data();
-	descriptorPoolInfo.maxSets = swapChainImageCount;
-	descriptorPoolInfo.flags = 0; // Optional
+	descriptorPoolInfo.maxSets = maxCombinedImageSamplers + maxUniformBuffers;
+	descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 	if (vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
 		throw std::runtime_error("Can't create descriptor pool");
