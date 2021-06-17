@@ -45,6 +45,9 @@
     <ClCompile Include="RHI\VulkanPipelineLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RHI\VulkanDescriptorSetLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RHI\VulkanTexture.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\VulkanPipelineLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RHI\VulkanDescriptorSetLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

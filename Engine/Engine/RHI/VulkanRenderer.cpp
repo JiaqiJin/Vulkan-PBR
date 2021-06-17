@@ -2,6 +2,7 @@
 #include "VulkanMesh.h"
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanPipelineLayout.h"
+#include "VulkanDescriptorSetLayout.h"
 #include "VulkanUtils.h"
 
 #include "RenderScene.h"
@@ -43,25 +44,18 @@ namespace RHI
 				uniformBuffersMemory[i]);
 		}
 
-		// Create descriptor set layout
-		std::array<VkDescriptorSetLayoutBinding, 7> bindings;
-
 		VkShaderStageFlags stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		bindings[0] = { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, stage, nullptr };
 
-		for (uint32_t i = 1; i < bindings.size(); i++)
+		// Create descriptor set layout
+		VulkanDescriptorSetLayout descriptorSetLayoutBuild(context);
+		descriptorSetLayoutBuild.addDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stage);
+		for (uint32_t i = 1; i < 7; i++)
 		{
-			bindings[i] = { i, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, stage, nullptr };
+			descriptorSetLayoutBuild.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 		}
 
-		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-		layoutInfo.pBindings = bindings.data();
-
-		if (vkCreateDescriptorSetLayout(context.device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-			throw std::runtime_error("Can't create descriptor set layout");
-
+		descriptorSetLayout = descriptorSetLayoutBuild.build();
+		
 		// Create descriptor set
 		std::vector<VkDescriptorSetLayout> layouts(imageCount, descriptorSetLayout);
 
@@ -227,7 +221,6 @@ namespace RHI
 		pbrPipelineBuild.addBlendColorAttachment();
 
 		pipeline = pbrPipelineBuild.build();
-
 		
 		// Create frame buffer
 		frameBuffers.resize(imageCount);
