@@ -29,6 +29,9 @@ namespace RHI
 
 		bool loadFromFile(const std::string& filename);
 
+		void createSkybox(float size);
+		void createQuad(float size);
+
 		void uploadToGPU();
 		void clearGPUData();
 		void clearCPUData();

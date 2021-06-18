@@ -124,6 +124,64 @@ namespace RHI
 		return true;
 	}
 
+	void VulkanMesh::createSkybox(float size)
+	{
+		clearCPUData();
+		clearGPUData();
+
+		vertices.resize(8);
+		indices.resize(36);
+
+		float halfSize = size * 0.5f;
+
+		vertices[0].position = glm::vec3(-halfSize, -halfSize, -halfSize);
+		vertices[1].position = glm::vec3(halfSize, -halfSize, -halfSize);
+		vertices[2].position = glm::vec3(halfSize, halfSize, -halfSize);
+		vertices[3].position = glm::vec3(-halfSize, halfSize, -halfSize);
+		vertices[4].position = glm::vec3(-halfSize, -halfSize, halfSize);
+		vertices[5].position = glm::vec3(halfSize, -halfSize, halfSize);
+		vertices[6].position = glm::vec3(halfSize, halfSize, halfSize);
+		vertices[7].position = glm::vec3(-halfSize, halfSize, halfSize);
+
+		indices = {
+		0, 1, 2, 2, 3, 0,
+		1, 5, 6, 6, 2, 1,
+		3, 2, 6, 6, 7, 3,
+		5, 4, 6, 4, 7, 6,
+		1, 0, 4, 4, 5, 1,
+		4, 0, 3, 3, 7, 4,
+		};
+
+		uploadToGPU();
+	}
+
+	void VulkanMesh::createQuad(float size)
+	{
+		clearCPUData();
+		clearGPUData();
+
+		vertices.resize(4);
+		indices.resize(6);
+
+		float halfSize = size * 0.5f;
+
+		vertices[0].position = glm::vec3(-halfSize, -halfSize, 0.0f);
+		vertices[1].position = glm::vec3(halfSize, -halfSize, 0.0f);
+		vertices[2].position = glm::vec3(halfSize, halfSize, 0.0f);
+		vertices[3].position = glm::vec3(-halfSize, halfSize, 0.0f);
+
+		vertices[0].uv = glm::vec2(0.0f, 0.0f);
+		vertices[1].uv = glm::vec2(1.0f, 0.0f);
+		vertices[2].uv = glm::vec2(1.0f, 1.0f);
+		vertices[3].uv = glm::vec2(0.0f, 1.0f);
+
+		indices = {
+			1, 0, 2, 3, 2, 0,
+		};
+
+		uploadToGPU();
+	}
+
 	void VulkanMesh::createVertexBuffer()
 	{
 		VkDeviceSize bufferSize = sizeof(Vertex) * vertices.size();
@@ -137,7 +195,8 @@ namespace RHI
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			vertexBuffer,
-			vertexBufferMemory);
+			vertexBufferMemory
+		);
 
 		// Create staging buffer
 		VulkanUtils::createBuffer(
@@ -146,7 +205,8 @@ namespace RHI
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			stagingBuffer,
-			stagingBufferMemory);
+			stagingBufferMemory
+		);
 
 		// Fill staging buffer
 		void* data = nullptr;
