@@ -49,17 +49,3 @@ namespace RHI
 		VkRenderPass renderPass{ VK_NULL_HANDLE };
 	};
 }
-
-/*
-	// Create render pass
-		VulkanRenderPass renderPassBuild(context);
-		renderPassBuild.addColorAttachment(swapChainContext.colorFormat, context.msaaSamples);
-		renderPassBuild.addColorResolveAttachment(swapChainContext.colorFormat);
-		renderPassBuild.addDepthStencilAttachment(swapChainContext.depthFormat, context.msaaSamples);
-		renderPassBuild.addSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS);
-		renderPassBuild.addColorAttachmentReference(0, 0);
-		renderPassBuild.addColorResolveAttachmentReference(0, 1);
-		renderPassBuild.setDepthStencilAttachmentReference(0, 2);
-
-		renderPass = renderPassBuild.build();
-*/
