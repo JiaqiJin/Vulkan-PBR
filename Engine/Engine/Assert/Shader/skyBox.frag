@@ -8,11 +8,6 @@ layout(binding = 0) uniform UniformBufferObject {
 	vec3 cameraPos;
 } ubo;
 
-layout(binding = 1) uniform sampler2D albedoSampler;
-layout(binding = 2) uniform sampler2D normalSampler;
-layout(binding = 3) uniform sampler2D aoSampler;
-layout(binding = 4) uniform sampler2D shadingSampler;
-layout(binding = 5) uniform sampler2D emissionSampler;
 layout(binding = 6) uniform sampler2D hdrSampler;
 
 layout(location = 0) in vec3 fragColor;
