@@ -115,14 +115,14 @@ void Application::render()
 		std::numeric_limits<uint64_t>::max(),
 		imageAvailableSemaphores[currentFrame],
 		VK_NULL_HANDLE,
-		&imageIndex);
+		&imageIndex
+	);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
 		recreateVulkanSwapChain();
 		return;
 	}
-
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 		throw std::runtime_error("Can't aquire swap chain image");
 
@@ -156,6 +156,14 @@ void Application::render()
 	presentInfo.pSwapchains = swapChains;
 	presentInfo.pImageIndices = &imageIndex;
 	presentInfo.pResults = nullptr; // Optional
+
+	VulkanUtils::transitionImageLayout(
+		context,
+		swapChainImages[imageIndex],
+		swapChainImageFormat,
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+	);
 
 	result = vkQueuePresentKHR(presentQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
@@ -432,8 +440,13 @@ void Application::initVulkanSwapChain()
 	SwapChainSupportDetails details = fetchSwapChainSupportDetails(physicalDevice, surface);
 	SwapChainSettings settings = selectOptimalSwapChainSettings(details);
 
+	// Simply sticking to this minimum means that we may sometimes have to wait
+	// on the driver to complete internal operations before we can acquire another image to render to.
+	// Therefore it is recommended to request at least one more image than the minimum
 	uint32_t imageCount = details.capabilities.minImageCount + 1;
 
+	// We should also make sure to not exceed the maximum number of images while doing this,
+	// where 0 is a special value that means that there is no maximum
 	if (details.capabilities.maxImageCount > 0)
 		imageCount = std::min(imageCount, details.capabilities.maxImageCount);
 
