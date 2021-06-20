@@ -17,8 +17,10 @@
 
 using namespace RHI;
 
-static std::string vertex_shader_path = "Assert/Shader/shader.vert";
-static std::string fragment_shader_path = "Assert/Shader/shader.frag";
+static std::string pbr_vertex_shader_path = "Assert/Shader/Pbrshader.vert";
+static std::string pbr_fragment_shader_path = "Assert/Shader/Pbrshader.frag";
+static std::string skyBox_vertex_shader_path = "Assert/Shader/skyBox.vert";
+static std::string skyBox_fragment_shader_path = "Assert/Shader/skyBox.frag";
 static std::string albedoTexturePath = "Assert/Texture/Default_albedo.jpg";
 static std::string normalTexturePath = "Assert/Texture/Default_normal.jpg";
 static std::string aoTexturePath = "Assert/Texture/Default_AO.jpg";
@@ -157,13 +159,13 @@ void Application::render()
 	presentInfo.pImageIndices = &imageIndex;
 	presentInfo.pResults = nullptr; // Optional
 
+	// Explicit prepared swap chain image for present
 	VulkanUtils::transitionImageLayout(
 		context,
 		swapChainImages[imageIndex],
 		swapChainImageFormat,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-	);
+		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 	result = vkQueuePresentKHR(presentQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
@@ -392,8 +394,10 @@ void Application::initRenderScene()
 {
 	scene = new RenderScene(context);
 	scene->init(
-		vertex_shader_path,
-		fragment_shader_path,
+		pbr_vertex_shader_path,
+		pbr_fragment_shader_path,
+		skyBox_vertex_shader_path,
+		skyBox_fragment_shader_path,
 		hdrDefaultTexturePath,
 		albedoTexturePath,
 		normalTexturePath,

@@ -54,8 +54,7 @@ namespace RHI
 		attachments.push_back(depthAttachment);
 	}
 
-	void VulkanRenderPass::addSubpass(
-		VkPipelineBindPoint bindPoint)
+	void VulkanRenderPass::addSubpass(VkPipelineBindPoint bindPoint)
 	{
 		VkSubpassDescription info = {};
 		info.pipelineBindPoint = bindPoint;
@@ -64,9 +63,7 @@ namespace RHI
 		subpassDatas.push_back(SubpassData());
 	}
 
-	void VulkanRenderPass::addColorAttachmentReference(
-		int subpassIndex,
-		int attachmentIndex)
+	void VulkanRenderPass::addColorAttachmentReference(int subpassIndex, int attachmentIndex)
 	{
 		if (subpassIndex < 0 || subpassIndex >= subpassInfos.size())
 			return;

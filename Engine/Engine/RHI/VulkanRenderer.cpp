@@ -29,8 +29,8 @@ namespace RHI
 	void Renderer::init(const RenderScene* scene)
 	{
 		// Create shader stages
-		const VulkanShader& vertexShader = scene->getVertexShader();
-		const VulkanShader& fragmentShader = scene->getFragmentShader();
+		const VulkanShader& vertexShader = scene->getPbrVertexShader();
+		const VulkanShader& fragmentShader = scene->getPbrFragmentShader();
 
 		VkViewport viewport = {};
 		viewport.x = 0.0f;

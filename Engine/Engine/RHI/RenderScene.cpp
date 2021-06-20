@@ -24,8 +24,10 @@ namespace RHI
 	}
 
 	void RenderScene::init(
-		const std::string& vertexShaderFile,
-		const std::string& fragmentShaderFile,
+		const std::string& pbrVertexShaderFile,
+		const std::string& pbrFragmentShaderFile,
+		const std::string& skyBoxVertexShaderFile,
+		const std::string& skyBoxFragmentShaderFile,
 		const std::string& hdrFile,
 		const std::string& albedoFile,
 		const std::string& normalFile,
@@ -34,8 +36,10 @@ namespace RHI
 		const std::string& emissionFile,
 		const std::string& modelFile)
 	{
-		vertexShader.compileFromFile(vertexShaderFile, VulkanShaderKind::Vertex);
-		fragmentShader.compileFromFile(fragmentShaderFile, VulkanShaderKind::Fragment);
+		pbrVertexShader.compileFromFile(pbrVertexShaderFile, VulkanShaderKind::Vertex);
+		pbrFragmentShader.compileFromFile(pbrFragmentShaderFile, VulkanShaderKind::Fragment);
+		skyBoxVertexShader.compileFromFile(skyBoxVertexShaderFile, VulkanShaderKind::Vertex);
+		skyBoxFragmentShader.compileFromFile(skyBoxFragmentShaderFile, VulkanShaderKind::Fragment);
 		mesh.loadFromFile(modelFile);
 		albedoTexture.loadFromFile(albedoFile);
 		normalTexture.loadFromFile(normalFile);
@@ -54,8 +58,10 @@ namespace RHI
 		shadingTexture.clearGPUData();
 		emissionTexture.clearGPUData();
 		mesh.clearGPUData();
-		vertexShader.clear();
-		fragmentShader.clear();
+		pbrVertexShader.clear();
+		pbrFragmentShader.clear();
+		skyBoxVertexShader.clear();
+		skyBoxFragmentShader.clear();
 	}
 
 	VkShaderModule RenderScene::createShader(const std::string& path) const
