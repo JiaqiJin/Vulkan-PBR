@@ -31,6 +31,8 @@ namespace RHI
 		// Create shader stages
 		const VulkanShader& vertexShader = scene->getPbrVertexShader();
 		const VulkanShader& fragmentShader = scene->getPbrFragmentShader();
+		const VulkanShader& skyBoxVertexShader = scene->getSkyboxVertexShader();
+		const VulkanShader& skyBoxFragmentShader = scene->getSkyboxFragmentShader();
 
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
@@ -73,6 +75,7 @@ namespace RHI
 		pipelineLayoutBuild.addDescriptorSetLayout(descriptorSetLayout);
 		pipelineLayout = pipelineLayoutBuild.build();
 
+		// Pbr Pipeline
 		VulkanGraphicsPipeline pbrPipelineBuild(context, pipelineLayout, renderPass);
 		pbrPipelineBuild.addShaderStage(vertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
 		pbrPipelineBuild.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -86,7 +89,23 @@ namespace RHI
 		pbrPipelineBuild.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
 		pbrPipelineBuild.addBlendColorAttachment();
 
-		pipeline = pbrPipelineBuild.build();
+		pbrPipeline = pbrPipelineBuild.build();
+
+		// SkyBox pipeline
+		VulkanGraphicsPipeline skyBoxPipelineBuild(context, pipelineLayout, renderPass);
+		skyBoxPipelineBuild.addShaderStage(skyBoxVertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
+		skyBoxPipelineBuild.addShaderStage(skyBoxFragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
+		skyBoxPipelineBuild.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
+		skyBoxPipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		skyBoxPipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		skyBoxPipelineBuild.addViewport(viewport);
+		skyBoxPipelineBuild.addScissor(scissor);
+		skyBoxPipelineBuild.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+		skyBoxPipelineBuild.setMultisampleState(context.msaaSamples, true);
+		skyBoxPipelineBuild.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
+		skyBoxPipelineBuild.addBlendColorAttachment();
+
+		skyBoxPipeline = skyBoxPipelineBuild.build();
 
 		// Create uniform buffers
 		VkDeviceSize uboSize = sizeof(UniformBufferObject);
@@ -210,7 +229,21 @@ namespace RHI
 
 			vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-			vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+			vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skyBoxPipeline);
+			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
+			{
+				const VulkanMesh& skybox = scene->getSkyBox();
+
+				VkBuffer vertexBuffers[] = { skybox.getVertexBuffer() };
+				VkBuffer indexBuffer = skybox.getIndexBuffer();
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
+				vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+				vkCmdDrawIndexed(commandBuffers[i], skybox.getNumIndices(), 1, 0, 0, 0);
+			}
+
+			vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pbrPipeline);
 			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 			{
 				const VulkanMesh& mesh = scene->getMesh();
@@ -246,7 +279,7 @@ namespace RHI
 
 		const float aspect = swapChainContext.extent.width / (float)swapChainContext.extent.height;
 		const float zNear = 0.1f;
-		const float zFar = 10.0f;
+		const float zFar = 1000.0f;
 
 		UniformBufferObject ubo{};
 		ubo.world = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
@@ -280,8 +313,11 @@ namespace RHI
 
 		frameBuffers.clear();
 
-		vkDestroyPipeline(context.device, pipeline, nullptr);
-		pipeline = VK_NULL_HANDLE;
+		vkDestroyPipeline(context.device, pbrPipeline, nullptr);
+		pbrPipeline = VK_NULL_HANDLE;
+
+		vkDestroyPipeline(context.device, skyBoxPipeline, nullptr);
+		skyBoxPipeline = VK_NULL_HANDLE;
 
 		vkDestroyPipelineLayout(context.device, pipelineLayout, nullptr);
 		pipelineLayout = VK_NULL_HANDLE;

@@ -97,7 +97,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assert\Shader\shader.vert" />
-    <None Include="Assert\Shader\shader.frag" />
+    <None Include="Assert\Shader\Pbrshader.vert" />
+    <None Include="Assert\Shader\Pbrshader.frag" />
+    <None Include="Assert\Shader\skyBox.vert" />
+    <None Include="Assert\Shader\skyBox.frag" />
   </ItemGroup>
 </Project>

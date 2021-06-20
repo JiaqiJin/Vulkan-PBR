@@ -177,8 +177,10 @@
     <ClInclude Include="RHI\VulkanUtils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assert\Shader\shader.frag" />
-    <None Include="Assert\Shader\shader.vert" />
+    <None Include="Assert\Shader\Pbrshader.frag" />
+    <None Include="Assert\Shader\Pbrshader.vert" />
+    <None Include="Assert\Shader\skyBox.frag" />
+    <None Include="Assert\Shader\skyBox.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

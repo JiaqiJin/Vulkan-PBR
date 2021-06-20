@@ -14,7 +14,7 @@ namespace RHI
 	{
 	public:
 		RenderScene(const VulkanRendererContext& context)
-			: context(context), mesh(context),
+			: context(context), mesh(context), skyBox(context),
 			albedoTexture(context), normalTexture(context), aoTexture(context),
 			shadingTexture(context), emissionTexture(context), hdrTexture(context), 
 			skyBoxVertexShader(context), skyBoxFragmentShader(context), 
@@ -47,6 +47,7 @@ namespace RHI
 		inline const VulkanTexture& getHDRTexture() const { return hdrTexture; }
 
 		inline const VulkanMesh& getMesh() const { return mesh; }
+		inline const VulkanMesh& getSkyBox() const { return skyBox; }
 	
 
 		VkShaderModule createShader(const std::string& path) const;
@@ -56,6 +57,7 @@ namespace RHI
 
 		// Mesh
 		VulkanMesh mesh;
+		VulkanMesh skyBox;
 
 		// Textures
 		VulkanTexture albedoTexture;

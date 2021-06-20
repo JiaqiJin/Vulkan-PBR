@@ -40,13 +40,16 @@ namespace RHI
 		pbrFragmentShader.compileFromFile(pbrFragmentShaderFile, VulkanShaderKind::Fragment);
 		skyBoxVertexShader.compileFromFile(skyBoxVertexShaderFile, VulkanShaderKind::Vertex);
 		skyBoxFragmentShader.compileFromFile(skyBoxFragmentShaderFile, VulkanShaderKind::Fragment);
-		mesh.loadFromFile(modelFile);
+	
 		albedoTexture.loadFromFile(albedoFile);
 		normalTexture.loadFromFile(normalFile);
 		aoTexture.loadFromFile(aoFile);
 		shadingTexture.loadFromFile(shadingFile);
 		emissionTexture.loadFromFile(emissionFile);
 		hdrTexture.loadHDRFromFile(hdrFile);
+
+		mesh.loadFromFile(modelFile);
+		skyBox.createSkybox(100.0f);
 	}
 
 	void RenderScene::shutdown()
