@@ -81,7 +81,6 @@ namespace RHI
 		pbrPipelineBuild.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
 		pbrPipelineBuild.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
 		pbrPipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		pbrPipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 		pbrPipelineBuild.addViewport(viewport);
 		pbrPipelineBuild.addScissor(scissor);
 		pbrPipelineBuild.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
@@ -127,17 +126,8 @@ namespace RHI
 		}
 
 		// Create descriptor sets
-		std::vector<VkDescriptorSetLayout> layouts(imageCount, descriptorSetLayout);
-
-		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
-		descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocInfo.descriptorPool = context.descriptorPool;
-		descriptorSetAllocInfo.descriptorSetCount = imageCount;
-		descriptorSetAllocInfo.pSetLayouts = layouts.data();
-
-		descriptorSets.resize(imageCount);
-		if (vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, descriptorSets.data()) != VK_SUCCESS)
-			throw std::runtime_error("Can't allocate descriptor sets");
+		VulkanDescriptorSet descriptoSetBuild(context, imageCount);
+		descriptorSets = descriptoSetBuild.build(descriptorSetLayout);
 
 		for (size_t i = 0; i < imageCount; i++)
 		{

@@ -18,6 +18,12 @@ namespace RHI
 		inline VkImage getImage() const { return image; }
 		inline VkImageView getImageView() const { return imageView; }
 		inline VkSampler getSampler() const { return imageSampler; }
+		inline VkFormat getImageFormat() const { return imageFormat; }
+
+		inline int getNumLayers() const { return layers; }
+		inline int getNumMipLevels() const { return mipLevels; }
+		inline int getWidth() const { return width; }
+		inline int getHeight() const { return height; }
 
 		bool loadHDRFromFile(const std::string& path);
 		bool loadFromFile(const std::string& path);
