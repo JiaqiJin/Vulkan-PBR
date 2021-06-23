@@ -22,19 +22,24 @@ namespace RHI
 		glm::mat4 faces[6];
 	};
 
-	void VulkanCubemapRenderer::init(const VulkanShader& vertexShader, const VulkanShader& fragmentShader,
-		const VulkanTexture& inputTexture, const VulkanTexture& targetTexture)
+	void VulkanCubemapRenderer::init(
+		const VulkanShader& vertexShader,
+		const VulkanShader& fragmentShader,
+		const VulkanTexture& inputTexture,
+		const VulkanTexture& targetTexture)
 	{
 		rendererQuad.createQuad(2.0f);
 
 		for (int i = 0; i < 6; i++)
 		{
-			faceViews[i] = VulkanUtils::createImageView(context,
+			faceViews[i] = VulkanUtils::createImageView(
+				context,
 				targetTexture.getImage(),
 				targetTexture.getImageFormat(),
 				VK_IMAGE_ASPECT_COLOR_BIT,
 				VK_IMAGE_VIEW_TYPE_2D,
-				0, targetTexture.getNumMipLevels(), i, 1);
+				0, targetTexture.getNumMipLevels(),
+				i, 1);
 		}
 
 		VkImageView targetView = targetTexture.getImageView();
@@ -54,53 +59,51 @@ namespace RHI
 
 		VkShaderStageFlags stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
-		// Descriptor set layout
 		VulkanDescriptorSetLayout descriptorSetLayoutBuilder(context);
+		
 		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stage);
 		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 		descriptorSetLayout = descriptorSetLayoutBuilder.build();
 
-		// Render pass
-		VulkanRenderPass renderPassBuild(context);
-		renderPassBuild.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
-		renderPassBuild.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
-		renderPassBuild.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
-		renderPassBuild.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
-		renderPassBuild.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
-		renderPassBuild.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
-		renderPassBuild.addSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS);
-		renderPassBuild.addColorAttachmentReference(0, 0);
-		renderPassBuild.addColorAttachmentReference(0, 1);
-		renderPassBuild.addColorAttachmentReference(0, 2);
-		renderPassBuild.addColorAttachmentReference(0, 3);
-		renderPassBuild.addColorAttachmentReference(0, 4);
-		renderPassBuild.addColorAttachmentReference(0, 5);
-		renderPass = renderPassBuild.build();
+		VulkanRenderPass renderPassBuilder(context);
+		
+		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
+		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
+		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
+		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
+		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
+		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
+		renderPassBuilder.addSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS);
+		renderPassBuilder.addColorAttachmentReference(0, 0);
+		renderPassBuilder.addColorAttachmentReference(0, 1);
+		renderPassBuilder.addColorAttachmentReference(0, 2);
+		renderPassBuilder.addColorAttachmentReference(0, 3);
+		renderPassBuilder.addColorAttachmentReference(0, 4);
+		renderPassBuilder.addColorAttachmentReference(0, 5);
+		renderPass = renderPassBuilder.build();
 
-		// Pipeline layout
-		VulkanPipelineLayout pipelineLayoutBuild(context);
-		pipelineLayoutBuild.addDescriptorSetLayout(descriptorSetLayout);
-		pipelineLayout = pipelineLayoutBuild.build();
+		VulkanPipelineLayout pipelineLayoutBuilder(context);
+		
+		pipelineLayoutBuilder.addDescriptorSetLayout(descriptorSetLayout);
+		pipelineLayout = pipelineLayoutBuilder.build();
 
-		// Graphic Pipeline
-		VulkanGraphicsPipeline PipelineBuild(context, pipelineLayout, renderPass);
-		PipelineBuild.addShaderStage(vertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
-		PipelineBuild.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
-		PipelineBuild.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
-		PipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		PipelineBuild.addViewport(viewport);
-		PipelineBuild.addScissor(scissor);
-		PipelineBuild.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
-		PipelineBuild.setMultisampleState(VK_SAMPLE_COUNT_1_BIT);
-		PipelineBuild.setDepthStencilState(false, false, VK_COMPARE_OP_LESS);
-		PipelineBuild.addBlendColorAttachment();
-		PipelineBuild.addBlendColorAttachment();
-		PipelineBuild.addBlendColorAttachment();
-		PipelineBuild.addBlendColorAttachment();
-		PipelineBuild.addBlendColorAttachment();
-		PipelineBuild.addBlendColorAttachment();
-
-		pipeline = PipelineBuild.build();
+		VulkanGraphicsPipeline pipelineBuilder(context, pipelineLayout, renderPass);
+		pipelineBuilder.addShaderStage(vertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
+		pipelineBuilder.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
+		pipelineBuilder.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
+		pipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		pipelineBuilder.addViewport(viewport);
+		pipelineBuilder.addScissor(scissor);
+		pipelineBuilder.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+		pipelineBuilder.setMultisampleState(VK_SAMPLE_COUNT_1_BIT);
+		pipelineBuilder.setDepthStencilState(false, false, VK_COMPARE_OP_LESS);
+		pipelineBuilder.addBlendColorAttachment();
+		pipelineBuilder.addBlendColorAttachment();
+		pipelineBuilder.addBlendColorAttachment();
+		pipelineBuilder.addBlendColorAttachment();
+		pipelineBuilder.addBlendColorAttachment();
+		pipelineBuilder.addBlendColorAttachment();
+		pipeline = pipelineBuilder.build();
 
 		// Create uniform buffers
 		VkDeviceSize uboSize = sizeof(CubemapFaceOrientationData);
@@ -111,7 +114,8 @@ namespace RHI
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			uniformBuffer,
-			uniformBufferMemory);
+			uniformBufferMemory
+		);
 
 		// Create descriptor set
 		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
@@ -145,7 +149,6 @@ namespace RHI
 
 		if (vkAllocateCommandBuffers(context.device, &allocateInfo, &commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't create command buffers");
-
 
 		// Fill uniform buffer
 		CubemapFaceOrientationData* ubo = nullptr;
@@ -192,14 +195,16 @@ namespace RHI
 			0,
 			uniformBuffer,
 			0,
-			uboSize);
+			uboSize
+		);
 
 		VulkanUtils::bindCombinedImageSampler(
 			context,
 			descriptorSet,
 			1,
 			inputTexture.getImageView(),
-			inputTexture.getSampler());
+			inputTexture.getSampler()
+		);
 
 		// Record command buffer
 		VkCommandBufferBeginInfo beginInfo = {};

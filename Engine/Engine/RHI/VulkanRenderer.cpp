@@ -14,7 +14,10 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 
-#include <chrono>
+#include <chrono>	
+
+static std::string commonCubeVertexShaderPath = "Assert/Shader/commonCube.vert";
+static std::string hdriToCubeFragmentShaderPath = "Assert/Shader/hdriToCube.frag";
 
 namespace RHI
 {
@@ -28,11 +31,44 @@ namespace RHI
 
 	void Renderer::init(const RenderScene* scene)
 	{
-		// Create shader stages
-		const VulkanShader& vertexShader = scene->getPbrVertexShader();
-		const VulkanShader& fragmentShader = scene->getPbrFragmentShader();
-		const VulkanShader& skyBoxVertexShader = scene->getSkyboxVertexShader();
-		const VulkanShader& skyBoxFragmentShader = scene->getSkyboxFragmentShader();
+		commonCubeVertexShader.compileFromFile(commonCubeVertexShaderPath, VulkanShaderKind::Vertex);
+
+		hdriToCubeFragmentShader.compileFromFile(hdriToCubeFragmentShaderPath, VulkanShaderKind::Fragment);
+
+		environmentCubemap.createCube(VK_FORMAT_R8G8B8A8_UNORM, 1024, 1024, 1);
+
+		{
+			VulkanUtils::transitionImageLayout(
+				context,
+				environmentCubemap.getImage(),
+				environmentCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				0, environmentCubemap.getNumMipLevels(),
+				0, environmentCubemap.getNumLayers()
+			);
+
+			hdriToCubeRenderer.init(
+				commonCubeVertexShader,
+				hdriToCubeFragmentShader,
+				scene->getHDRTexture(),
+				environmentCubemap);
+			hdriToCubeRenderer.render();
+
+			VulkanUtils::transitionImageLayout(
+				context,
+				environmentCubemap.getImage(),
+				environmentCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				0, environmentCubemap.getNumMipLevels(),
+				0, environmentCubemap.getNumLayers());
+		}
+
+		const VulkanShader& pbrVertexShader = scene->getPbrVertexShader();
+		const VulkanShader& pbrFragmentShader = scene->getPbrFragmentShader();
+		const VulkanShader& skyboxVertexShader = scene->getSkyboxVertexShader();
+		const VulkanShader& skyboxFragmentShader = scene->getSkyboxFragmentShader();
 
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
@@ -48,63 +84,59 @@ namespace RHI
 
 		VkShaderStageFlags stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
-		// Create descriptor set layout
-		VulkanDescriptorSetLayout descriptorSetLayoutBuild(context);
-		descriptorSetLayoutBuild.addDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stage);
-		for (uint32_t i = 1; i < 7; i++)
-		{
-			descriptorSetLayoutBuild.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
-		}
+		VulkanDescriptorSetLayout descriptorSetLayoutBuilder(context);
+		
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stage);
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
+		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
+		descriptorSetLayout = descriptorSetLayoutBuilder.build();
 
-		descriptorSetLayout = descriptorSetLayoutBuild.build();
+		VulkanRenderPass renderPassBuilder(context);
+		renderPassBuilder.addColorAttachment(swapChainContext.colorFormat, context.msaaSamples);
+		renderPassBuilder.addColorResolveAttachment(swapChainContext.colorFormat);
+		renderPassBuilder.addDepthStencilAttachment(swapChainContext.depthFormat, context.msaaSamples);
+		renderPassBuilder.addSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS);
+		renderPassBuilder.addColorAttachmentReference(0, 0);
+		renderPassBuilder.addColorResolveAttachmentReference(0, 1);
+		renderPassBuilder.setDepthStencilAttachmentReference(0, 2);
+		renderPass = renderPassBuilder.build();
 
-		// Create render pass
-		VulkanRenderPass renderPassBuild(context);
-		renderPassBuild.addColorAttachment(swapChainContext.colorFormat, context.msaaSamples);
-		renderPassBuild.addColorResolveAttachment(swapChainContext.colorFormat);
-		renderPassBuild.addDepthStencilAttachment(swapChainContext.depthFormat, context.msaaSamples);
-		renderPassBuild.addSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS);
-		renderPassBuild.addColorAttachmentReference(0, 0);
-		renderPassBuild.addColorResolveAttachmentReference(0, 1);
-		renderPassBuild.setDepthStencilAttachmentReference(0, 2);
+		VulkanPipelineLayout pipelineLayoutBuilder(context);
+		pipelineLayoutBuilder.addDescriptorSetLayout(descriptorSetLayout);
+		pipelineLayout = pipelineLayoutBuilder.build();
 
-		renderPass = renderPassBuild.build();
+		VulkanGraphicsPipeline pbrPipelineBuilder(context, pipelineLayout, renderPass);
+		
+		pbrPipelineBuilder.addShaderStage(pbrVertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
+		pbrPipelineBuilder.addShaderStage(pbrFragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
+		pbrPipelineBuilder.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
+		pbrPipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		pbrPipelineBuilder.addViewport(viewport);
+		pbrPipelineBuilder.addScissor(scissor);
+		pbrPipelineBuilder.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+		pbrPipelineBuilder.setMultisampleState(context.msaaSamples, true);
+		pbrPipelineBuilder.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
+		pbrPipelineBuilder.addBlendColorAttachment();
+		pbrPipeline = pbrPipelineBuilder.build();
 
-		// Pipeline layout
-		VulkanPipelineLayout pipelineLayoutBuild(context);
-		pipelineLayoutBuild.addDescriptorSetLayout(descriptorSetLayout);
-		pipelineLayout = pipelineLayoutBuild.build();
-
-		// Pbr Pipeline
-		VulkanGraphicsPipeline pbrPipelineBuild(context, pipelineLayout, renderPass);
-		pbrPipelineBuild.addShaderStage(vertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
-		pbrPipelineBuild.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
-		pbrPipelineBuild.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
-		pbrPipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		pbrPipelineBuild.addViewport(viewport);
-		pbrPipelineBuild.addScissor(scissor);
-		pbrPipelineBuild.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
-		pbrPipelineBuild.setMultisampleState(context.msaaSamples, true);
-		pbrPipelineBuild.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
-		pbrPipelineBuild.addBlendColorAttachment();
-
-		pbrPipeline = pbrPipelineBuild.build();
-
-		// SkyBox pipeline
-		VulkanGraphicsPipeline skyBoxPipelineBuild(context, pipelineLayout, renderPass);
-		skyBoxPipelineBuild.addShaderStage(skyBoxVertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
-		skyBoxPipelineBuild.addShaderStage(skyBoxFragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
-		skyBoxPipelineBuild.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
-		skyBoxPipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		skyBoxPipelineBuild.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		skyBoxPipelineBuild.addViewport(viewport);
-		skyBoxPipelineBuild.addScissor(scissor);
-		skyBoxPipelineBuild.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
-		skyBoxPipelineBuild.setMultisampleState(context.msaaSamples, true);
-		skyBoxPipelineBuild.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
-		skyBoxPipelineBuild.addBlendColorAttachment();
-
-		skyBoxPipeline = skyBoxPipelineBuild.build();
+		VulkanGraphicsPipeline skyboxPipelineBuilder(context, pipelineLayout, renderPass);
+		
+		skyboxPipelineBuilder.addShaderStage(skyboxVertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
+		skyboxPipelineBuilder.addShaderStage(skyboxFragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
+		skyboxPipelineBuilder.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
+		skyboxPipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+		skyboxPipelineBuilder.addViewport(viewport);
+		skyboxPipelineBuilder.addScissor(scissor);
+		skyboxPipelineBuilder.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
+		skyboxPipelineBuilder.setMultisampleState(context.msaaSamples, true);
+		skyboxPipelineBuilder.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
+		skyboxPipelineBuilder.addBlendColorAttachment();
+		skyBoxPipeline = skyboxPipelineBuilder.build();
 
 		// Create uniform buffers
 		VkDeviceSize uboSize = sizeof(UniformBufferObject);
@@ -126,8 +158,17 @@ namespace RHI
 		}
 
 		// Create descriptor sets
-		VulkanDescriptorSet descriptoSetBuild(context, imageCount);
-		descriptorSets = descriptoSetBuild.build(descriptorSetLayout);
+		std::vector<VkDescriptorSetLayout> layouts(imageCount, descriptorSetLayout);
+
+		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
+		descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		descriptorSetAllocInfo.descriptorPool = context.descriptorPool;
+		descriptorSetAllocInfo.descriptorSetCount = imageCount;
+		descriptorSetAllocInfo.pSetLayouts = layouts.data();
+
+		descriptorSets.resize(imageCount);
+		if (vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, descriptorSets.data()) != VK_SUCCESS)
+			throw std::runtime_error("Can't allocate descriptor sets");
 
 		for (size_t i = 0; i < imageCount; i++)
 		{
@@ -147,7 +188,8 @@ namespace RHI
 				0,
 				uniformBuffers[i],
 				0,
-				sizeof(UniformBufferObject));
+				sizeof(UniformBufferObject)
+			);
 
 			for (int k = 0; k < textures.size(); k++)
 				VulkanUtils::bindCombinedImageSampler(
@@ -155,8 +197,7 @@ namespace RHI
 					descriptorSets[i],
 					k + 1,
 					textures[k]->getImageView(),
-					textures[k]->getSampler()
-				);
+					textures[k]->getSampler());
 		}
 
 		// Create framebuffers
@@ -232,7 +273,6 @@ namespace RHI
 
 				vkCmdDrawIndexed(commandBuffers[i], skybox.getNumIndices(), 1, 0, 0, 0);
 			}
-
 			vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pbrPipeline);
 			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 			{

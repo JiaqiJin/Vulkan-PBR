@@ -107,5 +107,7 @@
     <None Include="Assert\Shader\Pbrshader.frag" />
     <None Include="Assert\Shader\skyBox.vert" />
     <None Include="Assert\Shader\skyBox.frag" />
+    <None Include="Assert\Shader\commonCube.vert" />
+    <None Include="Assert\Shader\hdriToCube.frag" />
   </ItemGroup>
 </Project>

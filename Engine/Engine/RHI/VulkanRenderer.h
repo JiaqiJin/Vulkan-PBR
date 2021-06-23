@@ -7,6 +7,8 @@
 #include "VulkanRendererContext.h"
 
 #include "VulkanCubemapRenderer.h"
+#include "VulkanTexture.h"
+#include "VulkanShader.h"
 
 namespace RHI
 {
@@ -17,7 +19,13 @@ namespace RHI
 	public:
 		Renderer(const VulkanRendererContext& context, const VulkanSwapChainContext& swapChainContext)
 			: context(context), swapChainContext(swapChainContext),
-			cubeRenderer(context){ }
+			commonCubeVertexShader(context), 
+			hdriToCubeFragmentShader(context),
+			hdriToCubeRenderer(context), 
+			environmentCubemap(context) 
+		{
+			
+		}
 
 		void init(const RenderScene* scene);
 
@@ -42,6 +50,13 @@ namespace RHI
 
 		std::vector<VkDescriptorSet> descriptorSets;
 
-		VulkanCubemapRenderer cubeRenderer;
+		VulkanShader commonCubeVertexShader;
+
+		// Cubemap Sahder
+		VulkanShader hdriToCubeFragmentShader;
+		// Cubemap renderer
+		VulkanCubemapRenderer hdriToCubeRenderer;
+		// Cubemap texture
+		VulkanTexture environmentCubemap;
 	};
 }

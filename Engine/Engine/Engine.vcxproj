@@ -179,6 +179,8 @@
     <ClInclude Include="RHI\VulkanUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assert\Shader\commonCube.vert" />
+    <None Include="Assert\Shader\hdriToCube.frag" />
     <None Include="Assert\Shader\Pbrshader.frag" />
     <None Include="Assert\Shader\Pbrshader.vert" />
     <None Include="Assert\Shader\skyBox.frag" />
