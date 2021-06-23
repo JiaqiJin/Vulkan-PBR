@@ -6,6 +6,8 @@
 
 #include "VulkanRendererContext.h"
 
+#include "VulkanCubemapRenderer.h"
+
 namespace RHI
 {
 	class RenderScene;
@@ -14,7 +16,8 @@ namespace RHI
 	{
 	public:
 		Renderer(const VulkanRendererContext& context, const VulkanSwapChainContext& swapChainContext)
-			: context(context), swapChainContext(swapChainContext) { }
+			: context(context), swapChainContext(swapChainContext),
+			cubeRenderer(context){ }
 
 		void init(const RenderScene* scene);
 
@@ -38,5 +41,7 @@ namespace RHI
 		std::vector<VkDeviceMemory> uniformBuffersMemory;
 
 		std::vector<VkDescriptorSet> descriptorSets;
+
+		VulkanCubemapRenderer cubeRenderer;
 	};
 }

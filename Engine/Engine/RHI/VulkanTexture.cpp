@@ -9,6 +9,57 @@
 
 namespace RHI
 {
+	static int deduceChannels(VkFormat format)
+	{
+		switch (format)
+		{
+		case VK_FORMAT_R16_SFLOAT: return 1;
+		case VK_FORMAT_R16G16_SFLOAT: return 2;
+		case VK_FORMAT_R16G16B16_SFLOAT: return 3;
+		case VK_FORMAT_R16G16B16A16_SFLOAT: return 4;
+		case VK_FORMAT_R32_SFLOAT: return 1;
+		case VK_FORMAT_R32G32_SFLOAT: return 2;
+		case VK_FORMAT_R32G32B32_SFLOAT: return 3;
+		case VK_FORMAT_R32G32B32A32_SFLOAT: return 4;
+		case VK_FORMAT_R8G8B8A8_UNORM: return 4;
+		default: throw std::runtime_error("Format is not supported");
+		}
+	}
+
+	static size_t deducePixelSize(VkFormat format)
+	{
+		switch (format)
+		{
+		case VK_FORMAT_R16_SFLOAT: return 2;
+		case VK_FORMAT_R16G16_SFLOAT: return 4;
+		case VK_FORMAT_R16G16B16_SFLOAT: return 6;
+		case VK_FORMAT_R16G16B16A16_SFLOAT: return 8;
+		case VK_FORMAT_R32_SFLOAT: return 4;
+		case VK_FORMAT_R32G32_SFLOAT: return 8;
+		case VK_FORMAT_R32G32B32_SFLOAT: return 12;
+		case VK_FORMAT_R32G32B32A32_SFLOAT: return 16;
+		case VK_FORMAT_R8G8B8A8_UNORM: return 4;
+		default: throw std::runtime_error("Format is not supported");
+		}
+	}
+
+	static VkImageTiling deduceTiling(VkFormat format)
+	{
+		switch (format)
+		{
+		case VK_FORMAT_R16_SFLOAT: return VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R16G16_SFLOAT: return VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R16G16B16_SFLOAT: return  VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R16G16B16A16_SFLOAT: return  VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R32_SFLOAT: return VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R32G32_SFLOAT: return VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R32G32B32_SFLOAT: return  VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R32G32B32A32_SFLOAT: return  VK_IMAGE_TILING_LINEAR;
+		case VK_FORMAT_R8G8B8A8_UNORM: return VK_IMAGE_TILING_OPTIMAL;
+		default: throw std::runtime_error("Format is not supported");
+		}
+	}
+
 	VulkanTexture::~VulkanTexture()
 	{
 		clearCPUData();
@@ -92,6 +143,54 @@ namespace RHI
 		return true;
 	}
 
+	void VulkanTexture::createCube(VkFormat format, int width_, int height_, int numMipLevels_)
+	{
+		width = width_;
+		height = height_;
+		mipLevels = numMipLevels_;
+		layers = 6;
+		imageFormat = format;
+
+		channels = deduceChannels(format);
+		VkImageTiling tiling = deduceTiling(format);
+
+		VulkanUtils::createImageCube(
+			context,
+			width,
+			height,
+			mipLevels,
+			VK_SAMPLE_COUNT_1_BIT,
+			imageFormat,
+			tiling,
+			VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			image,
+			imageMemory);
+
+		// Prepare the image for shader access
+		VulkanUtils::transitionImageLayout(
+			context,
+			image,
+			imageFormat,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			0,
+			mipLevels,
+			0,
+			layers);
+
+		// Create image view & sampler
+		imageView = VulkanUtils::createImageView(
+			context,
+			image,
+			imageFormat,
+			VK_IMAGE_ASPECT_COLOR_BIT,
+			VK_IMAGE_VIEW_TYPE_CUBE,
+			0, mipLevels,
+			0, layers);
+		imageSampler = VulkanUtils::createSampler(context, mipLevels);
+	}
+
 	void VulkanTexture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t pixelSize)
 	{
 		imageFormat = format;
@@ -107,8 +206,7 @@ namespace RHI
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			stagingBuffer,
-			stagingBufferMemory
-		);
+			stagingBufferMemory);
 
 		// Fill staging buffer
 		void* data = nullptr;
@@ -127,8 +225,7 @@ namespace RHI
 			VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			image,
-			imageMemory
-		);
+			imageMemory);
 
 		// Prepare the image for transfer
 		VulkanUtils::transitionImageLayout(
@@ -138,8 +235,7 @@ namespace RHI
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			0,
-			mipLevels
-		);
+			mipLevels);
 
 		// Copy to the image memory on GPU
 		VulkanUtils::copyBufferToImage(
@@ -147,8 +243,7 @@ namespace RHI
 			stagingBuffer,
 			image,
 			width,
-			height
-		);
+			height);
 
 		// Generate mipmaps on GPU with linear filtering
 		VulkanUtils::generateImage2DMipmaps(
@@ -158,8 +253,7 @@ namespace RHI
 			height,
 			mipLevels,
 			imageFormat,
-			VK_FILTER_LINEAR
-		);
+			VK_FILTER_LINEAR);
 
 		// Prepare the image for shader access
 		VulkanUtils::transitionImageLayout(
@@ -169,8 +263,7 @@ namespace RHI
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 			0,
-			mipLevels
-		);
+			mipLevels);
 
 		// Destroy staging buffer
 		vkDestroyBuffer(context.device, stagingBuffer, nullptr);
@@ -184,8 +277,7 @@ namespace RHI
 			VK_IMAGE_ASPECT_COLOR_BIT,
 			VK_IMAGE_VIEW_TYPE_2D,
 			0, mipLevels,
-			0, layers
-		);
+			0, layers);
 		imageSampler = VulkanUtils::createSampler(context, mipLevels);
 	}
 

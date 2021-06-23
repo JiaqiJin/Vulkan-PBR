@@ -31,6 +31,8 @@ namespace RHI
 		void clearGPUData();
 		void clearCPUData();;
 
+		void createCube(VkFormat format, int width, int height, int numMipLevels);
+
 	private:
 		void uploadToGPU(VkFormat format, VkImageTiling tiling, size_t pixel_size);
 
