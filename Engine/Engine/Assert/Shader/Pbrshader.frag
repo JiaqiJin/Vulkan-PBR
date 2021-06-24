@@ -13,7 +13,7 @@ layout(binding = 2) uniform sampler2D normalSampler;
 layout(binding = 3) uniform sampler2D aoSampler;
 layout(binding = 4) uniform sampler2D shadingSampler;
 layout(binding = 5) uniform sampler2D emissionSampler;
-layout(binding = 6) uniform sampler2D hdrSampler;
+layout(binding = 6) uniform samplerCube hdrSampler;
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;
@@ -181,7 +181,7 @@ void main() {
 	vec3 light = MicrofacetBRDF(surface, microfacet_material) * attenuation * 2.0f * surface.dotNL;
 	
 	// Ambient light (IBL)
-	vec3 ambient = MicrofacetBRDF(ibl, microfacet_material) * texture(hdrSampler, SampleSphericalMap(ibl.light)).rgb;
+	vec3 ambient = MicrofacetBRDF(ibl, microfacet_material) * texture(hdrSampler, ibl.light).rgb;
 	ambient *= texture(aoSampler, fragTexCoord).r;
 
 	// Result

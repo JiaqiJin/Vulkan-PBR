@@ -179,7 +179,7 @@ namespace RHI
 				&scene->getAOTexture(),
 				&scene->getShadingTexture(),
 				&scene->getEmissionTexture(),
-				&scene->getHDRTexture()
+				&environmentCubemap
 			};
 
 			VulkanUtils::bindUniformBuffer(

@@ -8,7 +8,7 @@ layout(binding = 0) uniform UniformBufferObject {
 	vec3 cameraPos;
 } ubo;
 
-layout(binding = 6) uniform sampler2D hdrSampler;
+layout(binding = 6) uniform samplerCube environmentSampler;
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;
@@ -31,7 +31,7 @@ vec2 SampleSphericalMap(vec3 v)
 }
 
 void main() {
-	vec3 color = texture(hdrSampler, SampleSphericalMap(normalize(fragPositionOS))).rgb;
+	vec3 color = texture(environmentSampler, normalize(fragPositionOS)).rgb;
 
 	// Tonemapping + gamma correction
 	color = color / (color + vec3(1.0));

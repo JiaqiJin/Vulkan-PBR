@@ -103,7 +103,7 @@ namespace RHI
 
 	bool VulkanTexture::loadHDRFromFile(const std::string& path)
 	{
-		stbi_set_flip_vertically_on_load(true);
+		//stbi_set_flip_vertically_on_load(true);
 
 		float* stb_pixels = stbi_loadf(path.c_str(), &width, &height, &channels, 0);
 
