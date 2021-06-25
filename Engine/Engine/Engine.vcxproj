@@ -180,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assert\Shader\commonCube.vert" />
+    <None Include="Assert\Shader\diffuseIrradiance.frag" />
     <None Include="Assert\Shader\hdriToCube.frag" />
     <None Include="Assert\Shader\Pbrshader.frag" />
     <None Include="Assert\Shader\Pbrshader.vert" />

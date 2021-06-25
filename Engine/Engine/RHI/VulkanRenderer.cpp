@@ -18,6 +18,7 @@
 
 static std::string commonCubeVertexShaderPath = "Assert/Shader/commonCube.vert";
 static std::string hdriToCubeFragmentShaderPath = "Assert/Shader/hdriToCube.frag";
+static std::string diffuseIrradianceFragmentShaderPath = "Assert/Shader/diffuseIrradiance.frag";
 
 namespace RHI
 {
@@ -34,8 +35,10 @@ namespace RHI
 		commonCubeVertexShader.compileFromFile(commonCubeVertexShaderPath, VulkanShaderKind::Vertex);
 
 		hdriToCubeFragmentShader.compileFromFile(hdriToCubeFragmentShaderPath, VulkanShaderKind::Fragment);
+		diffuseIrradianceFragmentShader.compileFromFile(diffuseIrradianceFragmentShaderPath, VulkanShaderKind::Fragment);
 
 		environmentCubemap.createCube(VK_FORMAT_R8G8B8A8_UNORM, 1024, 1024, 1);
+		diffuseIrradianceCubemap.createCube(VK_FORMAT_R8G8B8A8_UNORM, 1024, 1024, 1);
 
 		{
 			VulkanUtils::transitionImageLayout(
@@ -63,6 +66,35 @@ namespace RHI
 				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 				0, environmentCubemap.getNumMipLevels(),
 				0, environmentCubemap.getNumLayers());
+		}
+
+		// Diffuse irradiance images transitions
+		{
+			VulkanUtils::transitionImageLayout(
+				context,
+				environmentCubemap.getImage(),
+				environmentCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				0, diffuseIrradianceCubemap.getNumMipLevels(),
+				0, diffuseIrradianceCubemap.getNumLayers());
+
+			diffuseIrradianceRenderer.init(
+				commonCubeVertexShader,
+				diffuseIrradianceFragmentShader,
+				environmentCubemap,
+				diffuseIrradianceCubemap);
+
+			diffuseIrradianceRenderer.render();
+
+			VulkanUtils::transitionImageLayout(
+				context,
+				environmentCubemap.getImage(),
+				environmentCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				0, diffuseIrradianceCubemap.getNumMipLevels(),
+				0, diffuseIrradianceCubemap.getNumLayers());
 		}
 
 		const VulkanShader& pbrVertexShader = scene->getPbrVertexShader();

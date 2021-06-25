@@ -20,9 +20,8 @@ namespace RHI
 		Renderer(const VulkanRendererContext& context, const VulkanSwapChainContext& swapChainContext)
 			: context(context), swapChainContext(swapChainContext),
 			commonCubeVertexShader(context), 
-			hdriToCubeFragmentShader(context),
-			hdriToCubeRenderer(context), 
-			environmentCubemap(context) 
+			hdriToCubeFragmentShader(context), hdriToCubeRenderer(context), environmentCubemap(context),
+			diffuseIrradianceFragmentShader(context), diffuseIrradianceRenderer(context), diffuseIrradianceCubemap(context)
 		{
 			
 		}
@@ -58,5 +57,10 @@ namespace RHI
 		VulkanCubemapRenderer hdriToCubeRenderer;
 		// Cubemap texture
 		VulkanTexture environmentCubemap;
+
+		// Diffuse Radiance
+		VulkanCubemapRenderer diffuseIrradianceRenderer;
+		VulkanShader diffuseIrradianceFragmentShader;
+		VulkanTexture diffuseIrradianceCubemap;
 	};
 }
