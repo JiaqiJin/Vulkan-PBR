@@ -14,6 +14,7 @@ layout(binding = 3) uniform sampler2D aoSampler;
 layout(binding = 4) uniform sampler2D shadingSampler;
 layout(binding = 5) uniform sampler2D emissionSampler;
 layout(binding = 6) uniform samplerCube hdrSampler;
+layout(binding = 7) uniform samplerCube diffuseIrradianceSampler;
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;
@@ -54,17 +55,6 @@ struct Surface
 	float dotHV;
 };
 
-// HDR
-const vec2 invAtan = vec2(0.1591, 0.3183);
-vec2 SampleSphericalMap(vec3 v)
-{
-    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
-    uv *= invAtan;
-    uv += 0.5;
-    return uv;
-}
-
-
 // ---------- PBR ---------------------
 
 struct MicrofacetMaterial
@@ -72,6 +62,7 @@ struct MicrofacetMaterial
 	vec3 albedo;
 	float roughness;
 	float metalness;
+	vec3 f0;
 };
 
 // relative surface area of microfacete aligned with to the half vector h
@@ -119,6 +110,11 @@ vec3 F_Shlick(Surface surface, vec3 f0)
 	return f0 + (vec3(1.0f, 1.0f, 1.0f) - f0) * pow(1.0f - dotHV, 5);
 }
 
+vec3 F_Shlick(float cosTheta, vec3 f0, float roughness)
+{
+	return f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(1.0f - cosTheta, 5);
+}
+
 // Cook-Torrance reflectance equation
 // f_cookTorrance = DFG / 4(wo · n)(wi · n)
 
@@ -126,10 +122,10 @@ vec3 MicrofacetBRDF(Surface surface, MicrofacetMaterial material)
 {
 	// simplifying assumption that most dielectric surfaces look visually correct with a constant F0 0.04.
 	// while do specify f0 for metallic surfaces as then given by the albedo value.
-	vec3 f0 = lerp(vec3(0.04f), material.albedo, material.metalness);
+	//vec3 f0 = lerp(vec3(0.04f), material.albedo, material.metalness);
 
 	float D = DistributionGGX(surface, material.roughness);
-	vec3 F = F_Shlick(surface, f0);
+	vec3 F = F_Shlick(surface, material.f0);
 	float G= G_SmithGGX(surface, material.roughness);
 
 	vec3 specular_reflection = D * F * G;
@@ -174,6 +170,7 @@ void main() {
 	microfacet_material.albedo = texture(albedoSampler, fragTexCoord).rgb;
 	microfacet_material.roughness = texture(shadingSampler, fragTexCoord).g;
 	microfacet_material.metalness = texture(shadingSampler, fragTexCoord).b;
+	microfacet_material.f0 = lerp(vec3(0.04f), microfacet_material.albedo, microfacet_material.metalness);
 
 	// Direct light
 	float attenuation = 1.0f / dot(lightPos - fragPositionWS, lightPos - fragPositionWS);
@@ -181,13 +178,14 @@ void main() {
 	vec3 light = MicrofacetBRDF(surface, microfacet_material) * attenuation * 2.0f * surface.dotNL;
 	
 	// Ambient light (IBL)
-	vec3 ambient = MicrofacetBRDF(ibl, microfacet_material) * texture(hdrSampler, ibl.light).rgb;
+	vec3 ambient = texture(diffuseIrradianceSampler, ibl.normal).rgb;
 	ambient *= texture(aoSampler, fragTexCoord).r;
+	ambient *= (1.0f - F_Shlick(ibl.dotNV, microfacet_material.f0, microfacet_material.roughness));
 
 	// Result
 	vec3 color = ambient;
-	// color += light;
-	// color += texture(emissionSampler, fragTexCoord).rgb;
+	color += light;
+	color += texture(emissionSampler, fragTexCoord).rgb;
 
 	// Tonemapping + gamma correction
 	color = color / (color + vec3(1.0));

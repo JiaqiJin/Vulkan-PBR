@@ -35,6 +35,8 @@ namespace RHI
 		commonCubeVertexShader.compileFromFile(commonCubeVertexShaderPath, VulkanShaderKind::Vertex);
 
 		hdriToCubeFragmentShader.compileFromFile(hdriToCubeFragmentShaderPath, VulkanShaderKind::Fragment);
+		// Irradiance pre-computed sum of all indirect diffuse light of the scene hitting some surface aligned along direction wo
+		// The irradiance map displays somewhat like an average color or lighting display of the environment
 		diffuseIrradianceFragmentShader.compileFromFile(diffuseIrradianceFragmentShaderPath, VulkanShaderKind::Fragment);
 
 		environmentCubemap.createCube(VK_FORMAT_R8G8B8A8_UNORM, 1024, 1024, 1);
@@ -72,10 +74,10 @@ namespace RHI
 		{
 			VulkanUtils::transitionImageLayout(
 				context,
-				environmentCubemap.getImage(),
-				environmentCubemap.getImageFormat(),
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				diffuseIrradianceCubemap.getImage(),
+				diffuseIrradianceCubemap.getImageFormat(),
 				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				0, diffuseIrradianceCubemap.getNumMipLevels(),
 				0, diffuseIrradianceCubemap.getNumLayers());
 
@@ -84,15 +86,14 @@ namespace RHI
 				diffuseIrradianceFragmentShader,
 				environmentCubemap,
 				diffuseIrradianceCubemap);
-
 			diffuseIrradianceRenderer.render();
 
 			VulkanUtils::transitionImageLayout(
 				context,
-				environmentCubemap.getImage(),
-				environmentCubemap.getImageFormat(),
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				diffuseIrradianceCubemap.getImage(),
+				diffuseIrradianceCubemap.getImageFormat(),
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 				0, diffuseIrradianceCubemap.getNumMipLevels(),
 				0, diffuseIrradianceCubemap.getNumLayers());
 		}
@@ -204,14 +205,15 @@ namespace RHI
 
 		for (size_t i = 0; i < imageCount; i++)
 		{
-			std::array<const VulkanTexture*, 6> textures =
+			std::array<const VulkanTexture*, 7> textures =
 			{
 				&scene->getAlbedoTexture(),
 				&scene->getNormalTexture(),
 				&scene->getAOTexture(),
 				&scene->getShadingTexture(),
 				&scene->getEmissionTexture(),
-				&environmentCubemap
+				&environmentCubemap,
+				&diffuseIrradianceCubemap
 			};
 
 			VulkanUtils::bindUniformBuffer(
@@ -389,5 +391,22 @@ namespace RHI
 
 		vkDestroyRenderPass(context.device, renderPass, nullptr);
 		renderPass = VK_NULL_HANDLE;
+
+		vkFreeCommandBuffers(context.device, context.commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+		commandBuffers.clear();
+
+		vkFreeDescriptorSets(context.device, context.descriptorPool, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data());
+		descriptorSets.clear();
+
+		commonCubeVertexShader.clear();
+
+		hdriToCubeFragmentShader.clear();
+		hdriToCubeRenderer.shutdown();
+
+		diffuseIrradianceFragmentShader.clear();
+		diffuseIrradianceRenderer.shutdown();
+
+		environmentCubemap.clearGPUData();
+		diffuseIrradianceCubemap.clearGPUData();
 	}
 }
