@@ -27,7 +27,7 @@ namespace RHI
 		glm::mat4 world;
 		glm::mat4 view;
 		glm::mat4 proj;
-		glm::vec3 cameraPos;
+		glm::vec3 cameraPosWS;
 	};
 
 	void Renderer::init(const RenderScene* scene)
@@ -39,8 +39,8 @@ namespace RHI
 		// The irradiance map displays somewhat like an average color or lighting display of the environment
 		diffuseIrradianceFragmentShader.compileFromFile(diffuseIrradianceFragmentShaderPath, VulkanShaderKind::Fragment);
 
-		environmentCubemap.createCube(VK_FORMAT_R8G8B8A8_UNORM, 1024, 1024, 1);
-		diffuseIrradianceCubemap.createCube(VK_FORMAT_R8G8B8A8_UNORM, 1024, 1024, 1);
+		environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
+		diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 
 		{
 			VulkanUtils::transitionImageLayout(
@@ -345,16 +345,19 @@ namespace RHI
 		const float zNear = 0.1f;
 		const float zFar = 1000.0f;
 
-		UniformBufferObject ubo{};
-		ubo.world = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), zero, up);
-		ubo.proj = glm::perspective(glm::radians(45.0f), aspect, zNear, zFar);
-		ubo.proj[1][1] *= -1;
-		ubo.cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
+		UniformBufferObject *ubo = nullptr;
 
-		void* data;
-		vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(ubo), 0, &data);
-		memcpy(data, &ubo, sizeof(ubo));
+		vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(UniformBufferObject), 0, reinterpret_cast<void**>(&ubo));
+
+		const glm::vec3& cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
+		const glm::mat4& rotation = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
+
+		ubo->world = glm::mat4(1.0f);
+		ubo->view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), zero, up);
+		ubo->proj = glm::perspective(glm::radians(45.0f), aspect, zNear, zFar);
+		ubo->proj[1][1] *= -1;
+		ubo->cameraPosWS = glm::vec3(glm::vec4(cameraPos, 1.0f) * rotation);
+		
 		vkUnmapMemory(context.device, uniformBufferMemory);
 
 		return commandBuffers[imageIndex];
