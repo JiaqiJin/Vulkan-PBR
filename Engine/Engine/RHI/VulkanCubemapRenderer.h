@@ -42,5 +42,7 @@ namespace RHI
 
 		VkBuffer uniformBuffer{ VK_NULL_HANDLE };
 		VkDeviceMemory uniformBufferMemory{ VK_NULL_HANDLE };
+
+		VkFence fence{ VK_NULL_HANDLE };
 	};
 }
