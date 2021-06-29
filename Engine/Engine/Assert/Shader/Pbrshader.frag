@@ -178,40 +178,32 @@ vec3 MicrofacetBRDF(Surface surface, MicrofacetMaterial material)
 vec3 SpecularIBL(Surface surface, MicrofacetMaterial material)
 {
 	vec3 result = vec3(0.0);
+	 const uint SAMPLE_COUNT = 124u;
 
-    vec3 V;
-    V.x = sqrt(1.0 - surface.dotNV *surface.dotNV);
-    V.y = 0.0;
-    V.z = surface.dotNV;
-
-    float A = 0.0;
-    float B = 0.0;
-
-	const uint SAMPLE_COUNT = 1024u;
+	Surface sample_surface;
+	sample_surface.view = surface.view;
+	sample_surface.normal = surface.normal;
+	sample_surface.dotNV = max(0.0f, dot(sample_surface.normal, sample_surface.view));
 
 	for(uint i = 0u; i < SAMPLE_COUNT; ++i)
 	{
 		vec2 Xi = Hammersley(i, SAMPLE_COUNT);
-        vec3 H  = ImportanceSamplingGGX(Xi, surface.normal, material.roughness);
-        vec3 L  = normalize(2.0 * dot(V, H) * H - V);
+		sample_surface.halfVector = ImportanceSamplingGGX(Xi, surface.normal, material.roughness);
+		sample_surface.light = -reflect(sample_surface.view, sample_surface.halfVector);
 
-        float NdotL = max(L.z, 0.0);
-        float NdotH = max(H.z, 0.0);
-        float VdotH = max(dot(V, H), 0.0);
+		sample_surface.dotNH = max(0.0f, dot(sample_surface.normal, sample_surface.halfVector));
+		sample_surface.dotNL = max(0.0f, dot(sample_surface.normal, sample_surface.light));
+		sample_surface.dotHV = max(0.0f, dot(sample_surface.halfVector, sample_surface.view));
 
-		if(NdotL > 0.0)
+		if(sample_surface.dotNL > 0)
         {
-            float G = G_SmithGGX(surface, material.roughness);
-            float G_Vis = (G * VdotH) / (surface.dotNV * surface.dotNV);
-            float Fc = pow(1.0 - VdotH, 5.0);
+			vec3 F = F_Shlick(sample_surface, material.f0);
+			float G = G_SmithGGX(surface, material.roughness);
 
-            A += (1.0 - Fc) * G_Vis;
-            B += Fc * G_Vis;
+			vec3 color = texture(hdrSampler, sample_surface.light).rgb;
+	
+			result += color * F * G * sample_surface.dotHV / (sample_surface.dotNH * sample_surface.dotNV);
         }
-
-		vec3 color = texture(hdrSampler, surface.light).rgb;
-
-		result += color * A * B * surface.dotHV / (surface.dotNH * surface.dotNV);
 	}
 
 	return result / float(SAMPLE_COUNT);
