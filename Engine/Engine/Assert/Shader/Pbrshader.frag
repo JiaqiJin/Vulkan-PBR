@@ -26,6 +26,7 @@ layout(location = 5) in vec3 fragPositionWS;
 layout(location = 0) out vec4 outColor;
 
 const float PI = 3.141592653589798979f;
+const float PI2 = pow(PI, 2.0f);
 const float iPI = 0.31830988618379f;
 
 float sqr(float a)
@@ -64,6 +65,46 @@ struct MicrofacetMaterial
 	float metalness;
 	vec3 f0;
 };
+
+vec3 ImportanceSamplingGGX(vec2 Xi, vec3 normal, float roughness)
+{
+	float alpha = sqr(roughness * roughness);
+	float alpha2 = sqr(alpha);
+
+	float phi = PI2 * Xi.x;
+	float cosTheta = sqrt((1.0f - Xi.y) / (1.0f + (alpha2 - 1.0f) * Xi.y));
+	float sinTheta = sqrt(1.0f - sqr(cosTheta));
+
+	// from spherical coordinates to cartesian coordinates
+	vec3 H;
+	H.x = cos(phi) * sinTheta;
+	H.y = sin(phi) * sinTheta;
+	H.z = cosTheta;
+
+	// from tangent-space vector to world-space sample vector
+	vec3 up        = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+	vec3 tangent   = normalize(cross(up, normal));
+	vec3 bitangent = cross(normal, tangent);
+
+	vec3 sampleVec = tangent * H.x + bitangent * H.y + normal * H.z;
+	return normalize(sampleVec);
+}
+
+// Low Discrepancy
+float RadicalInverse_VdC(uint bits) 
+{
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+vec2 Hammersley(uint i, uint N)
+{
+    return vec2(float(i)/float(N), RadicalInverse_VdC(i));
+}  
 
 // relative surface area of microfacete aligned with to the half vector h
 // D = alpha^2 / pi((n · h)^2 (alpha^2 - 1) + 1)^2
@@ -134,6 +175,48 @@ vec3 MicrofacetBRDF(Surface surface, MicrofacetMaterial material)
 	return (diffuse_reflection * iPI + specular_reflection);
 }
 
+vec3 SpecularIBL(Surface surface, MicrofacetMaterial material)
+{
+	vec3 result = vec3(0.0);
+
+    vec3 V;
+    V.x = sqrt(1.0 - surface.dotNV *surface.dotNV);
+    V.y = 0.0;
+    V.z = surface.dotNV;
+
+    float A = 0.0;
+    float B = 0.0;
+
+	const uint SAMPLE_COUNT = 1024u;
+
+	for(uint i = 0u; i < SAMPLE_COUNT; ++i)
+	{
+		vec2 Xi = Hammersley(i, SAMPLE_COUNT);
+        vec3 H  = ImportanceSamplingGGX(Xi, surface.normal, material.roughness);
+        vec3 L  = normalize(2.0 * dot(V, H) * H - V);
+
+        float NdotL = max(L.z, 0.0);
+        float NdotH = max(H.z, 0.0);
+        float VdotH = max(dot(V, H), 0.0);
+
+		if(NdotL > 0.0)
+        {
+            float G = G_SmithGGX(surface, material.roughness);
+            float G_Vis = (G * VdotH) / (surface.dotNV * surface.dotNV);
+            float Fc = pow(1.0 - VdotH, 5.0);
+
+            A += (1.0 - Fc) * G_Vis;
+            B += Fc * G_Vis;
+        }
+
+		vec3 color = texture(hdrSampler, surface.light).rgb;
+
+		result += color * A * B * surface.dotHV / (surface.dotNH * surface.dotNV);
+	}
+
+	return result / float(SAMPLE_COUNT);
+}
+
 void main() {
 	vec3 lightPos = ubo.cameraPos;
 	vec3 lightDirWS = normalize(lightPos - fragPositionWS);
@@ -178,14 +261,21 @@ void main() {
 	vec3 light = MicrofacetBRDF(surface, microfacet_material) * attenuation * 2.0f * surface.dotNL;
 	
 	// Ambient light (IBL)
-	vec3 ambient = texture(diffuseIrradianceSampler, ibl.normal).rgb;
+	vec3 ibl_diffuse  = texture(diffuseIrradianceSampler, ibl.normal).rgb * microfacet_material.albedo;
+	ibl_diffuse  *= iPI;
+	ibl_diffuse  *= (1.0f - F_Shlick(ibl.dotNV, microfacet_material.f0, microfacet_material.roughness));
+
+	vec3 ibl_specular = SpecularIBL(ibl, microfacet_material);
+
+	vec3 ambient = ibl_diffuse + ibl_specular;
+
 	ambient *= texture(aoSampler, fragTexCoord).r;
-	ambient *= (1.0f - F_Shlick(ibl.dotNV, microfacet_material.f0, microfacet_material.roughness));
 
 	// Result
-	vec3 color = ambient;
+	vec3 color = vec3(0.0f);
+	color += ambient;
 	color += light;
-	color += texture(emissionSampler, fragTexCoord).rgb;
+	//color += texture(emissionSampler, fragTexCoord).rgb;
 
 	// Tonemapping + gamma correction
 	color = color / (color + vec3(1.0));

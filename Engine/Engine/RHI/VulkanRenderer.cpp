@@ -352,11 +352,11 @@ namespace RHI
 		const glm::vec3& cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
 		const glm::mat4& rotation = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
 
-		ubo->world = glm::mat4(1.0f);
+		ubo->world = glm::mat4(1.0f); // glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
 		ubo->view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), zero, up);
 		ubo->proj = glm::perspective(glm::radians(45.0f), aspect, zNear, zFar);
 		ubo->proj[1][1] *= -1;
-		ubo->cameraPosWS = glm::vec3(glm::vec4(cameraPos, 1.0f) * rotation);
+		ubo->cameraPosWS = glm::vec3(glm::vec4(cameraPos, 1.0f) * rotation); // glm::vec3(2.0f, 2.0f, 2.0f);
 		
 		vkUnmapMemory(context.device, uniformBufferMemory);
 
