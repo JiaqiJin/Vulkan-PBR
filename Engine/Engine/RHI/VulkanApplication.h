@@ -76,6 +76,10 @@ namespace RHI
 		void initRenderScene();
 		void shutdownRenderScene();
 
+		void initImGui();
+		void shutdownImGui();
+
+		void update();
 		void mainloop();
 		void render();
 

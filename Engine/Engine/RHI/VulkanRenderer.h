@@ -4,6 +4,11 @@
 #include <string>
 #include <vector>
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <GLM/glm.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+
 #include "VulkanRendererContext.h"
 
 #include "VulkanCubemapRenderer.h"
@@ -13,6 +18,14 @@
 namespace RHI
 {
 	class RenderScene;
+
+	struct UniformBufferObject
+	{
+		glm::mat4 world;
+		glm::mat4 view;
+		glm::mat4 proj;
+		glm::vec3 cameraPosWS;
+	};
 
 	class Renderer
 	{
@@ -27,8 +40,8 @@ namespace RHI
 		}
 
 		void init(const RenderScene* scene);
-
-		VkCommandBuffer render(uint32_t imageIndex);
+		void update(const RenderScene* scene);
+		VkCommandBuffer render(const RenderScene* scene, uint32_t imageIndex);
 		void shutdown();
 
 	private:
@@ -62,5 +75,7 @@ namespace RHI
 		VulkanCubemapRenderer diffuseIrradianceRenderer;
 		VulkanShader diffuseIrradianceFragmentShader;
 		VulkanTexture diffuseIrradianceCubemap;
+
+		UniformBufferObject ubo;
 	};
 }

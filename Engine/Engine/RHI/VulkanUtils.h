@@ -118,10 +118,11 @@ namespace RHI
 			VkDeviceSize size);
 
 		static VkSampleCountFlagBits getMaxUsableSampleCount(const VulkanRendererContext& context);
-	private:
-		static bool hasStencilComponent(VkFormat format);
+
 		// Helper functions recording and excuting a command buffer
 		static VkCommandBuffer beginSingleTimeCommands(const VulkanRendererContext& context);
 		static void endSingleTimeCommands(const VulkanRendererContext& context, VkCommandBuffer commandBuffer);
+	private:
+		static bool hasStencilComponent(VkFormat format);
 	};
 }

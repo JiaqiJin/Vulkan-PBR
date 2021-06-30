@@ -259,14 +259,14 @@ void main() {
 
 	vec3 ibl_specular = SpecularIBL(ibl, microfacet_material);
 
-	vec3 ambient = ibl_diffuse + ibl_specular;
+	vec3 ambient = ibl_diffuse * iPI + ibl_specular;
 
 	ambient *= texture(aoSampler, fragTexCoord).r;
 
 	// Result
 	vec3 color = vec3(0.0f);
 	color += ambient;
-	color += light;
+	//color += light;
 	//color += texture(emissionSampler, fragTexCoord).rgb;
 
 	// Tonemapping + gamma correction
