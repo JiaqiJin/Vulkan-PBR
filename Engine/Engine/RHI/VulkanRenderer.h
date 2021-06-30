@@ -25,6 +25,9 @@ namespace RHI
 		glm::mat4 view;
 		glm::mat4 proj;
 		glm::vec3 cameraPosWS;
+		float lerpUserValues{ 0.0f };
+		float userMetalness{ 0.0f };
+		float userRoughness{ 0.0f };
 	};
 
 	class Renderer

@@ -6,6 +6,9 @@ layout(binding = 0) uniform UniformBufferObject {
 	mat4 view;
 	mat4 proj;
 	vec3 cameraPos;
+	float lerpUserValues;
+	float userMetalness;
+	float userRoughness;
 } ubo;
 
 layout(binding = 1) uniform sampler2D albedoSampler;
@@ -247,6 +250,10 @@ void main() {
 	microfacet_material.metalness = texture(shadingSampler, fragTexCoord).b;
 	microfacet_material.f0 = lerp(vec3(0.04f), microfacet_material.albedo, microfacet_material.metalness);
 
+	microfacet_material.albedo = lerp(microfacet_material.albedo, vec3(0.5f, 0.5f, 0.5f), ubo.lerpUserValues);
+	microfacet_material.roughness = lerp(microfacet_material.roughness, ubo.userRoughness, ubo.lerpUserValues);
+	microfacet_material.metalness = lerp(microfacet_material.metalness, ubo.userMetalness, ubo.lerpUserValues);
+
 	// Direct light
 	float attenuation = 1.0f / dot(lightPos - fragPositionWS, lightPos - fragPositionWS);
 
@@ -254,7 +261,6 @@ void main() {
 	
 	// Ambient light (IBL)
 	vec3 ibl_diffuse  = texture(diffuseIrradianceSampler, ibl.normal).rgb * microfacet_material.albedo;
-	ibl_diffuse  *= iPI;
 	ibl_diffuse  *= (1.0f - F_Shlick(ibl.dotNV, microfacet_material.f0, microfacet_material.roughness));
 
 	vec3 ibl_specular = SpecularIBL(ibl, microfacet_material);
