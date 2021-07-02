@@ -19,68 +19,7 @@ namespace RHI
 
 	void Renderer::init(const RenderScene* scene)
 	{
-		// Irradiance pre-computed sum of all indirect diffuse light of the scene hitting some surface aligned along direction wo
-		// The irradiance map displays somewhat like an average color or lighting display of the environment
-		environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
-		diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
-
-		{
-			VulkanUtils::transitionImageLayout(
-				context,
-				environmentCubemap.getImage(),
-				environmentCubemap.getImageFormat(),
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				0, environmentCubemap.getNumMipLevels(),
-				0, environmentCubemap.getNumLayers()
-			);
-
-			hdriToCubeRenderer.init(
-				*scene->getCubeVertexShader(),
-				*scene->getHDRIToFragmentShader(),
-				*scene->getHDRTexture(),
-				environmentCubemap);
-
-			hdriToCubeRenderer.render();
-
-			VulkanUtils::transitionImageLayout(
-				context,
-				environmentCubemap.getImage(),
-				environmentCubemap.getImageFormat(),
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				0, environmentCubemap.getNumMipLevels(),
-				0, environmentCubemap.getNumLayers());
-		}
-
-		// Diffuse irradiance images transitions
-		{
-			VulkanUtils::transitionImageLayout(
-				context,
-				diffuseIrradianceCubemap.getImage(),
-				diffuseIrradianceCubemap.getImageFormat(),
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				0, diffuseIrradianceCubemap.getNumMipLevels(),
-				0, diffuseIrradianceCubemap.getNumLayers());
-
-			diffuseIrradianceRenderer.init(
-				*scene->getCubeVertexShader(),
-				*scene->getDiffuseIrradianceFragmentShader(),
-				environmentCubemap,
-				diffuseIrradianceCubemap);
-
-			diffuseIrradianceRenderer.render();
-
-			VulkanUtils::transitionImageLayout(
-				context,
-				diffuseIrradianceCubemap.getImage(),
-				diffuseIrradianceCubemap.getImageFormat(),
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				0, diffuseIrradianceCubemap.getNumMipLevels(),
-				0, diffuseIrradianceCubemap.getNumLayers());
-		}
+		initEnvironment(scene);
 
 		const VulkanShader* pbrVertexShader = scene->getPBRVertexShader();
 		const VulkanShader* pbrFragmentShader = scene->getPBRFragmentShader();
@@ -282,6 +221,77 @@ namespace RHI
 		}
 	}
 
+	void Renderer::initEnvironment(const RenderScene* scene)
+	{
+		// Irradiance pre-computed sum of all indirect diffuse light of the scene hitting some surface aligned along direction wo
+		// The irradiance map displays somewhat like an average color or lighting display of the environment
+		environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
+		diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
+
+		setEnvironment(scene, currentEnvironment);;
+	}
+
+	void Renderer::setEnvironment(const RenderScene* scene, int index)
+	{
+		{
+			VulkanUtils::transitionImageLayout(
+				context,
+				environmentCubemap.getImage(),
+				environmentCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				0, environmentCubemap.getNumMipLevels(),
+				0, environmentCubemap.getNumLayers()
+			);
+
+			hdriToCubeRenderer.init(
+				*scene->getCubeVertexShader(),
+				*scene->getHDRIToFragmentShader(),
+				*scene->getHDRTexture(currentEnvironment),
+				environmentCubemap);
+
+			hdriToCubeRenderer.render();
+
+			VulkanUtils::transitionImageLayout(
+				context,
+				environmentCubemap.getImage(),
+				environmentCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				0, environmentCubemap.getNumMipLevels(),
+				0, environmentCubemap.getNumLayers());
+		}
+
+		// Diffuse irradiance images transitions
+		{
+			VulkanUtils::transitionImageLayout(
+				context,
+				diffuseIrradianceCubemap.getImage(),
+				diffuseIrradianceCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				0, diffuseIrradianceCubemap.getNumMipLevels(),
+				0, diffuseIrradianceCubemap.getNumLayers());
+
+			diffuseIrradianceRenderer.init(
+				*scene->getCubeVertexShader(),
+				*scene->getDiffuseIrradianceFragmentShader(),
+				environmentCubemap,
+				diffuseIrradianceCubemap);
+
+			diffuseIrradianceRenderer.render();
+
+			VulkanUtils::transitionImageLayout(
+				context,
+				diffuseIrradianceCubemap.getImage(),
+				diffuseIrradianceCubemap.getImageFormat(),
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				0, diffuseIrradianceCubemap.getNumMipLevels(),
+				0, diffuseIrradianceCubemap.getNumLayers());
+		}
+	}
+
 	VkCommandBuffer Renderer::render(const RenderScene* scene, uint32_t imageIndex)
 	{
 		VkCommandBuffer commandBuffer = commandBuffers[imageIndex];
@@ -395,6 +405,21 @@ namespace RHI
 
 		ImGui::Begin("Material Parameters");
 
+		int oldCurrentEnvironment = currentEnvironment;
+
+		if (ImGui::BeginCombo("Choose your HDR map", scene->getHDRTexturePath(currentEnvironment)))
+		{
+			for (int i = 0; i < scene->getNumHDRTextures(); i++)
+			{
+				bool selected = (i == currentEnvironment);
+				if (ImGui::Selectable(scene->getHDRTexturePath(i), &selected))
+					currentEnvironment = i;
+				if (selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
 		ImGui::Checkbox("Demo Window", &show_demo_window);
 
 		ImGui::SliderFloat("Lerp User Material", &ubo.lerpUserValues, 0.0f, 1.0f);
@@ -403,6 +428,9 @@ namespace RHI
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
+
+		if (oldCurrentEnvironment != currentEnvironment)
+			setEnvironment(scene, currentEnvironment);
 	}
 
 	void Renderer::shutdown()

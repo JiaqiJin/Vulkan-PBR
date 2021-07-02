@@ -5,6 +5,8 @@
 #include <iostream>
 #include <vector>
 
+#include <cassert>
+
 namespace RHI
 {
 	namespace config
@@ -41,7 +43,10 @@ namespace RHI
 			"Assert/Texture/Default_emissive.jpg",
 		};
 
-		static const char* hdrTexture = "Assert/Texture/Ice_Lake/Ice_Lake_Ref.hdr";
+		static std::vector<const char*> hdrTextures = {
+			"Assert/Texture/Ice_Lake/Ice_Lake_Ref.hdr",
+			"Assert/Texture/Default_environment.hdr"
+		};
 	}
 
 	void RenderScene::init()
@@ -57,7 +62,19 @@ namespace RHI
 		for (int i = 0; i < config::textures.size(); i++)
 			resources.loadTexture(i, config::textures[i]);
 
-		resources.loadHDRTexture(config::Textures::Environment, config::hdrTexture);
+		for (int i = 0; i < config::hdrTextures.size(); i++)
+			resources.loadHDRTexture(config::Textures::Environment + i, config::hdrTextures[i]);
+	}
+
+	const char* RenderScene::getHDRTexturePath(int index) const
+	{
+		assert(index >= 0 && index < config::hdrTextures.size());
+		return config::hdrTextures[index];
+	}
+
+	size_t RenderScene::getNumHDRTextures() const
+	{
+		return config::hdrTextures.size();
 	}
 
 	void RenderScene::shutdown()
@@ -73,6 +90,7 @@ namespace RHI
 		for (int i = 0; i < config::textures.size(); i++)
 			resources.unloadTexture(i);
 
-		resources.unloadTexture(config::Textures::Environment);
+		for (int i = 0; i < config::hdrTextures.size(); i++)
+			resources.unloadTexture(config::Textures::Environment + i);
 	}
 }

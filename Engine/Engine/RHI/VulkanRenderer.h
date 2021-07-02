@@ -45,9 +45,13 @@ namespace RHI
 		}
 
 		void init(const RenderScene* scene);
+		void initEnvironment(const RenderScene* scene);
 		void update(const RenderScene* scene);
 		VkCommandBuffer render(const RenderScene* scene, uint32_t imageIndex);
 		void shutdown();
+
+	private:
+		void setEnvironment(const RenderScene* scene, int index);
 
 	private:
 		VulkanRendererContext context;
@@ -75,5 +79,7 @@ namespace RHI
 		// Cubemap Texture
 		VulkanCubemapRenderer hdriToCubeRenderer;
 		VulkanCubemapRenderer diffuseIrradianceRenderer;
+
+		int currentEnvironment = 0;
 	};
 }

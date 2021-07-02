@@ -62,12 +62,13 @@ namespace RHI
 		inline const VulkanTexture* getAOTexture() const { return resources.getTexture(config::Textures::AO); }
 		inline const VulkanTexture* getShadingTexture() const { return resources.getTexture(config::Textures::Shading); }
 		inline const VulkanTexture* getEmissionTexture() const { return resources.getTexture(config::Textures::Emission); }
-		inline const VulkanTexture* getHDRTexture() const { return resources.getTexture(config::Textures::Environment); }
+		inline const VulkanTexture* getHDRTexture(int index) const { return resources.getTexture(config::Textures::Environment + index); }
 
 		inline const VulkanMesh* getMesh() const { return resources.getMesh(config::Meshes::Helmet); }
 		inline const VulkanMesh* getSkybox() const { return resources.getMesh(config::Meshes::Skybox); }
 
-		VkShaderModule createShader(const std::string& path) const;
+		const char* getHDRTexturePath(int index) const;
+		size_t getNumHDRTextures() const;
 
 	private:
 		ResourceManager resources;
