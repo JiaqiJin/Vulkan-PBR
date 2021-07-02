@@ -14,22 +14,13 @@
 
 #include <chrono>	
 
-static std::string commonCubeVertexShaderPath = "Assert/Shader/commonCube.vert";
-static std::string hdriToCubeFragmentShaderPath = "Assert/Shader/hdriToCube.frag";
-static std::string diffuseIrradianceFragmentShaderPath = "Assert/Shader/diffuseIrradiance.frag";
-
 namespace RHI
 {
 
 	void Renderer::init(const RenderScene* scene)
 	{
-		commonCubeVertexShader.compileFromFile(commonCubeVertexShaderPath, VulkanShaderKind::Vertex);
-
-		hdriToCubeFragmentShader.compileFromFile(hdriToCubeFragmentShaderPath, VulkanShaderKind::Fragment);
 		// Irradiance pre-computed sum of all indirect diffuse light of the scene hitting some surface aligned along direction wo
 		// The irradiance map displays somewhat like an average color or lighting display of the environment
-		diffuseIrradianceFragmentShader.compileFromFile(diffuseIrradianceFragmentShaderPath, VulkanShaderKind::Fragment);
-
 		environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 		diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 
@@ -45,10 +36,11 @@ namespace RHI
 			);
 
 			hdriToCubeRenderer.init(
-				commonCubeVertexShader,
-				hdriToCubeFragmentShader,
-				scene->getHDRTexture(),
+				*scene->getCubeVertexShader(),
+				*scene->getHDRIToFragmentShader(),
+				*scene->getHDRTexture(),
 				environmentCubemap);
+
 			hdriToCubeRenderer.render();
 
 			VulkanUtils::transitionImageLayout(
@@ -73,10 +65,11 @@ namespace RHI
 				0, diffuseIrradianceCubemap.getNumLayers());
 
 			diffuseIrradianceRenderer.init(
-				commonCubeVertexShader,
-				diffuseIrradianceFragmentShader,
+				*scene->getCubeVertexShader(),
+				*scene->getDiffuseIrradianceFragmentShader(),
 				environmentCubemap,
 				diffuseIrradianceCubemap);
+
 			diffuseIrradianceRenderer.render();
 
 			VulkanUtils::transitionImageLayout(
@@ -89,10 +82,10 @@ namespace RHI
 				0, diffuseIrradianceCubemap.getNumLayers());
 		}
 
-		const VulkanShader& pbrVertexShader = scene->getPbrVertexShader();
-		const VulkanShader& pbrFragmentShader = scene->getPbrFragmentShader();
-		const VulkanShader& skyboxVertexShader = scene->getSkyboxVertexShader();
-		const VulkanShader& skyboxFragmentShader = scene->getSkyboxFragmentShader();
+		const VulkanShader* pbrVertexShader = scene->getPBRVertexShader();
+		const VulkanShader* pbrFragmentShader = scene->getPBRFragmentShader();
+		const VulkanShader* skyboxVertexShader = scene->getSkyboxVertexShader();
+		const VulkanShader* skyboxFragmentShader = scene->getSkyboxFragmentShader();
 
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
@@ -136,8 +129,8 @@ namespace RHI
 
 		VulkanGraphicsPipeline pbrPipelineBuilder(context, pipelineLayout, renderPass);
 		
-		pbrPipelineBuilder.addShaderStage(pbrVertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
-		pbrPipelineBuilder.addShaderStage(pbrFragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
+		pbrPipelineBuilder.addShaderStage(pbrVertexShader->getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
+		pbrPipelineBuilder.addShaderStage(pbrFragmentShader->getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
 		pbrPipelineBuilder.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
 		pbrPipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 		pbrPipelineBuilder.addViewport(viewport);
@@ -150,8 +143,8 @@ namespace RHI
 
 		VulkanGraphicsPipeline skyboxPipelineBuilder(context, pipelineLayout, renderPass);
 		
-		skyboxPipelineBuilder.addShaderStage(skyboxVertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
-		skyboxPipelineBuilder.addShaderStage(skyboxFragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
+		skyboxPipelineBuilder.addShaderStage(skyboxVertexShader->getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
+		skyboxPipelineBuilder.addShaderStage(skyboxFragmentShader->getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
 		skyboxPipelineBuilder.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
 		skyboxPipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 		skyboxPipelineBuilder.addViewport(viewport);
@@ -198,13 +191,13 @@ namespace RHI
 		{
 			std::array<const VulkanTexture*, 7> textures =
 			{
-				&scene->getAlbedoTexture(),
-				&scene->getNormalTexture(),
-				&scene->getAOTexture(),
-				&scene->getShadingTexture(),
-				&scene->getEmissionTexture(),
-				&environmentCubemap,
-				&diffuseIrradianceCubemap
+				scene->getAlbedoTexture(),
+				scene->getNormalTexture(),
+				scene->getAOTexture(),
+				scene->getShadingTexture(),
+				scene->getEmissionTexture(),
+				& environmentCubemap,
+				& diffuseIrradianceCubemap,
 			};
 
 			VulkanUtils::bindUniformBuffer(
@@ -332,28 +325,28 @@ namespace RHI
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, skyBoxPipeline);
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 		{
-			const VulkanMesh& skybox = scene->getSkyBox();
+			const VulkanMesh* skybox = scene->getSkybox();
 
-			VkBuffer vertexBuffers[] = { skybox.getVertexBuffer() };
-			VkBuffer indexBuffer = skybox.getIndexBuffer();
+			VkBuffer vertexBuffers[] = { skybox->getVertexBuffer() };
+			VkBuffer indexBuffer = skybox->getIndexBuffer();
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-			vkCmdDrawIndexed(commandBuffer, skybox.getNumIndices(), 1, 0, 0, 0);
+			vkCmdDrawIndexed(commandBuffer, skybox->getNumIndices(), 1, 0, 0, 0);
 		}
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pbrPipeline);
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 		{
-			const VulkanMesh& mesh = scene->getMesh();
+			const VulkanMesh* mesh = scene->getMesh();
 
-			VkBuffer vertexBuffers[] = { mesh.getVertexBuffer() };
-			VkBuffer indexBuffer = mesh.getIndexBuffer();
+			VkBuffer vertexBuffers[] = { mesh->getVertexBuffer() };
+			VkBuffer indexBuffer = mesh->getIndexBuffer();
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-			vkCmdDrawIndexed(commandBuffer, mesh.getNumIndices(), 1, 0, 0, 0);
+			vkCmdDrawIndexed(commandBuffer, mesh->getNumIndices(), 1, 0, 0, 0);
 		}
 
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
@@ -450,12 +443,8 @@ namespace RHI
 		vkFreeDescriptorSets(context.device, context.descriptorPool, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data());
 		descriptorSets.clear();
 
-		commonCubeVertexShader.clear();
-
-		hdriToCubeFragmentShader.clear();
 		hdriToCubeRenderer.shutdown();
 
-		diffuseIrradianceFragmentShader.clear();
 		diffuseIrradianceRenderer.shutdown();
 
 		environmentCubemap.clearGPUData();

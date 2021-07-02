@@ -28,3 +28,4 @@ int main(void)
 }
 
 // https://github.com/Drawoceans/vulkan_tutorial_zhcn
+// https://interplayoflight.wordpress.com/2013/12/30/readings-on-physically-based-rendering/

@@ -4,72 +4,72 @@
 #include <string>
 
 #include "VulkanRendererContext.h"
-#include "VulkanMesh.h"
-#include "VulkanTexture.h"
-#include "VulkanShader.h"
+#include "../Common/ResourceManager.h"
 
 namespace RHI
 {
+	namespace config
+	{
+		enum Meshes
+		{
+			Helmet = 0,
+			Skybox,
+		};
+
+		enum Shaders
+		{
+			PBRVertex = 0,
+			PBRFragment,
+			SkyboxVertex,
+			SkyboxFragment,
+			CubeVertex,
+			HDRIToCubeFragment,
+			DiffuseIrradianceFragment,
+		};
+
+		enum Textures
+		{
+			Albedo = 0,
+			Normal,
+			AO,
+			Shading,
+			Emission,
+			Environment,
+		};
+	}
+
 	class RenderScene
 	{
 	public:
 		RenderScene(const VulkanRendererContext& context)
-			: context(context), mesh(context), skyBox(context),
-			albedoTexture(context), normalTexture(context), aoTexture(context),
-			shadingTexture(context), emissionTexture(context), hdrTexture(context), 
-			skyBoxVertexShader(context), skyBoxFragmentShader(context), 
-			pbrVertexShader(context), pbrFragmentShader(context) { }
+			: resources(context) { }
 
-		void init(const std::string& vertexShaderFile,
-			const std::string& fragmentShaderFile,
-			const std::string& skyBoxVertexShaderFile,
-			const std::string& skyBoxFragmentShaderFile,
-			const std::string& hdrFile,
-			const std::string& albedoFile,
-			const std::string& normalFile,
-			const std::string& aoFile,
-			const std::string& shadingFile,
-			const std::string& emissionFile,
-			const std::string& modelFile);
+		void init();
 
 		void shutdown();
 
-		inline const VulkanShader& getPbrVertexShader() const { return pbrVertexShader; }
-		inline const VulkanShader& getPbrFragmentShader() const { return pbrFragmentShader; }
-		inline const VulkanShader& getSkyboxVertexShader() const { return skyBoxVertexShader; }
-		inline const VulkanShader& getSkyboxFragmentShader() const { return skyBoxFragmentShader; }
 
-		inline const VulkanTexture& getAlbedoTexture() const { return albedoTexture; }
-		inline const VulkanTexture& getNormalTexture() const { return normalTexture; }
-		inline const VulkanTexture& getAOTexture() const { return aoTexture; }
-		inline const VulkanTexture& getShadingTexture() const { return shadingTexture; }
-		inline const VulkanTexture& getEmissionTexture() const { return emissionTexture; }
-		inline const VulkanTexture& getHDRTexture() const { return hdrTexture; }
+		inline const VulkanShader* getPBRVertexShader() const { return resources.getShader(config::Shaders::PBRVertex); }
+		inline const VulkanShader* getPBRFragmentShader() const { return resources.getShader(config::Shaders::PBRFragment); }
+		inline const VulkanShader* getSkyboxVertexShader() const { return resources.getShader(config::Shaders::SkyboxVertex); }
+		inline const VulkanShader* getSkyboxFragmentShader() const { return resources.getShader(config::Shaders::SkyboxFragment); }
+		inline const VulkanShader* getCubeVertexShader() const { return resources.getShader(config::Shaders::CubeVertex); }
+		inline const VulkanShader* getHDRIToFragmentShader() const { return resources.getShader(config::Shaders::HDRIToCubeFragment); }
+		inline const VulkanShader* getDiffuseIrradianceFragmentShader() const { return resources.getShader(config::Shaders::DiffuseIrradianceFragment); }
 
-		inline const VulkanMesh& getMesh() const { return mesh; }
-		inline const VulkanMesh& getSkyBox() const { return skyBox; }
-	
+		inline const VulkanTexture* getAlbedoTexture() const { return resources.getTexture(config::Textures::Albedo); }
+		inline const VulkanTexture* getNormalTexture() const { return resources.getTexture(config::Textures::Normal); }
+		inline const VulkanTexture* getAOTexture() const { return resources.getTexture(config::Textures::AO); }
+		inline const VulkanTexture* getShadingTexture() const { return resources.getTexture(config::Textures::Shading); }
+		inline const VulkanTexture* getEmissionTexture() const { return resources.getTexture(config::Textures::Emission); }
+		inline const VulkanTexture* getHDRTexture() const { return resources.getTexture(config::Textures::Environment); }
+
+		inline const VulkanMesh* getMesh() const { return resources.getMesh(config::Meshes::Helmet); }
+		inline const VulkanMesh* getSkybox() const { return resources.getMesh(config::Meshes::Skybox); }
 
 		VkShaderModule createShader(const std::string& path) const;
 
 	private:
-		VulkanRendererContext context;
-
-		// Mesh
-		VulkanMesh mesh;
-		VulkanMesh skyBox;
-
-		// Textures
-		VulkanTexture albedoTexture;
-		VulkanTexture normalTexture;
-		VulkanTexture aoTexture;
-		VulkanTexture shadingTexture;
-		VulkanTexture emissionTexture;
-		VulkanTexture hdrTexture;
-
-		VulkanShader pbrVertexShader;
-		VulkanShader pbrFragmentShader;
-		VulkanShader skyBoxVertexShader;
-		VulkanShader skyBoxFragmentShader;
+		ResourceManager resources;
 	};
 }

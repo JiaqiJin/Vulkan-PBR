@@ -20,19 +20,6 @@
 
 using namespace RHI;
 
-static std::string pbr_vertex_shader_path = "Assert/Shader/Pbrshader.vert";
-static std::string pbr_fragment_shader_path = "Assert/Shader/Pbrshader.frag";
-static std::string skyBox_vertex_shader_path = "Assert/Shader/skyBox.vert";
-static std::string skyBox_fragment_shader_path = "Assert/Shader/skyBox.frag";
-static std::string albedoTexturePath = "Assert/Texture/Default_albedo.jpg";
-static std::string normalTexturePath = "Assert/Texture/Default_normal.jpg";
-static std::string aoTexturePath = "Assert/Texture/Default_AO.jpg";
-static std::string shadingTexturePath = "Assert/Texture/Default_metalRoughness.jpg";
-static std::string emissionTexturePath = "Assert/Texture/Default_emissive.jpg";
-static std::string hdrTexturePath = "Assert/Texture/Ice_Lake/Ice_Lake_Env.hdr";
-static std::string hdrDefaultTexturePath = "Assert/Texture/Ice_Lake/Ice_Lake_Ref.hdr";
-static std::string model_path = "Assert/Model/DamagedHelmet.fbx";
-
 static int maxCombinedImageSamplers = 32;
 static int maxUniformBuffers = 32;
 
@@ -412,18 +399,7 @@ void Application::shutdownVulkan()
 void Application::initRenderScene()
 {
 	scene = new RenderScene(context);
-	scene->init(
-		pbr_vertex_shader_path,
-		pbr_fragment_shader_path,
-		skyBox_vertex_shader_path,
-		skyBox_fragment_shader_path,
-		hdrDefaultTexturePath,
-		albedoTexturePath,
-		normalTexturePath,
-		aoTexturePath,
-		shadingTexturePath,
-		emissionTexturePath,
-		model_path);
+	scene->init();
 }
 
 void Application::shutdownRenderScene()

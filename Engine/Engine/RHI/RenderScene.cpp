@@ -1,4 +1,5 @@
 #include "RenderScene.h"
+#include "VulkanShader.h"
 
 #include <fstream>
 #include <iostream>
@@ -6,80 +7,72 @@
 
 namespace RHI
 {
-	static std::vector<char> readFile(const std::string& filename)
+	namespace config
 	{
-		std::ifstream file(filename, std::ios::ate | std::ios::binary);
+		static std::vector<const char*> meshes = {
+		"Assert/Model/DamagedHelmet.fbx"
+		};
 
-		if (!file.is_open())
-			throw std::runtime_error("Can't open file");
+		static std::vector<const char*> shaders = {
+			 "Assert/Shader/Pbrshader.vert",
+			 "Assert/Shader/Pbrshader.frag",
+			 "Assert/Shader/skyBox.vert",
+			 "Assert/Shader/skyBox.frag",
+			 "Assert/Shader/commonCube.vert",
+			 "Assert/Shader/hdriToCube.frag",
+			 "Assert/Shader/diffuseIrradiance.frag"
+		};
 
-		size_t fileSize = static_cast<size_t>(file.tellg());
-		std::vector<char> buffer(fileSize);
+		static std::vector<VulkanShaderKind> shaderKinds = {
+			VulkanShaderKind::Vertex,
+			VulkanShaderKind::Fragment,
+			VulkanShaderKind::Vertex,
+			VulkanShaderKind::Fragment,
+			VulkanShaderKind::Vertex,
+			VulkanShaderKind::Fragment,
+			VulkanShaderKind::Fragment,
+		};
 
-		file.seekg(0);
-		file.read(buffer.data(), fileSize);
-		file.close();
+		static std::vector<const char*> textures = {
+			"Assert/Texture/Default_albedo.jpg",
+			"Assert/Texture/Default_normal.jpg",
+			"Assert/Texture/Default_AO.jpg",
+			"Assert/Texture/Default_metalRoughness.jpg",
+			"Assert/Texture/Default_emissive.jpg",
+		};
 
-		return buffer;
+		static const char* hdrTexture = "Assert/Texture/Ice_Lake/Ice_Lake_Ref.hdr";
 	}
 
-	void RenderScene::init(
-		const std::string& pbrVertexShaderFile,
-		const std::string& pbrFragmentShaderFile,
-		const std::string& skyBoxVertexShaderFile,
-		const std::string& skyBoxFragmentShaderFile,
-		const std::string& hdrFile,
-		const std::string& albedoFile,
-		const std::string& normalFile,
-		const std::string& aoFile,
-		const std::string& shadingFile,
-		const std::string& emissionFile,
-		const std::string& modelFile)
+	void RenderScene::init()
 	{
-		pbrVertexShader.compileFromFile(pbrVertexShaderFile, VulkanShaderKind::Vertex);
-		pbrFragmentShader.compileFromFile(pbrFragmentShaderFile, VulkanShaderKind::Fragment);
-		skyBoxVertexShader.compileFromFile(skyBoxVertexShaderFile, VulkanShaderKind::Vertex);
-		skyBoxFragmentShader.compileFromFile(skyBoxFragmentShaderFile, VulkanShaderKind::Fragment);
-	
-		albedoTexture.loadFromFile(albedoFile);
-		normalTexture.loadFromFile(normalFile);
-		aoTexture.loadFromFile(aoFile);
-		shadingTexture.loadFromFile(shadingFile);
-		emissionTexture.loadFromFile(emissionFile);
-		hdrTexture.loadHDRFromFile(hdrFile);
+		for (int i = 0; i < config::meshes.size(); i++)
+			resources.loadMesh(i, config::meshes[i]);
 
-		mesh.loadFromFile(modelFile);
-		skyBox.createSkybox(100.0f);
+		resources.createCubeMesh(config::Meshes::Skybox, 1000.0f);
+
+		for (int i = 0; i < config::shaders.size(); i++)
+			resources.loadShader(i, config::shaderKinds[i], config::shaders[i]);
+
+		for (int i = 0; i < config::textures.size(); i++)
+			resources.loadTexture(i, config::textures[i]);
+
+		resources.loadHDRTexture(config::Textures::Environment, config::hdrTexture);
 	}
 
 	void RenderScene::shutdown()
 	{
-		albedoTexture.clearGPUData();
-		normalTexture.clearGPUData();
-		aoTexture.clearGPUData();
-		hdrTexture.clearGPUData();
-		shadingTexture.clearGPUData();
-		emissionTexture.clearGPUData();
-		mesh.clearGPUData();
-		pbrVertexShader.clear();
-		pbrFragmentShader.clear();
-		skyBoxVertexShader.clear();
-		skyBoxFragmentShader.clear();
-	}
+		for (int i = 0; i < config::meshes.size(); i++)
+			resources.unloadMesh(i);
 
-	VkShaderModule RenderScene::createShader(const std::string& path) const
-	{
-		std::vector<char> code = readFile(path);
+		resources.unloadMesh(config::Meshes::Skybox);
 
-		VkShaderModuleCreateInfo shaderInfo = {};
-		shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		shaderInfo.codeSize = code.size();
-		shaderInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+		for (int i = 0; i < config::shaders.size(); i++)
+			resources.unloadShader(i);
 
-		VkShaderModule shader;
-		if (vkCreateShaderModule(context.device, &shaderInfo, nullptr, &shader) != VK_SUCCESS)
-			throw std::runtime_error("Can't create shader module");
+		for (int i = 0; i < config::textures.size(); i++)
+			resources.unloadTexture(i);
 
-		return shader;
+		resources.unloadTexture(config::Textures::Environment);
 	}
 }

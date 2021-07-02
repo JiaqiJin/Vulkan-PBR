@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\ResourceManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RHI\RenderScene.cpp" />
     <ClCompile Include="RHI\VulkanApplication.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="Vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\ResourceManager.h" />
     <ClInclude Include="RHI\RenderScene.h" />
     <ClInclude Include="RHI\VulkanApplication.h" />
     <ClInclude Include="RHI\VulkanCubemapRenderer.h" />
