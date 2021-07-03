@@ -25,7 +25,6 @@ namespace RHI
 	void VulkanCubemapRenderer::init(
 		const VulkanShader& vertexShader,
 		const VulkanShader& fragmentShader,
-		const VulkanTexture& inputTexture,
 		const VulkanTexture& targetTexture)
 	{
 		rendererQuad.createQuad(2.0f);
@@ -42,29 +41,31 @@ namespace RHI
 				i, 1);
 		}
 
-		VkImageView targetView = targetTexture.getImageView();
+		targetExtent.width = targetTexture.getWidth();
+		targetExtent.height = targetTexture.getHeight();
 
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(targetTexture.getWidth());
-		viewport.height = static_cast<float>(targetTexture.getHeight());
+		viewport.width = static_cast<float>(targetExtent.width);
+		viewport.height = static_cast<float>(targetExtent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor = {};
 		scissor.offset = { 0, 0 };
-		scissor.extent.width = targetTexture.getWidth();
-		scissor.extent.height = targetTexture.getHeight();
+		scissor.extent.width = targetExtent.width;
+		scissor.extent.height = targetExtent.height;
 
 		VkShaderStageFlags stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
+		// Descriptor set layout
 		VulkanDescriptorSetLayout descriptorSetLayoutBuilder(context);
-		
 		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stage);
 		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 		descriptorSetLayout = descriptorSetLayoutBuilder.build();
 
+		// Render pass
 		VulkanRenderPass renderPassBuilder(context);
 		
 		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT);
@@ -82,11 +83,13 @@ namespace RHI
 		renderPassBuilder.addColorAttachmentReference(0, 5);
 		renderPass = renderPassBuilder.build();
 
+		// Pipeline layout
 		VulkanPipelineLayout pipelineLayoutBuilder(context);
 		
 		pipelineLayoutBuilder.addDescriptorSetLayout(descriptorSetLayout);
 		pipelineLayout = pipelineLayoutBuilder.build();
 
+		// Graphic Pipeline
 		VulkanGraphicsPipeline pipelineBuilder(context, pipelineLayout, renderPass);
 		pipelineBuilder.addShaderStage(vertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
 		pipelineBuilder.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -114,8 +117,7 @@ namespace RHI
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			uniformBuffer,
-			uniformBufferMemory
-		);
+			uniformBufferMemory);
 
 		// Create descriptor set
 		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
@@ -133,8 +135,8 @@ namespace RHI
 		framebufferInfo.renderPass = renderPass;
 		framebufferInfo.attachmentCount = 6;
 		framebufferInfo.pAttachments = faceViews;
-		framebufferInfo.width = targetTexture.getWidth();
-		framebufferInfo.height = targetTexture.getHeight();
+		framebufferInfo.width = targetExtent.width;
+		framebufferInfo.height = targetExtent.height;
 		framebufferInfo.layers = 1;
 
 		if (vkCreateFramebuffer(context.device, &framebufferInfo, nullptr, &frameBuffer) != VK_SUCCESS)
@@ -195,16 +197,7 @@ namespace RHI
 			0,
 			uniformBuffer,
 			0,
-			uboSize
-		);
-
-		VulkanUtils::bindCombinedImageSampler(
-			context,
-			descriptorSet,
-			1,
-			inputTexture.getImageView(),
-			inputTexture.getSampler()
-		);
+			uboSize);
 
 		// Create Fence
 		VkFenceCreateInfo fenceInfo{};
@@ -213,51 +206,6 @@ namespace RHI
 
 		if (vkCreateFence(context.device, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
 			throw std::runtime_error("Can't create fence");
-
-		// Record command buffer
-		VkCommandBufferBeginInfo beginInfo = {};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-		beginInfo.pInheritanceInfo = nullptr; // Optional
-
-		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-			throw std::runtime_error("Can't begin recording command buffer");
-
-		VkRenderPassBeginInfo renderPassInfo = {};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = renderPass;
-		renderPassInfo.framebuffer = frameBuffer;
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent.width = static_cast<uint32_t>(targetTexture.getWidth());
-		renderPassInfo.renderArea.extent.height = static_cast<uint32_t>(targetTexture.getHeight());
-
-		VkClearValue clearValues[6];
-		for (int i = 0; i < 6; i++)
-		{
-			clearValues[i] = {};
-			clearValues[i].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-		}
-		renderPassInfo.clearValueCount = 6;
-		renderPassInfo.pClearValues = clearValues;
-
-		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
-		{
-			VkBuffer vertexBuffers[] = { rendererQuad.getVertexBuffer() };
-			VkBuffer indexBuffer = rendererQuad.getIndexBuffer();
-			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-			vkCmdDrawIndexed(commandBuffer, rendererQuad.getNumIndices(), 1, 0, 0, 0);
-		}
-
-		vkCmdEndRenderPass(commandBuffer);
-
-		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-			throw std::runtime_error("Can't record command buffer");
 	}
 
 	void VulkanCubemapRenderer::shutdown()
@@ -302,17 +250,72 @@ namespace RHI
 		rendererQuad.clearCPUData();
 	}
 
-	void VulkanCubemapRenderer::render()
+	void VulkanCubemapRenderer::render(const VulkanTexture& inputTexture)
 	{
+		VulkanUtils::bindCombinedImageSampler(
+			context,
+			descriptorSet,
+			1,
+			inputTexture.getImageView(),
+			inputTexture.getSampler());
+
+		// Record command buffer
+		VkCommandBufferBeginInfo beginInfo = {};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+		beginInfo.pInheritanceInfo = nullptr; // Optional
+
+		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+			throw std::runtime_error("Can't begin recording command buffer");
+
+		VkRenderPassBeginInfo renderPassInfo = {};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = renderPass;
+		renderPassInfo.framebuffer = frameBuffer;
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent.width = targetExtent.width;
+		renderPassInfo.renderArea.extent.height = targetExtent.height;
+
+		VkClearValue clearValues[6];
+		for (int i = 0; i < 6; i++)
+		{
+			clearValues[i] = {};
+			clearValues[i].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+		}
+		renderPassInfo.clearValueCount = 6;
+		renderPassInfo.pClearValues = clearValues;
+
+		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+		{
+			VkBuffer vertexBuffers[] = { rendererQuad.getVertexBuffer() };
+			VkBuffer indexBuffer = rendererQuad.getIndexBuffer();
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+			vkCmdDrawIndexed(commandBuffer, rendererQuad.getNumIndices(), 1, 0, 0, 0);
+		}
+
+		vkCmdEndRenderPass(commandBuffer);
+
+		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+			throw std::runtime_error("Can't record command buffer");
+
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
+		if (vkResetFences(context.device, 1, &fence) != VK_SUCCESS)
+			throw std::runtime_error("Can't reset fence");
+
 		if (vkQueueSubmit(context.graphicsQueue, 1, &submitInfo, fence) != VK_SUCCESS)
 			throw std::runtime_error("Can't submit command buffer");
 
-		if (vkWaitForFences(context.device, 1, &fence, VK_TRUE, 100000000000) != VK_SUCCESS)
+		if (vkWaitForFences(context.device, 1, &fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS)
 			throw std::runtime_error("Can't wait for a fence");
 	}
 }

@@ -18,16 +18,16 @@ namespace RHI
 			: context(context)
 			, rendererQuad(context)	{ }
 
-		void init(const VulkanShader& vertexShader, const VulkanShader& fragmentShader,
-			const VulkanTexture& inputTexture, const VulkanTexture& targetTexture);
+		void init(const VulkanShader& vertexShader, const VulkanShader& fragmentShader, const VulkanTexture& targetTexture);
 
 		void shutdown();
 
-		void render();
+		void render(const VulkanTexture& inputTexture);
 
 	private:
 		VulkanRendererContext context;
 		VulkanMesh rendererQuad;
+		VkExtent2D targetExtent;
 
 		VkImageView faceViews[6]{ VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE };
 

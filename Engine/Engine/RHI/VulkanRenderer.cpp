@@ -19,8 +19,6 @@ namespace RHI
 
 	void Renderer::init(const RenderScene* scene)
 	{
-		initEnvironment(scene);
-
 		const VulkanShader* pbrVertexShader = scene->getPBRVertexShader();
 		const VulkanShader* pbrFragmentShader = scene->getPBRFragmentShader();
 		const VulkanShader* skyboxVertexShader = scene->getSkyboxVertexShader();
@@ -126,6 +124,9 @@ namespace RHI
 		if (vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, descriptorSets.data()) != VK_SUCCESS)
 			throw std::runtime_error("Can't allocate descriptor sets");
 
+		// Init Cubemap
+		initEnvironment(scene);
+
 		for (size_t i = 0; i < imageCount; i++)
 		{
 			std::array<const VulkanTexture*, 7> textures =
@@ -228,6 +229,18 @@ namespace RHI
 		environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 		diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 
+		hdriToCubeRenderer.init(
+			*scene->getCubeVertexShader(),
+			*scene->getHDRIToFragmentShader(),
+			environmentCubemap
+		);
+
+		diffuseIrradianceRenderer.init(
+			*scene->getCubeVertexShader(),
+			*scene->getDiffuseIrradianceFragmentShader(),
+			diffuseIrradianceCubemap
+		);
+
 		setEnvironment(scene, currentEnvironment);;
 	}
 
@@ -241,18 +254,10 @@ namespace RHI
 				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				0, environmentCubemap.getNumMipLevels(),
-				0, environmentCubemap.getNumLayers()
-			);
+				0, environmentCubemap.getNumLayers());
 
-			hdriToCubeRenderer.init(
-				*scene->getCubeVertexShader(),
-				*scene->getHDRIToFragmentShader(),
-				*scene->getHDRTexture(currentEnvironment),
-				environmentCubemap);
-
-			hdriToCubeRenderer.render();
-			hdriToCubeRenderer.shutdown();
-
+			hdriToCubeRenderer.render(*scene->getHDRTexture(index));
+			
 			VulkanUtils::transitionImageLayout(
 				context,
 				environmentCubemap.getImage(),
@@ -274,14 +279,7 @@ namespace RHI
 				0, diffuseIrradianceCubemap.getNumMipLevels(),
 				0, diffuseIrradianceCubemap.getNumLayers());
 
-			diffuseIrradianceRenderer.init(
-				*scene->getCubeVertexShader(),
-				*scene->getDiffuseIrradianceFragmentShader(),
-				environmentCubemap,
-				diffuseIrradianceCubemap);
-
-			diffuseIrradianceRenderer.render();
-			diffuseIrradianceRenderer.shutdown();
+			diffuseIrradianceRenderer.render(environmentCubemap);
 
 			VulkanUtils::transitionImageLayout(
 				context,
@@ -292,6 +290,24 @@ namespace RHI
 				0, diffuseIrradianceCubemap.getNumMipLevels(),
 				0, diffuseIrradianceCubemap.getNumLayers());
 		}
+
+		std::array<const VulkanTexture*, 2> textures =
+		{
+			&environmentCubemap,
+			&diffuseIrradianceCubemap,
+		};
+
+		int imageCount = static_cast<int>(swapChainContext.swapChainImageViews.size());
+
+
+		for (size_t i = 0; i < imageCount; i++)
+			for (int k = 0; k < textures.size(); k++)
+				VulkanUtils::bindCombinedImageSampler(
+					context,
+					descriptorSets[i],
+					k + 6,
+					textures[k]->getImageView(),
+					textures[k]->getSampler());
 	}
 
 	VkCommandBuffer Renderer::render(const RenderScene* scene, uint32_t imageIndex)
