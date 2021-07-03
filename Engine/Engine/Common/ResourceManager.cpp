@@ -74,6 +74,23 @@ VulkanShader* ResourceManager::getShader(int id) const
 	return nullptr;
 }
 
+VulkanShader* ResourceManager::loadShader(int id, const char* path)
+{
+	auto it = shaders.find(id);
+	if (it != shaders.end())
+	{
+		std::cerr << "ResourceManager::loadShader(): " << id << " is already taken by another shader" << std::endl;
+		return nullptr;
+	}
+
+	VulkanShader* shader = new VulkanShader(context);
+	if (!shader->compileFromFile(path))
+		return nullptr;
+
+	shaders.insert(std::make_pair(id, shader));
+	return shader;
+}
+
 VulkanShader* ResourceManager::loadShader(int id, VulkanShaderKind kind, const char* path)
 {
 	auto it = shaders.find(id);

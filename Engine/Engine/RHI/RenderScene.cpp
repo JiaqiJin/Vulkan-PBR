@@ -25,16 +25,6 @@ namespace RHI
 			 "Assert/Shader/diffuseIrradiance.frag"
 		};
 
-		static std::vector<VulkanShaderKind> shaderKinds = {
-			VulkanShaderKind::Vertex,
-			VulkanShaderKind::Fragment,
-			VulkanShaderKind::Vertex,
-			VulkanShaderKind::Fragment,
-			VulkanShaderKind::Vertex,
-			VulkanShaderKind::Fragment,
-			VulkanShaderKind::Fragment,
-		};
-
 		static std::vector<const char*> textures = {
 			"Assert/Texture/Default_albedo.jpg",
 			"Assert/Texture/Default_normal.jpg",
@@ -57,7 +47,7 @@ namespace RHI
 		resources.createCubeMesh(config::Meshes::Skybox, 1000.0f);
 
 		for (int i = 0; i < config::shaders.size(); i++)
-			resources.loadShader(i, config::shaderKinds[i], config::shaders[i]);
+			resources.loadShader(i, config::shaders[i]);
 
 		for (int i = 0; i < config::textures.size(); i++)
 			resources.loadTexture(i, config::textures[i]);

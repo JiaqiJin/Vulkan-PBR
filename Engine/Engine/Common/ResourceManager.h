@@ -24,6 +24,7 @@ public:
 	void unloadMesh(int id);
 
 	RHI::VulkanShader* getShader(int id) const;
+	RHI::VulkanShader* loadShader(int id, const char* path);
 	RHI::VulkanShader* loadShader(int id, RHI::VulkanShaderKind kind, const char* path);
 	void unloadShader(int id);
 
