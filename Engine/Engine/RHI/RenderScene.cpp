@@ -63,7 +63,7 @@ namespace RHI
 			resources.loadTexture(i, config::textures[i]);
 
 		for (int i = 0; i < config::hdrTextures.size(); i++)
-			resources.loadHDRTexture(config::Textures::Environment + i, config::hdrTextures[i]);
+			resources.loadTexture(config::Textures::Environment + i, config::hdrTextures[i]);
 	}
 
 	const char* RenderScene::getHDRTexturePath(int index) const

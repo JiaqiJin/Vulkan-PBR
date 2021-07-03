@@ -25,7 +25,6 @@ namespace RHI
 		inline int getWidth() const { return width; }
 		inline int getHeight() const { return height; }
 
-		bool loadHDRFromFile(const std::string& path);
 		bool loadFromFile(const std::string& path);
 
 		void clearGPUData();
@@ -34,7 +33,7 @@ namespace RHI
 		void createCube(VkFormat format, int width, int height, int numMipLevels);
 
 	private:
-		void uploadToGPU(VkFormat format, VkImageTiling tiling, size_t pixel_size);
+		void uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSize);
 
 	private:
 		VulkanRendererContext context;

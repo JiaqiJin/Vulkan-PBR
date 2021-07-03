@@ -29,7 +29,6 @@ public:
 
 	RHI::VulkanTexture* getTexture(int id) const;
 	RHI::VulkanTexture* loadTexture(int id, const char* path);
-	RHI::VulkanTexture* loadHDRTexture(int id, const char* path);
 	void unloadTexture(int id);
 
 private:
