@@ -251,6 +251,7 @@ namespace RHI
 				environmentCubemap);
 
 			hdriToCubeRenderer.render();
+			hdriToCubeRenderer.shutdown();
 
 			VulkanUtils::transitionImageLayout(
 				context,
@@ -280,6 +281,7 @@ namespace RHI
 				diffuseIrradianceCubemap);
 
 			diffuseIrradianceRenderer.render();
+			diffuseIrradianceRenderer.shutdown();
 
 			VulkanUtils::transitionImageLayout(
 				context,
