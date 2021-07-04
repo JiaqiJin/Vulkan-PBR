@@ -113,7 +113,8 @@ namespace RHI
 				swapChainImages[i],
 				swapChainImageFormat,
 				VK_IMAGE_ASPECT_COLOR_BIT,
-				VK_IMAGE_VIEW_TYPE_2D);
+				VK_IMAGE_VIEW_TYPE_2D
+			);
 
 		// Create color buffer & image view
 		VulkanUtils::createImage2D(
@@ -127,21 +128,24 @@ namespace RHI
 			VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			colorImage,
-			colorImageMemory);
+			colorImageMemory
+		);
 
 		colorImageView = VulkanUtils::createImageView(
 			context,
 			colorImage,
 			swapChainImageFormat,
 			VK_IMAGE_ASPECT_COLOR_BIT,
-			VK_IMAGE_VIEW_TYPE_2D);
+			VK_IMAGE_VIEW_TYPE_2D
+		);
 
 		VulkanUtils::transitionImageLayout(
 			context,
 			colorImage,
 			swapChainImageFormat,
 			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		);
 
 		// Create depth buffer & image view
 		depthFormat = VulkanUtils::selectOptimalDepthFormat(context);
@@ -157,21 +161,24 @@ namespace RHI
 			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			depthImage,
-			depthImageMemory);
+			depthImageMemory
+		);
 
 		depthImageView = VulkanUtils::createImageView(
 			context,
 			depthImage,
 			depthFormat,
 			VK_IMAGE_ASPECT_DEPTH_BIT,
-			VK_IMAGE_VIEW_TYPE_2D);
+			VK_IMAGE_VIEW_TYPE_2D
+		);
 
 		VulkanUtils::transitionImageLayout(
 			context,
 			depthImage,
 			depthFormat,
 			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+		);
 	}
 
 	void SwapChain::shutdownTransient()
@@ -263,17 +270,30 @@ namespace RHI
 
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 			throw std::runtime_error("Can't acquire swap chain image");
+
+		return true;
 	}
 
-	bool SwapChain::present()
+	bool SwapChain::present(VkCommandBuffer commandBuffer)
 	{
-	/*	if (vkEndCommandBuffer(frame.commandBuffer) != VK_SUCCESS)
-			throw std::runtime_error("Can't record command buffer");*/
-
 		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
 		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		vkResetFences(context.device, 1, &inFlightFences[currentFrame]);
+		if (vkQueueSubmit(context.graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+			throw std::runtime_error("Can't submit command buffer");
 
 		VkSwapchainKHR swapChains[] = { swapChain };
 		VkPresentInfoKHR presentInfo = {};
@@ -290,7 +310,8 @@ namespace RHI
 			swapChainImages[imageIndex],
 			swapChainImageFormat,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		);
 
 		VkResult result = vkQueuePresentKHR(context.presentQueue, &presentInfo);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)

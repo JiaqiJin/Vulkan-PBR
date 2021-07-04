@@ -32,7 +32,7 @@ namespace RHI
 
 		void init(const UniformBufferObject* ubo, const RenderScene* scene);
 		void update(UniformBufferObject* ubo, const RenderScene* scene);
-		void render(const UniformBufferObject* ubo, const RenderScene* scene, uint32_t imageIndex);
+		VkCommandBuffer render(const UniformBufferObject* ubo, const RenderScene* scene, uint32_t imageIndex);
 		void shutdown();
 
 	private:

@@ -118,9 +118,9 @@ void Application::render()
 		return;
 	}
 
-	renderer->render(&ubo, scene, swapChain->getImageIndex());
+	VkCommandBuffer commandBuffer = renderer->render(&ubo, scene, swapChain->getImageIndex());
 
-	if (!swapChain->present() || windowResized)
+	if (!swapChain->present(commandBuffer) || windowResized)
 	{
 		windowResized = false;
 		recreateVulkanSwapChain();

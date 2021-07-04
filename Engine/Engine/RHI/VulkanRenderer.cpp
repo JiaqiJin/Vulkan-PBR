@@ -314,7 +314,7 @@ namespace RHI
 					textures[k]->getSampler());
 	}
 
-	void Renderer::render(const UniformBufferObject* ubo, const RenderScene* scene, uint32_t imageIndex)
+	VkCommandBuffer Renderer::render(const UniformBufferObject* ubo, const RenderScene* scene, uint32_t imageIndex)
 	{
 		VkCommandBuffer commandBuffer = commandBuffers[imageIndex];
 		VkFramebuffer frameBuffer = frameBuffers[imageIndex];
@@ -323,8 +323,8 @@ namespace RHI
 		VkDeviceMemory uniformBufferMemory = uniformBuffersMemory[imageIndex];
 
 		void* data = nullptr;
-		vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(ubo), 0, &data);
-		memcpy(data, &ubo, sizeof(ubo));
+		vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(UniformBufferObject), 0, &data);
+		memcpy(data, &ubo, sizeof(UniformBufferObject));
 		vkUnmapMemory(context.device, uniformBufferMemory);
 
 		if (vkResetCommandBuffer(commandBuffer, 0) != VK_SUCCESS)
@@ -387,6 +387,8 @@ namespace RHI
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't record command buffer");
+
+		return commandBuffer;
 	}
 
 	void Renderer::update(UniformBufferObject* ubo, const RenderScene* scene)

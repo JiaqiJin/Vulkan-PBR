@@ -20,15 +20,11 @@ namespace RHI
 		void shutdown();
 
 		bool acquire(const UniformBufferObject& ubo);
-		bool present();
+		bool present(VkCommandBuffer commandBuffer);
 
 		inline uint32_t getNumImages() const { return static_cast<uint32_t>(swapChainImages.size()); }
 		inline VkExtent2D getExtent() const { return swapChainExtent; }
-		inline VkDescriptorSetLayout getDescriptorSetLayout() const { return descriptorSetLayout; }
-		inline VkRenderPass getRenderPass() const { return renderPass; }
-		inline VkRenderPass getNoClearRenderPass() const { return noClearRenderPass; }
 		inline uint32_t getImageIndex() const { return imageIndex; }
-
 		inline VkFormat getSwapChainImageFormat() const { return swapChainImageFormat; }
 		inline VkFormat getDepthFormat() const { return depthFormat; }
 		inline std::vector<VkImageView> getSwapChainImageViews() const { return swapChainImageViews; }
@@ -85,12 +81,7 @@ namespace RHI
 		VkDeviceMemory depthImageMemory{ VK_NULL_HANDLE };
 
 		VkFormat depthFormat;
-
-		// Render pass
-		VkRenderPass renderPass{ VK_NULL_HANDLE };
-		VkRenderPass noClearRenderPass{ VK_NULL_HANDLE };
-		VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
-
+	
 		// Semaphore
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;
