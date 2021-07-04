@@ -4,11 +4,6 @@
 #include <string>
 #include <vector>
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <GLM/glm.hpp>
-#include <GLM/gtc/matrix_transform.hpp>
-
 #include "VulkanRendererContext.h"
 
 #include "VulkanCubemapRenderer.h"
@@ -18,17 +13,8 @@
 namespace RHI
 {
 	class RenderScene;
-
-	struct UniformBufferObject
-	{
-		glm::mat4 world;
-		glm::mat4 view;
-		glm::mat4 proj;
-		glm::vec3 cameraPosWS;
-		float lerpUserValues{ 0.0f };
-		float userMetalness{ 0.0f };
-		float userRoughness{ 0.0f };
-	};
+	struct VulkanRenderFrame;
+	struct UniformBufferObject;
 
 	class Renderer
 	{
@@ -44,13 +30,13 @@ namespace RHI
 			
 		}
 
-		void init(const RenderScene* scene);
-		void initEnvironment(const RenderScene* scene);
-		void update(const RenderScene* scene);
-		VkCommandBuffer render(const RenderScene* scene, uint32_t imageIndex);
+		void init(const UniformBufferObject* ubo, const RenderScene* scene);
+		void update(UniformBufferObject* ubo, const RenderScene* scene);
+		void render(const UniformBufferObject* ubo, const RenderScene* scene, uint32_t imageIndex);
 		void shutdown();
 
 	private:
+		void initEnvironment(const UniformBufferObject* ubo, const RenderScene* scene);
 		void setEnvironment(const RenderScene* scene, int index);
 
 	private:
@@ -70,8 +56,6 @@ namespace RHI
 		std::vector<VkDeviceMemory> uniformBuffersMemory;
 
 		std::vector<VkDescriptorSet> descriptorSets;
-
-		UniformBufferObject ubo;
 
 		// Cubemap
 		VulkanTexture environmentCubemap;

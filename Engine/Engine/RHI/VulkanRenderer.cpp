@@ -6,18 +6,24 @@
 #include "VulkanDescriptorSet.h"
 #include "VulkanRenderPass.h"
 #include "VulkanUtils.h"
+#include "VulkanApplication.h"
 
 #include "RenderScene.h"
 
 #include "../Vendor/imgui/imgui.h"
 #include "../Vendor/imgui/imgui_impl_vulkan.h"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <GLM/glm.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+
 #include <chrono>	
 
 namespace RHI
 {
 
-	void Renderer::init(const RenderScene* scene)
+	void Renderer::init(const UniformBufferObject* ubo, const RenderScene* scene)
 	{
 		const VulkanShader* pbrVertexShader = scene->getPBRVertexShader();
 		const VulkanShader* pbrFragmentShader = scene->getPBRFragmentShader();
@@ -93,7 +99,7 @@ namespace RHI
 		skyBoxPipeline = skyboxPipelineBuilder.build();
 
 		// Create uniform buffers
-		VkDeviceSize uboSize = sizeof(UniformBufferObject);
+		VkDeviceSize uboSize = sizeof(ubo);
 
 		uint32_t imageCount = static_cast<uint32_t>(swapChainContext.swapChainImageViews.size());
 		uniformBuffers.resize(imageCount);
@@ -125,7 +131,7 @@ namespace RHI
 			throw std::runtime_error("Can't allocate descriptor sets");
 
 		// Init Cubemap
-		initEnvironment(scene);
+		initEnvironment(ubo, scene);
 
 		for (size_t i = 0; i < imageCount; i++)
 		{
@@ -146,7 +152,7 @@ namespace RHI
 				0,
 				uniformBuffers[i],
 				0,
-				sizeof(UniformBufferObject)
+				sizeof(ubo)
 			);
 
 			for (int k = 0; k < textures.size(); k++)
@@ -222,7 +228,7 @@ namespace RHI
 		}
 	}
 
-	void Renderer::initEnvironment(const RenderScene* scene)
+	void Renderer::initEnvironment(const UniformBufferObject* ubo, const RenderScene* scene)
 	{
 		// Irradiance pre-computed sum of all indirect diffuse light of the scene hitting some surface aligned along direction wo
 		// The irradiance map displays somewhat like an average color or lighting display of the environment
@@ -232,14 +238,12 @@ namespace RHI
 		hdriToCubeRenderer.init(
 			*scene->getCubeVertexShader(),
 			*scene->getHDRIToFragmentShader(),
-			environmentCubemap
-		);
+			environmentCubemap);
 
 		diffuseIrradianceRenderer.init(
 			*scene->getCubeVertexShader(),
 			*scene->getDiffuseIrradianceFragmentShader(),
-			diffuseIrradianceCubemap
-		);
+			diffuseIrradianceCubemap);
 
 		setEnvironment(scene, currentEnvironment);;
 	}
@@ -310,7 +314,7 @@ namespace RHI
 					textures[k]->getSampler());
 	}
 
-	VkCommandBuffer Renderer::render(const RenderScene* scene, uint32_t imageIndex)
+	void Renderer::render(const UniformBufferObject* ubo, const RenderScene* scene, uint32_t imageIndex)
 	{
 		VkCommandBuffer commandBuffer = commandBuffers[imageIndex];
 		VkFramebuffer frameBuffer = frameBuffers[imageIndex];
@@ -319,8 +323,8 @@ namespace RHI
 		VkDeviceMemory uniformBufferMemory = uniformBuffersMemory[imageIndex];
 
 		void* data = nullptr;
-		vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(UniformBufferObject), 0, &data);
-		memcpy(data, &ubo, sizeof(UniformBufferObject));
+		vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(ubo), 0, &data);
+		memcpy(data, &ubo, sizeof(ubo));
 		vkUnmapMemory(context.device, uniformBufferMemory);
 
 		if (vkResetCommandBuffer(commandBuffer, 0) != VK_SUCCESS)
@@ -383,11 +387,9 @@ namespace RHI
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't record command buffer");
-
-		return commandBuffer;
 	}
 
-	void Renderer::update(const RenderScene* scene)
+	void Renderer::update(UniformBufferObject* ubo, const RenderScene* scene)
 	{
 
 		static auto startTime = std::chrono::high_resolution_clock::now();
@@ -406,11 +408,11 @@ namespace RHI
 		const glm::vec3& cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
 		const glm::mat4& rotation = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
 
-		ubo.world = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up); // mat4(1.0f);
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), zero, up);
-		ubo.proj = glm::perspective(glm::radians(45.0f), aspect, zNear, zFar);
-		ubo.proj[1][1] *= -1;
-		ubo.cameraPosWS = glm::vec3(glm::vec4(cameraPos, 1.0f) * rotation); // glm::vec3(2.0f, 2.0f, 2.0f);
+		ubo->world = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up); // mat4(1.0f);
+		ubo->view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), zero, up);
+		ubo->proj = glm::perspective(glm::radians(45.0f), aspect, zNear, zFar);
+		ubo->proj[1][1] *= -1;
+		ubo->cameraPosWS = glm::vec3(glm::vec4(cameraPos, 1.0f) * rotation); // glm::vec3(2.0f, 2.0f, 2.0f);
 
 		// ImGui
 		static float f = 0.0f;
@@ -440,9 +442,9 @@ namespace RHI
 
 		ImGui::Checkbox("Demo Window", &show_demo_window);
 
-		ImGui::SliderFloat("Lerp User Material", &ubo.lerpUserValues, 0.0f, 1.0f);
-		ImGui::SliderFloat("Metalness", &ubo.userMetalness, 0.0f, 1.0f);
-		ImGui::SliderFloat("Roughness", &ubo.userRoughness, 0.0f, 1.0f);
+		ImGui::SliderFloat("Lerp User Material", &ubo->lerpUserValues, 0.0f, 1.0f);
+		ImGui::SliderFloat("Metalness", &ubo->userMetalness, 0.0f, 1.0f);
+		ImGui::SliderFloat("Roughness", &ubo->userRoughness, 0.0f, 1.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();

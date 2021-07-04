@@ -150,6 +150,7 @@
     <ClCompile Include="Common\ResourceManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RHI\RenderScene.cpp" />
+    <ClCompile Include="RHI\SwapChain.cpp" />
     <ClCompile Include="RHI\VulkanApplication.cpp" />
     <ClCompile Include="RHI\VulkanCubemapRenderer.cpp" />
     <ClCompile Include="RHI\VulkanDescriptorSet.cpp" />
@@ -172,6 +173,7 @@
   <ItemGroup>
     <ClInclude Include="Common\ResourceManager.h" />
     <ClInclude Include="RHI\RenderScene.h" />
+    <ClInclude Include="RHI\SwapChain.h" />
     <ClInclude Include="RHI\VulkanApplication.h" />
     <ClInclude Include="RHI\VulkanCubemapRenderer.h" />
     <ClInclude Include="RHI\VulkanDescriptorSet.h" />

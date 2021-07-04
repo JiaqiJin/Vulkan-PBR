@@ -10,6 +10,14 @@ namespace RHI
 	class VulkanUtils
 	{
 	public:
+		static VkFormat selectOptimalImageFormat(
+			const VulkanRendererContext& context,
+			const std::vector<VkFormat>& candidates,
+			VkImageTiling tiling,
+			VkFormatFeatureFlags features);
+
+		static VkFormat selectOptimalDepthFormat(const VulkanRendererContext& context);
+
 		static uint32_t findMemoryType(
 			const VulkanRendererContext& context,
 			uint32_t typeFilter,
