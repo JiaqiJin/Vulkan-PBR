@@ -40,22 +40,22 @@ namespace RHI
 		inline VkRenderPass getNoClearRenderPass() const { return noClearRenderPass; }
 
 	private:
-		struct SwapChainSupportDetails
+		struct SupportDetails
 		{
 			VkSurfaceCapabilitiesKHR capabilities;
 			std::vector<VkSurfaceFormatKHR> formats;
 			std::vector<VkPresentModeKHR> presentModes;
 		};
 
-		struct SwapChainSettings
+		struct Settings
 		{
 			VkSurfaceFormatKHR format;
 			VkPresentModeKHR presentMode;
 			VkExtent2D extent;
 		};
 
-		SwapChainSupportDetails fetchSwapChainSupportDetails() const;
-		SwapChainSettings selectOptimalSwapChainSettings(const SwapChainSupportDetails& details, int width, int height) const;
+		SupportDetails fetchSwapChainSupportDetails() const;
+		Settings selectOptimalSwapChainSettings(const SupportDetails& details, int width, int height) const;
 	private:
 		void initTransient(int width, int height);
 		void shutdownTransient();

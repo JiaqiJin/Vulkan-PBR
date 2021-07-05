@@ -1,12 +1,11 @@
 #version 450
-#extension GL_ARB_separate_shader_objects : enable
 #pragma shader_stage(fragment)
 
-layout(set = 0, binding = 0) uniform UniformBufferObject {
+layout(set = 0, binding = 0) uniform RenderState {
 	mat4 world;
 	mat4 view;
 	mat4 proj;
-	vec3 cameraPos;
+	vec3 cameraPosWS;
 } ubo;
 
 layout(set = 1, binding = 5) uniform samplerCube environmentSampler;
@@ -21,20 +20,10 @@ layout(location = 0) out vec4 outColor;
 const float PI = 3.141592653589798979f;
 const float iPI = 0.31830988618379f;
 
-// Equirectangular world
-
-const vec2 invAtan = vec2(0.1591, 0.3183);
-vec2 SampleSphericalMap(vec3 v)
-{
-	vec2 uv = vec2(atan(v.y, v.x), asin(v.z));
-	uv *= invAtan;
-	uv += 0.5;
-	return uv;
-}
-
 void main() {
 	vec3 color = texture(environmentSampler, normalize(fragPositionOS)).rgb;
 
+	// TODO: move to separate pass
 	// Tonemapping + gamma correction
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));

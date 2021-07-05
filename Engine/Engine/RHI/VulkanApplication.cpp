@@ -11,9 +11,6 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-#include "../Vendor/imgui/imgui.h"
-#include "../Vendor/imgui/imgui_impl_glfw.h"
-
 #include <array>
 #include <iostream>
 #include <set>
@@ -32,6 +29,7 @@ static std::vector<const char*> requiredValidationLayers = {
 	"VK_LAYER_KHRONOS_validation",
 };
 
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 	VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -42,15 +40,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	return VK_FALSE;
 }
 
-void Application::update()
-{
-	renderer->update(&ubo ,scene);
-}
-
 void Application::run()
 {
 	initWindow();
-	initImGui();
+	//initImGui();
 	initVulkan();
 	initVulkanSwapChain();
 	initRenderScene();
@@ -60,55 +53,15 @@ void Application::run()
 	shutdownRenderScene();
 	shutdownVulkanSwapChain();
 	shutdownVulkan();
-	shutdownImGui();
+	//shutdownImGui();
 	shutdownWindow();
 }
 
-void Application::initWindow()
+void Application::update()
 {
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	window = glfwCreateWindow(1024, 768, "Vulkan", nullptr, nullptr);
-
-	glfwSetWindowUserPointer(window, this);
-	glfwSetFramebufferSizeCallback(window, &Application::onFramebufferResize);
+	renderer->update(&ubo, scene);
 }
 
-void Application::mainloop()
-{
-	if (!window)
-		return;
-
-	while (!glfwWindowShouldClose(window))
-	{
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		update();
-
-		ImGui::Render();
-
-		render();
-		glfwPollEvents();
-	}
-
-	vkDeviceWaitIdle(device);
-}
-
-
-void Application::shutdownWindow()
-{
-	glfwDestroyWindow(window);
-	window = nullptr;
-}
-
-void Application::onFramebufferResize(GLFWwindow* window, int width, int height)
-{
-	Application* app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
-	assert(app != nullptr);
-	app->windowResized = true;
-}
-
-// --------------------- Vulkan Object Initializations ---------------------------------
 
 void Application::render()
 {
@@ -127,6 +80,44 @@ void Application::render()
 		recreateVulkanSwapChain();
 	}
 }
+
+void Application::mainloop()
+{
+	if (!window)
+		return;
+
+	while (!glfwWindowShouldClose(window))
+	{
+		update();
+		render();
+		glfwPollEvents();
+	}
+
+	vkDeviceWaitIdle(device);
+}
+
+void Application::initWindow()
+{
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	window = glfwCreateWindow(1024, 768, "Vulkan", nullptr, nullptr);
+
+	glfwSetWindowUserPointer(window, this);
+	glfwSetFramebufferSizeCallback(window, &Application::onFramebufferResize);
+}
+
+void Application::shutdownWindow()
+{
+	glfwDestroyWindow(window);
+	window = nullptr;
+}
+
+void Application::onFramebufferResize(GLFWwindow* window, int width, int height)
+{
+	Application* app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
+	assert(app != nullptr);
+	app->windowResized = true;
+}
+
 
 void Application::initVulkan()
 {
@@ -284,6 +275,9 @@ void Application::initVulkan()
 
 void Application::shutdownVulkan()
 {
+	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+	descriptorPool = VK_NULL_HANDLE;
+
 	vkDestroyCommandPool(device, commandPool, nullptr);
 	commandPool = VK_NULL_HANDLE;
 
@@ -297,33 +291,6 @@ void Application::shutdownVulkan()
 	instance = VK_NULL_HANDLE;
 }
 
-void Application::initRenderScene()
-{
-	scene = new RenderScene(context);
-	scene->init();
-}
-
-void Application::shutdownRenderScene()
-{
-	scene->shutdown();
-
-	delete scene;
-	scene = nullptr;
-}
-
-void Application::initRenderers()
-{
-	renderer = new Renderer(context, swapChain->getExtent(), swapChain->getDescriptorSetLayout(), swapChain->getRenderPass());
-	renderer->init(&ubo, scene);
-}
-
-void Application::shutdownRenderers()
-{
-	renderer->shutdown();
-
-	delete renderer;
-	renderer = nullptr;
-}
 
 void Application::initVulkanSwapChain()
 {
@@ -354,28 +321,46 @@ void Application::recreateVulkanSwapChain()
 
 	glfwGetWindowSize(window, &width, &height);
 	swapChain->reinit(width, height);
-	//renderer->resize(swapChain);
+}
+
+void Application::initRenderScene()
+{
+	scene = new RenderScene(context);
+	scene->init();
+}
+
+void Application::shutdownRenderScene()
+{
+	scene->shutdown();
+
+	delete scene;
+	scene = nullptr;
+}
+
+void Application::initRenderers()
+{
+	renderer = new Renderer(context, swapChain->getExtent(), swapChain->getDescriptorSetLayout(), swapChain->getRenderPass());
+	renderer->init(&ubo, scene);
+}
+
+void Application::shutdownRenderers()
+{
+	delete renderer;
+	renderer = nullptr;
 }
 
 void Application::initImGui()
 {
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	ImGui::StyleColorsDark();
 
-	//TODO: use own GLFW callbacks
-	ImGui_ImplGlfw_InitForVulkan(window, true);
 }
 
 void Application::shutdownImGui()
 {
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+
 }
 
+// -------------------- Helper Functions ---------------------------
 
-// ----------------------------- Helper Functions ---------------------------------------
 bool Application::checkRequiredValidationLayers(std::vector<const char*>& layers) const
 {
 	uint32_t vulkanLayerCount = 0;
@@ -538,7 +523,3 @@ QueueFamilyIndices Application::fetchQueueFamilyIndices(VkPhysicalDevice device)
 
 	return indices;
 }
-
-
-
-

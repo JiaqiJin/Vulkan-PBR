@@ -1,13 +1,12 @@
 #version 450
-#extension GL_ARB_separate_shader_objects : enable
 #pragma shader_stage(vertex)
 
 // Uniforms
-layout(set = 0, binding = 0) uniform UniformBufferObject {
+layout(set = 0, binding = 0) uniform RenderState {
 	mat4 world;
 	mat4 view;
 	mat4 proj;
-	vec3 cameraPos;
+	vec3 cameraPosWS;
 } ubo;
 
 // Input
@@ -27,10 +26,10 @@ layout(location = 4) out vec3 fragNormalWS;
 layout(location = 5) out vec3 fragPositionWS;
 
 void main() {
-    gl_Position = ubo.proj * ubo.view * ubo.world * vec4(inPosition, 1.0);
+	gl_Position = ubo.proj * ubo.view * ubo.world * vec4(inPosition, 1.0f);
 
-    fragColor = inColor;
-    fragTexCoord = inTexCoord;
+	fragColor = inColor;
+	fragTexCoord = inTexCoord;
 
 	fragTangentWS = vec3(ubo.world * vec4(inTangent, 0.0f));
 	fragBinormalWS = vec3(ubo.world * vec4(inBinormal, 0.0f));
