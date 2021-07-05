@@ -16,11 +16,25 @@ namespace RHI
 
 		inline VkRenderPass getRenderPass() const { return renderPass; }
 
-		void addColorAttachment(VkFormat format, VkSampleCountFlagBits msaaSamples);
+		void addColorAttachment(VkFormat format,
+			VkSampleCountFlagBits msaaSamples,
+			VkAttachmentLoadOp loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VkAttachmentStoreOp storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VkAttachmentLoadOp stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VkAttachmentStoreOp stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE);
 
-		void addColorResolveAttachment(VkFormat format);
+		void addColorResolveAttachment(VkFormat format,
+			VkAttachmentLoadOp loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VkAttachmentStoreOp storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VkAttachmentLoadOp stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VkAttachmentStoreOp stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE);
 
-		void addDepthStencilAttachment(VkFormat format, VkSampleCountFlagBits msaaSamples);
+		void addDepthStencilAttachment(VkFormat format,
+			VkSampleCountFlagBits msaaSamples,
+			VkAttachmentLoadOp loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VkAttachmentStoreOp storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VkAttachmentLoadOp stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VkAttachmentStoreOp stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE);
 
 		void addSubpass(VkPipelineBindPoint bindPoint);
 

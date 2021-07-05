@@ -19,20 +19,13 @@ namespace RHI
 	class Renderer
 	{
 	public:
-		Renderer(const VulkanRendererContext& context, const VulkanSwapChainContext& swapChainContext)
-			: context(context)
-			, swapChainContext(swapChainContext)
-			, hdriToCubeRenderer(context)
-			, diffuseIrradianceRenderer(context)
-			, environmentCubemap(context)
-			, diffuseIrradianceCubemap(context)
-		{
-			
-		}
+		Renderer(const VulkanRendererContext& context, VkExtent2D extent, VkDescriptorSetLayout descriptorSetLayout, VkRenderPass renderPass);
+
+		virtual ~Renderer();
 
 		void init(const UniformBufferObject* ubo, const RenderScene* scene);
 		void update(UniformBufferObject* ubo, const RenderScene* scene);
-		VkCommandBuffer render(const UniformBufferObject* ubo, const RenderScene* scene, uint32_t imageIndex);
+		void render(const UniformBufferObject* ubo, const RenderScene* scene, const VulkanRenderFrame& frame);
 		void shutdown();
 
 	private:
@@ -41,29 +34,24 @@ namespace RHI
 
 	private:
 		VulkanRendererContext context;
-		VulkanSwapChainContext swapChainContext;
-
+		VkExtent2D extent;
 		VkRenderPass renderPass{ VK_NULL_HANDLE };
-		VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
 		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
-		VkPipeline pbrPipeline{ VK_NULL_HANDLE };
-		VkPipeline skyBoxPipeline{ VK_NULL_HANDLE };
 
-		std::vector<VkFramebuffer> frameBuffers;
-		std::vector<VkCommandBuffer> commandBuffers;
-
-		std::vector<VkBuffer> uniformBuffers;
-		std::vector<VkDeviceMemory> uniformBuffersMemory;
-
-		std::vector<VkDescriptorSet> descriptorSets;
-
-		// Cubemap
-		VulkanTexture environmentCubemap;
-		VulkanTexture diffuseIrradianceCubemap;
-		// Cubemap Texture
+		//
 		VulkanCubemapRenderer hdriToCubeRenderer;
 		VulkanCubemapRenderer diffuseIrradianceRenderer;
 
-		int currentEnvironment = 0;
+		VulkanTexture environmentCubemap;
+		VulkanTexture diffuseIrradianceCubemap;
+
+		VkPipeline skyboxPipeline{ VK_NULL_HANDLE };
+		VkPipeline pbrPipeline{ VK_NULL_HANDLE };
+
+		VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
+		VkDescriptorSetLayout sceneDescriptorSetLayout{ VK_NULL_HANDLE };
+		VkDescriptorSet sceneDescriptorSet{ VK_NULL_HANDLE };
+
+		uint32_t currentEnvironment{ 0 };
 	};
 }

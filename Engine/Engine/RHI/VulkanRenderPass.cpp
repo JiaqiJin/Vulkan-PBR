@@ -9,45 +9,59 @@ namespace RHI
 			delete data.depthStencilAttachmentReference;
 	}
 
-	void VulkanRenderPass::addColorAttachment(VkFormat format, VkSampleCountFlagBits msaaSamples)
+	void VulkanRenderPass::addColorAttachment(VkFormat format,
+		VkSampleCountFlagBits msaaSamples,
+		VkAttachmentLoadOp loadOp,
+		VkAttachmentStoreOp storeOp,
+		VkAttachmentLoadOp stencilLoadOp,
+		VkAttachmentStoreOp stencilStoreOp)
 	{
 		VkAttachmentDescription colorAttachment = {};
 		colorAttachment.format = format;
 		colorAttachment.samples = msaaSamples;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.loadOp = loadOp;
+		colorAttachment.storeOp = storeOp;
+		colorAttachment.stencilLoadOp = stencilLoadOp;
+		colorAttachment.stencilStoreOp = stencilStoreOp;
 		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 		attachments.push_back(colorAttachment);
 	}
 
-	void VulkanRenderPass::addColorResolveAttachment(VkFormat format)
+	void VulkanRenderPass::addColorResolveAttachment(VkFormat format,
+		VkAttachmentLoadOp loadOp,
+		VkAttachmentStoreOp storeOp,
+		VkAttachmentLoadOp stencilLoadOp,
+		VkAttachmentStoreOp stencilStoreOp)
 	{
 		VkAttachmentDescription colorAttachmentResolve = {};
 		colorAttachmentResolve.format = format;
 		colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachmentResolve.loadOp = loadOp;
+		colorAttachmentResolve.storeOp = storeOp;
+		colorAttachmentResolve.stencilLoadOp = stencilLoadOp;
+		colorAttachmentResolve.stencilStoreOp = stencilStoreOp;
 		colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 		attachments.push_back(colorAttachmentResolve);
 	}
 
-	void VulkanRenderPass::addDepthStencilAttachment(VkFormat format, VkSampleCountFlagBits msaaSamples)
+	void VulkanRenderPass::addDepthStencilAttachment(VkFormat format,
+		VkSampleCountFlagBits msaaSamples,
+		VkAttachmentLoadOp loadOp,
+		VkAttachmentStoreOp storeOp,
+		VkAttachmentLoadOp stencilLoadOp,
+		VkAttachmentStoreOp stencilStoreOp)
 	{
 		VkAttachmentDescription depthAttachment = {};
 		depthAttachment.format = format;
 		depthAttachment.samples = msaaSamples;
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.loadOp = loadOp;
+		depthAttachment.storeOp = storeOp;
+		depthAttachment.stencilLoadOp = stencilLoadOp;
+		depthAttachment.stencilStoreOp = stencilStoreOp;
 		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
@@ -115,14 +129,6 @@ namespace RHI
 
 	VkRenderPass VulkanRenderPass::build()
 	{
-		VkSubpassDependency dependency = {};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
 		for (int i = 0; i < subpassInfos.size(); i++)
 		{
 			SubpassData& data = subpassDatas[i];
@@ -140,8 +146,6 @@ namespace RHI
 		renderPassInfo.pAttachments = attachments.data();
 		renderPassInfo.subpassCount = static_cast<uint32_t>(subpassInfos.size());
 		renderPassInfo.pSubpasses = subpassInfos.data();
-		renderPassInfo.dependencyCount = 1;
-		renderPassInfo.pDependencies = &dependency;
 
 		if (vkCreateRenderPass(context.device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
 			throw std::runtime_error("Can't create render pass");

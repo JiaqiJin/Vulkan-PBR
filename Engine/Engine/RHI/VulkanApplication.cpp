@@ -112,15 +112,16 @@ void Application::onFramebufferResize(GLFWwindow* window, int width, int height)
 
 void Application::render()
 {
-	if (!swapChain->acquire(ubo))
+	VulkanRenderFrame frame;
+	if (!swapChain->acquire(ubo, frame))
 	{
 		recreateVulkanSwapChain();
 		return;
 	}
 
-	VkCommandBuffer commandBuffer = renderer->render(&ubo, scene, swapChain->getImageIndex());
+	renderer->render(&ubo, scene, frame);
 
-	if (!swapChain->present(commandBuffer) || windowResized)
+	if (!swapChain->present(frame) || windowResized)
 	{
 		windowResized = false;
 		recreateVulkanSwapChain();
@@ -147,13 +148,6 @@ void Application::initVulkan()
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.apiVersion = VK_API_VERSION_1_0;
 
-	VkDebugUtilsMessengerCreateInfoEXT debugMessengerInfo = {};
-	debugMessengerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	debugMessengerInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-	debugMessengerInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-	debugMessengerInfo.pfnUserCallback = debugCallback;
-	debugMessengerInfo.pUserData = nullptr;
-
 	VkInstanceCreateInfo instanceInfo = {};
 	instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instanceInfo.pApplicationInfo = &appInfo;
@@ -161,7 +155,7 @@ void Application::initVulkan()
 	instanceInfo.ppEnabledExtensionNames = extensions.data();
 	instanceInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
 	instanceInfo.ppEnabledLayerNames = layers.data();
-	//instanceInfo.pNext = &debugMessengerInfo;
+	instanceInfo.pNext = nullptr;
 
 	// Create Vulkan instance
 	VkResult result = vkCreateInstance(&instanceInfo, nullptr, &instance);
@@ -249,6 +243,15 @@ void Application::initVulkan()
 	if (presentQueue == VK_NULL_HANDLE)
 		throw std::runtime_error("Can't get present queue from logical device");
 
+	// Create command pool
+	VkCommandPoolCreateInfo commandPoolInfo = {};
+	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	commandPoolInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+	if (vkCreateCommandPool(device, &commandPoolInfo, nullptr, &commandPool) != VK_SUCCESS)
+		throw std::runtime_error("Can't create command pool");
+
 	// Create descriptor pools
 	std::array<VkDescriptorPoolSize, 2> descriptorPoolSizes = {};
 	descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -263,29 +266,19 @@ void Application::initVulkan()
 	descriptorPoolInfo.maxSets = maxCombinedImageSamplers + maxUniformBuffers;
 	descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
-
 	if (vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
 		throw std::runtime_error("Can't create descriptor pool");
-
-	// Create command pool
-	VkCommandPoolCreateInfo commandPoolInfo = {};
-	commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	commandPoolInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-	if (vkCreateCommandPool(device, &commandPoolInfo, nullptr, &commandPool) != VK_SUCCESS)
-		throw std::runtime_error("Can't create command pool");
 
 	context.instance = instance;
 	context.surface = surface;
 	context.device = device;
 	context.physicalDevice = physicalDevice;
 	context.commandPool = commandPool;
-	context.graphicsQueue = graphicsQueue;
-	context.presentQueue = presentQueue;
 	context.descriptorPool = descriptorPool;
 	context.graphicsQueueFamily = indices.graphicsFamily.value();
 	context.presentQueueFamily = indices.presentFamily.value();
+	context.graphicsQueue = graphicsQueue;
+	context.presentQueue = presentQueue;
 	context.msaaSamples = VulkanUtils::getMaxUsableSampleCount(context);
 }
 
@@ -320,15 +313,7 @@ void Application::shutdownRenderScene()
 
 void Application::initRenderers()
 {
-	VulkanSwapChainContext swapChainContext = {};
-	swapChainContext.colorFormat = swapChain->getSwapChainImageFormat();
-	swapChainContext.depthFormat = swapChain->getDepthFormat();
-	swapChainContext.extent = swapChain->getExtent();;
-	swapChainContext.swapChainImageViews = swapChain->getSwapChainImageViews();
-	swapChainContext.depthImageView = swapChain->getDepthImageView();
-	swapChainContext.colorImageView = swapChain->getColorImageView();
-
-	renderer = new Renderer(context, swapChainContext);
+	renderer = new Renderer(context, swapChain->getExtent(), swapChain->getDescriptorSetLayout(), swapChain->getRenderPass());
 	renderer->init(&ubo, scene);
 }
 
@@ -369,6 +354,7 @@ void Application::recreateVulkanSwapChain()
 
 	glfwGetWindowSize(window, &width, &height);
 	swapChain->reinit(width, height);
+	//renderer->resize(swapChain);
 }
 
 void Application::initImGui()
