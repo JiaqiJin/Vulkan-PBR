@@ -24,6 +24,8 @@ namespace RHI
 			const VkVertexInputBindingDescription& binding,
 			const std::vector<VkVertexInputAttributeDescription>& attributes);
 
+		void addDynamicState(VkDynamicState state);
+
 		void addViewport(
 			const VkViewport& viewport);
 
@@ -78,6 +80,7 @@ namespace RHI
 		std::vector<VkVertexInputBindingDescription> vertexInputBindings;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
+		std::vector<VkDynamicState> dynamicStates;
 
 		std::vector<VkViewport> viewports;
 		std::vector<VkRect2D> scissors;

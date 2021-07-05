@@ -18,6 +18,11 @@ namespace RHI
 		shaderStages.push_back(shaderStageInfo);
 	}
 
+	void VulkanGraphicsPipeline::addDynamicState(VkDynamicState state)
+	{
+		dynamicStates.push_back(state);
+	}
+
 	void VulkanGraphicsPipeline::addVertexInput(
 		const VkVertexInputBindingDescription& binding,
 		const std::vector<VkVertexInputAttributeDescription>& attributes)
@@ -167,6 +172,11 @@ namespace RHI
 		colorBlendState.blendConstants[2] = 0.0f;
 		colorBlendState.blendConstants[3] = 0.0f;
 
+		VkPipelineDynamicStateCreateInfo dynamicState = {};
+		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+		dynamicState.pDynamicStates = dynamicStates.data();
+
 		// Create graphics pipeline
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -179,6 +189,7 @@ namespace RHI
 		pipelineInfo.pMultisampleState = &multisamplingState;
 		pipelineInfo.pDepthStencilState = &depthStencilState;
 		pipelineInfo.pColorBlendState = &colorBlendState;
+		pipelineInfo.pDynamicState = &dynamicState;
 		pipelineInfo.layout = pipelineLayout;
 		pipelineInfo.renderPass = renderPass;
 		pipelineInfo.subpass = 0;
