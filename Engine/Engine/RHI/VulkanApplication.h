@@ -10,6 +10,7 @@
 
 // Forward declaration
 struct GLFWwindow;
+class ImGuiRenderer;
 
 namespace RHI
 {
@@ -97,5 +98,8 @@ namespace RHI
 		VkDescriptorPool descriptorPool{ VK_NULL_HANDLE };
 
 		bool windowResized{ false };
+
+		// GUI
+		ImGuiRenderer* imguiRenderer = nullptr;
 	};
 }

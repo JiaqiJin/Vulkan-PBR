@@ -6,6 +6,11 @@
 
 #include "RenderScene.h"
 
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+
+#include "../GUI/ImGuiRenderer.h"
+
 #include <GLFW/glfw3.h>
 
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -43,7 +48,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 void Application::run()
 {
 	initWindow();
-	//initImGui();
+	initImGui();
 	initVulkan();
 	initVulkanSwapChain();
 	initRenderScene();
@@ -53,13 +58,14 @@ void Application::run()
 	shutdownRenderScene();
 	shutdownVulkanSwapChain();
 	shutdownVulkan();
-	//shutdownImGui();
+	shutdownImGui();
 	shutdownWindow();
 }
 
 void Application::update()
 {
 	renderer->update(&ubo, scene);
+	imguiRenderer->update(&ubo, scene);
 }
 
 
@@ -73,6 +79,7 @@ void Application::render()
 	}
 
 	renderer->render(&ubo, scene, frame);
+	imguiRenderer->render(&ubo, scene, frame);
 
 	if (!swapChain->present(frame) || windowResized)
 	{
@@ -88,7 +95,13 @@ void Application::mainloop()
 
 	while (!glfwWindowShouldClose(window))
 	{
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		update();
+
+		ImGui::Render();
+
 		render();
 		glfwPollEvents();
 	}
@@ -321,6 +334,7 @@ void Application::recreateVulkanSwapChain()
 
 	glfwGetWindowSize(window, &width, &height);
 	swapChain->reinit(width, height);
+	imguiRenderer->resize(swapChain);
 }
 
 void Application::initRenderScene()
@@ -341,22 +355,35 @@ void Application::initRenderers()
 {
 	renderer = new Renderer(context, swapChain->getExtent(), swapChain->getDescriptorSetLayout(), swapChain->getRenderPass());
 	renderer->init(&ubo, scene);
+
+	imguiRenderer = new ImGuiRenderer(context, swapChain->getExtent(), swapChain->getNoClearRenderPass());
+	imguiRenderer->init(&ubo, scene, swapChain);
 }
 
 void Application::shutdownRenderers()
 {
 	delete renderer;
 	renderer = nullptr;
+
+	delete imguiRenderer;
+	imguiRenderer = nullptr;
 }
 
 void Application::initImGui()
 {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui::StyleColorsDark();
 
+	// TODO: use own GLFW callbacks
+	ImGui_ImplGlfw_InitForVulkan(window, true);
 }
 
 void Application::shutdownImGui()
 {
-
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 // -------------------- Helper Functions ---------------------------
