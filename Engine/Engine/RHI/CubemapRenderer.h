@@ -4,28 +4,28 @@
 #include <string>
 #include <vector>
 
-#include "VulkanRendererContext.h"
-#include "VulkanShader.h"
+#include "RendererContext.h"
+#include "Shader.h"
 #include "../Common/Texture.h"
 #include "../Common/Mesh.h"
 
 namespace RHI
 {
-	class VulkanCubemapRenderer
+	class CubemapRenderer
 	{
 	public:
-		VulkanCubemapRenderer(const VulkanRendererContext& context)
+		CubemapRenderer(const RendererContext& context)
 			: context(context)
 			, rendererQuad(context)	{ }
 
-		void init(const VulkanShader& vertexShader, const VulkanShader& fragmentShader, const Texture& targetTexture);
+		void init(const Shader& vertexShader, const Shader& fragmentShader, const Texture& targetTexture);
 
 		void shutdown();
 
 		void render(const Texture& inputTexture);
 
 	private:
-		VulkanRendererContext context;
+		RendererContext context;
 		Mesh rendererQuad;
 		VkExtent2D targetExtent;
 

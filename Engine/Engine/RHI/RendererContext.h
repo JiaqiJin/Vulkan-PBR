@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-struct VulkanRendererContext
+struct RendererContext
 {
 	VkInstance instance{ VK_NULL_HANDLE };
 	VkSurfaceKHR surface{ VK_NULL_HANDLE };

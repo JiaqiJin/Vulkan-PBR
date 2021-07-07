@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
-#include "../RHI/VulkanRendererContext.h"
+#include "../RHI/RendererContext.h"
 #include "ResourceManager.h"
 
 namespace RHI
@@ -41,20 +41,20 @@ namespace RHI
 	class RenderScene
 	{
 	public:
-		RenderScene(const VulkanRendererContext& context)
+		RenderScene(const RendererContext& context)
 			: resources(context) { }
 
 		void init();
 
 		void shutdown();
 
-		inline const VulkanShader* getPBRVertexShader() const { return resources.getShader(config::Shaders::PBRVertex); }
-		inline const VulkanShader* getPBRFragmentShader() const { return resources.getShader(config::Shaders::PBRFragment); }
-		inline const VulkanShader* getSkyboxVertexShader() const { return resources.getShader(config::Shaders::SkyboxVertex); }
-		inline const VulkanShader* getSkyboxFragmentShader() const { return resources.getShader(config::Shaders::SkyboxFragment); }
-		inline const VulkanShader* getCubeVertexShader() const { return resources.getShader(config::Shaders::CubeVertex); }
-		inline const VulkanShader* getHDRIToFragmentShader() const { return resources.getShader(config::Shaders::HDRIToCubeFragment); }
-		inline const VulkanShader* getDiffuseIrradianceFragmentShader() const { return resources.getShader(config::Shaders::DiffuseIrradianceFragment); }
+		inline const Shader* getPBRVertexShader() const { return resources.getShader(config::Shaders::PBRVertex); }
+		inline const Shader* getPBRFragmentShader() const { return resources.getShader(config::Shaders::PBRFragment); }
+		inline const Shader* getSkyboxVertexShader() const { return resources.getShader(config::Shaders::SkyboxVertex); }
+		inline const Shader* getSkyboxFragmentShader() const { return resources.getShader(config::Shaders::SkyboxFragment); }
+		inline const Shader* getCubeVertexShader() const { return resources.getShader(config::Shaders::CubeVertex); }
+		inline const Shader* getHDRIToFragmentShader() const { return resources.getShader(config::Shaders::HDRIToCubeFragment); }
+		inline const Shader* getDiffuseIrradianceFragmentShader() const { return resources.getShader(config::Shaders::DiffuseIrradianceFragment); }
 
 		inline const Texture* getAlbedoTexture() const { return resources.getTexture(config::Textures::Albedo); }
 		inline const Texture* getNormalTexture() const { return resources.getTexture(config::Textures::Normal); }

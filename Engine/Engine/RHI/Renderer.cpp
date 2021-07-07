@@ -1,10 +1,10 @@
-#include "VulkanRenderer.h"	
+#include "Renderer.h"	
 #include "../Common/Mesh.h"
-#include "VulkanGraphicsPipeline.h"
-#include "VulkanPipelineLayout.h"
-#include "VulkanDescriptorSetLayout.h"
-#include "VulkanDescriptorSet.h"
-#include "VulkanRenderPass.h"
+#include "GraphicsPipeline.h"
+#include "PipelineLayout.h"
+#include "DescriptorSetLayout.h"
+#include "DescriptorSet.h"
+#include "RenderPass.h"
 #include "VulkanUtils.h"
 #include "../Application.h"
 #include "SwapChain.h"
@@ -22,7 +22,7 @@
 
 using namespace RHI;
 
-Renderer::Renderer(const VulkanRendererContext& context,
+Renderer::Renderer(const RendererContext& context,
 	VkExtent2D extent,
 	VkDescriptorSetLayout descriptorSetLayout,
 	VkRenderPass renderPass)
@@ -45,15 +45,15 @@ Renderer::~Renderer()
 
 void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 {
-	const VulkanShader* pbrVertexShader = scene->getPBRVertexShader();
-	const VulkanShader* pbrFragmentShader = scene->getPBRFragmentShader();
-	const VulkanShader* skyboxVertexShader = scene->getSkyboxVertexShader();
-	const VulkanShader* skyboxFragmentShader = scene->getSkyboxFragmentShader();
+	const Shader* pbrVertexShader = scene->getPBRVertexShader();
+	const Shader* pbrFragmentShader = scene->getPBRFragmentShader();
+	const Shader* skyboxVertexShader = scene->getSkyboxVertexShader();
+	const Shader* skyboxFragmentShader = scene->getSkyboxFragmentShader();
 
 	VkShaderStageFlags stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	// Descriptor set Layout
-	VulkanDescriptorSetLayout sceneDescriptorSetLayoutBuilder(context);
+	DescriptorSetLayout sceneDescriptorSetLayoutBuilder(context);
 	sceneDescriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 	sceneDescriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 	sceneDescriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
@@ -64,13 +64,13 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	sceneDescriptorSetLayout = sceneDescriptorSetLayoutBuilder.build();
 
 	// Pipeline Layout
-	VulkanPipelineLayout pipelineLayoutBuilder(context);
+	PipelineLayout pipelineLayoutBuilder(context);
 	pipelineLayoutBuilder.addDescriptorSetLayout(descriptorSetLayout);
 	pipelineLayoutBuilder.addDescriptorSetLayout(sceneDescriptorSetLayout);
 	pipelineLayout = pipelineLayoutBuilder.build();
 	
 	// Graphic Pipeline
-	VulkanGraphicsPipeline pbrPipelineBuilder(context, pipelineLayout, renderPass);
+	GraphicsPipeline pbrPipelineBuilder(context, pipelineLayout, renderPass);
 	pbrPipelineBuilder.addShaderStage(pbrVertexShader->getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
 	pbrPipelineBuilder.addShaderStage(pbrFragmentShader->getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
 	pbrPipelineBuilder.addVertexInput(Mesh::getVertexInputBindingDescription(), Mesh::getAttributeDescriptions());
@@ -86,7 +86,7 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	pbrPipeline = pbrPipelineBuilder.build();
 		
 	// Skybox Graphic Pipeline
-	VulkanGraphicsPipeline skyboxPipelineBuilder(context, pipelineLayout, renderPass);
+	GraphicsPipeline skyboxPipelineBuilder(context, pipelineLayout, renderPass);
 	skyboxPipelineBuilder.addShaderStage(skyboxVertexShader->getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
 	skyboxPipelineBuilder.addShaderStage(skyboxFragmentShader->getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
 	skyboxPipelineBuilder.addVertexInput(Mesh::getVertexInputBindingDescription(), Mesh::getAttributeDescriptions());

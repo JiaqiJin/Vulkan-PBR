@@ -3,14 +3,14 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
 namespace RHI
 {
-	class VulkanGraphicsPipeline
+	class GraphicsPipeline
 	{
 	public:
-		VulkanGraphicsPipeline(const VulkanRendererContext& context, VkPipelineLayout pipelineLayout, VkRenderPass renderPass)
+		GraphicsPipeline(const RendererContext& context, VkPipelineLayout pipelineLayout, VkRenderPass renderPass)
 			: context(context), renderPass(renderPass), pipelineLayout(pipelineLayout) { }
 
 		inline VkPipeline getPipeline() const { return pipeline; }
@@ -72,7 +72,7 @@ namespace RHI
 		VkPipeline build();
 
 	private:
-		VulkanRendererContext context;
+		RendererContext context;
 		VkRenderPass renderPass{ VK_NULL_HANDLE };
 		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
 

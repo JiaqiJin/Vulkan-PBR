@@ -1,10 +1,10 @@
-#include "VulkanCubemapRenderer.h"
+#include "CubemapRenderer.h"
 
-#include "VulkanDescriptorSetLayout.h"
-#include "VulkanDescriptorSet.h"
-#include "VulkanPipelineLayout.h"
-#include "VulkanRenderPass.h"
-#include "VulkanGraphicsPipeline.h"
+#include "DescriptorSetLayout.h"
+#include "DescriptorSet.h"
+#include "PipelineLayout.h"
+#include "RenderPass.h"
+#include "GraphicsPipeline.h"
 
 #include "VulkanUtils.h"
 
@@ -22,9 +22,9 @@ namespace RHI
 		glm::mat4 faces[6];
 	};
 
-	void VulkanCubemapRenderer::init(
-		const VulkanShader& vertexShader,
-		const VulkanShader& fragmentShader,
+	void CubemapRenderer::init(
+		const Shader& vertexShader,
+		const Shader& fragmentShader,
 		const Texture& targetTexture)
 	{
 		rendererQuad.createQuad(2.0f);
@@ -61,13 +61,13 @@ namespace RHI
 		VkShaderStageFlags stage = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 		// Descriptor set layout
-		VulkanDescriptorSetLayout descriptorSetLayoutBuilder(context);
+		DescriptorSetLayout descriptorSetLayoutBuilder(context);
 		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stage);
 		descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 		descriptorSetLayout = descriptorSetLayoutBuilder.build();
 
 		// Render pass
-		VulkanRenderPass renderPassBuilder(context);
+		RenderPass renderPassBuilder(context);
 		
 		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
 		renderPassBuilder.addColorAttachment(targetTexture.getImageFormat(), VK_SAMPLE_COUNT_1_BIT, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
@@ -85,13 +85,13 @@ namespace RHI
 		renderPass = renderPassBuilder.build();
 
 		// Pipeline layout
-		VulkanPipelineLayout pipelineLayoutBuilder(context);
+		PipelineLayout pipelineLayoutBuilder(context);
 		
 		pipelineLayoutBuilder.addDescriptorSetLayout(descriptorSetLayout);
 		pipelineLayout = pipelineLayoutBuilder.build();
 
 		// Graphic Pipeline
-		VulkanGraphicsPipeline pipelineBuilder(context, pipelineLayout, renderPass);
+		GraphicsPipeline pipelineBuilder(context, pipelineLayout, renderPass);
 		pipelineBuilder.addShaderStage(vertexShader.getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
 		pipelineBuilder.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
 		pipelineBuilder.addVertexInput(Mesh::getVertexInputBindingDescription(), Mesh::getAttributeDescriptions());
@@ -209,7 +209,7 @@ namespace RHI
 			throw std::runtime_error("Can't create fence");
 	}
 
-	void VulkanCubemapRenderer::shutdown()
+	void CubemapRenderer::shutdown()
 	{
 		vkDestroyBuffer(context.device, uniformBuffer, nullptr);
 		uniformBuffer = VK_NULL_HANDLE;
@@ -251,7 +251,7 @@ namespace RHI
 		rendererQuad.clearCPUData();
 	}
 
-	void VulkanCubemapRenderer::render(const Texture& inputTexture)
+	void CubemapRenderer::render(const Texture& inputTexture)
 	{
 		VulkanUtils::bindCombinedImageSampler(
 			context,

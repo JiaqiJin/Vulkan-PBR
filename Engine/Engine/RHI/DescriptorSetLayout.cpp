@@ -1,10 +1,10 @@
-#include "VulkanDescriptorSetLayout.h"
+#include "DescriptorSetLayout.h"
 #include "VulkanUtils.h"
 #include <stdexcept>
 
 namespace RHI
 {
-	void VulkanDescriptorSetLayout::addDescriptorBinding(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, int descriptorCount)
+	void DescriptorSetLayout::addDescriptorBinding(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, int descriptorCount)
 	{
 		VkDescriptorSetLayoutBinding descriptorBinding = {};
 		descriptorBinding.binding = static_cast<uint32_t>(bindings.size());
@@ -15,7 +15,7 @@ namespace RHI
 		bindings.push_back(descriptorBinding);
 	}
 
-	VkDescriptorSetLayout VulkanDescriptorSetLayout::build()
+	VkDescriptorSetLayout DescriptorSetLayout::build()
 	{
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo = {};
 		descriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;

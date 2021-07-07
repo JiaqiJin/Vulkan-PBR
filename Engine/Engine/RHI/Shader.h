@@ -3,13 +3,13 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
 #include <shaderc/shaderc.h>
 
 namespace RHI
 {
-	enum class VulkanShaderKind
+	enum class ShaderKind
 	{
 		Vertex = 0,
 		Fragment,
@@ -19,16 +19,16 @@ namespace RHI
 		TessellationEvaulation,
 	};
 
-	class VulkanShader
+	class Shader
 	{
 	public:
-		VulkanShader(const VulkanRendererContext& context)
+		Shader(const RendererContext& context)
 			: context(context) { }
 
-		~VulkanShader();
+		~Shader();
 
 		bool compileFromFile(const char* path);
-		bool compileFromFile(const char* path, VulkanShaderKind kind);
+		bool compileFromFile(const char* path, ShaderKind kind);
 		void clear();
 
 		inline VkShaderModule getShaderModule() const { return shaderModule; }
@@ -37,7 +37,7 @@ namespace RHI
 		bool compileFromSourceInternal(const char* path, const char* sourceData, size_t sourceSize, shaderc_shader_kind kind);
 
 	private:
-		VulkanRendererContext context;
+		RendererContext context;
 
 		VkShaderModule shaderModule{ VK_NULL_HANDLE };
 	};

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../RHI/VulkanRendererContext.h"
+#include "../RHI/RendererContext.h"
 
 namespace RHI
 {
@@ -13,7 +13,7 @@ namespace RHI
 class ImGuiRenderer
 {
 public:
-	ImGuiRenderer(const VulkanRendererContext& context,
+	ImGuiRenderer(const RendererContext& context,
 		VkExtent2D extent,
 		VkRenderPass renderPass);
 	virtual ~ImGuiRenderer();
@@ -25,7 +25,7 @@ public:
 	void shutdown();
 
 private:
-	VulkanRendererContext context;
+	RendererContext context;
 	VkExtent2D extent;
 	VkRenderPass renderPass;
 };

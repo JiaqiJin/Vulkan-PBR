@@ -3,14 +3,14 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
 namespace RHI
 {
-	class VulkanDescriptorSetLayout
+	class DescriptorSetLayout
 	{
 	public:
-		VulkanDescriptorSetLayout(const VulkanRendererContext& context)
+		DescriptorSetLayout(const RendererContext& context)
 			: context(context) { }
 
 		inline VkDescriptorSetLayout getDescriptorSetLayout() const { return descriptorSetLayout; }
@@ -19,7 +19,7 @@ namespace RHI
 
 		VkDescriptorSetLayout build();
 	private:
-		VulkanRendererContext context;
+		RendererContext context;
 
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 

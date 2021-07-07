@@ -1,6 +1,6 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #include "Application.h"
-#include "RHI/VulkanRenderer.h"
+#include "RHI/Renderer.h"
 #include "RHI/VulkanUtils.h"
 #include "RHI/SwapChain.h"
 

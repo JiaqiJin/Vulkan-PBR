@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-struct VulkanRendererContext;
+struct RendererContext;
 
 namespace RHI
 {
@@ -11,29 +11,29 @@ namespace RHI
 	{
 	public:
 		static VkFormat selectOptimalImageFormat(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			const std::vector<VkFormat>& candidates,
 			VkImageTiling tiling,
 			VkFormatFeatureFlags features);
 
-		static VkFormat selectOptimalDepthFormat(const VulkanRendererContext& context);
+		static VkFormat selectOptimalDepthFormat(const RendererContext& context);
 
 		static uint32_t findMemoryType(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			uint32_t typeFilter,
 			VkMemoryPropertyFlags properties);
 
 		static VkSampler createSampler(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			uint32_t mipLevels);
 
 		static VkShaderModule createShaderModule(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			const uint32_t* bytecode,
 			size_t bytecodeSize);
 
 		static VkImageView createImageView(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			VkImage image,
 			VkFormat format,
 			VkImageAspectFlags aspectFlags,
@@ -44,7 +44,7 @@ namespace RHI
 			uint32_t numLayers = 1);
 
 		static void createImageCube(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			uint32_t width,
 			uint32_t height,
 			uint32_t mipLevels,
@@ -56,7 +56,7 @@ namespace RHI
 			VkImage& image,
 			VkDeviceMemory& memory);
 
-		static void createImage2D(const VulkanRendererContext& context,
+		static void createImage2D(const RendererContext& context,
 			uint32_t width,
 			uint32_t height,
 			uint32_t mipLevels,
@@ -68,7 +68,7 @@ namespace RHI
 			VkImage& image,
 			VkDeviceMemory& memory);
 
-		static void createBuffer(const VulkanRendererContext& context,
+		static void createBuffer(const RendererContext& context,
 			VkDeviceSize size,
 			VkBufferUsageFlags usage,
 			VkMemoryPropertyFlags memoryProperties,
@@ -77,7 +77,7 @@ namespace RHI
 
 		// Helper functions recording and excuting a command buffer
 		static void transitionImageLayout(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			VkImage image,
 			VkFormat format,
 			VkImageLayout oldLayout,
@@ -88,21 +88,21 @@ namespace RHI
 			uint32_t numLayers = 1);
 
 		static void copyBuffer(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			VkBuffer src,
 			VkBuffer dst,
 			VkDeviceSize size);
 
 		// Which part of the buffer is going to be copied and which part of the image
 		static void copyBufferToImage(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			VkBuffer src,
 			VkImage dst,
 			uint32_t width,
 			uint32_t height);
 
 		static void generateImage2DMipmaps(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			VkImage image,
 			uint32_t width,
 			uint32_t height,
@@ -111,25 +111,25 @@ namespace RHI
 			VkFilter filter);
 
 		static void bindCombinedImageSampler(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			VkDescriptorSet descriptorSet,
 			int binding,
 			VkImageView imageView,
 			VkSampler sampler);
 
 		static void bindUniformBuffer(
-			const VulkanRendererContext& context,
+			const RendererContext& context,
 			VkDescriptorSet descriptorSet,
 			int binding,
 			VkBuffer buffer,
 			VkDeviceSize offset,
 			VkDeviceSize size);
 
-		static VkSampleCountFlagBits getMaxUsableSampleCount(const VulkanRendererContext& context);
+		static VkSampleCountFlagBits getMaxUsableSampleCount(const RendererContext& context);
 
 		// Helper functions recording and excuting a command buffer
-		static VkCommandBuffer beginSingleTimeCommands(const VulkanRendererContext& context);
-		static void endSingleTimeCommands(const VulkanRendererContext& context, VkCommandBuffer commandBuffer);
+		static VkCommandBuffer beginSingleTimeCommands(const RendererContext& context);
+		static void endSingleTimeCommands(const RendererContext& context, VkCommandBuffer commandBuffer);
 	private:
 		static bool hasStencilComponent(VkFormat format);
 	};

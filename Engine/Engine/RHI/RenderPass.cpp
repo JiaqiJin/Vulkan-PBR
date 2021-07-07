@@ -1,15 +1,15 @@
-#include "VulkanRenderPass.h"
+#include "RenderPass.h"
 #include <stdexcept>
 
 namespace RHI
 {
-	VulkanRenderPass::~VulkanRenderPass()
+	RenderPass::~RenderPass()
 	{
 		for (SubpassData& data : subpassDatas)
 			delete data.depthStencilAttachmentReference;
 	}
 
-	void VulkanRenderPass::addColorAttachment(VkFormat format,
+	void RenderPass::addColorAttachment(VkFormat format,
 		VkSampleCountFlagBits msaaSamples,
 		VkAttachmentLoadOp loadOp,
 		VkAttachmentStoreOp storeOp,
@@ -29,7 +29,7 @@ namespace RHI
 		attachments.push_back(colorAttachment);
 	}
 
-	void VulkanRenderPass::addColorResolveAttachment(VkFormat format,
+	void RenderPass::addColorResolveAttachment(VkFormat format,
 		VkAttachmentLoadOp loadOp,
 		VkAttachmentStoreOp storeOp,
 		VkAttachmentLoadOp stencilLoadOp,
@@ -48,7 +48,7 @@ namespace RHI
 		attachments.push_back(colorAttachmentResolve);
 	}
 
-	void VulkanRenderPass::addDepthStencilAttachment(VkFormat format,
+	void RenderPass::addDepthStencilAttachment(VkFormat format,
 		VkSampleCountFlagBits msaaSamples,
 		VkAttachmentLoadOp loadOp,
 		VkAttachmentStoreOp storeOp,
@@ -68,7 +68,7 @@ namespace RHI
 		attachments.push_back(depthAttachment);
 	}
 
-	void VulkanRenderPass::addSubpass(VkPipelineBindPoint bindPoint)
+	void RenderPass::addSubpass(VkPipelineBindPoint bindPoint)
 	{
 		VkSubpassDescription info = {};
 		info.pipelineBindPoint = bindPoint;
@@ -77,7 +77,7 @@ namespace RHI
 		subpassDatas.push_back(SubpassData());
 	}
 
-	void VulkanRenderPass::addColorAttachmentReference(int subpassIndex, int attachmentIndex)
+	void RenderPass::addColorAttachmentReference(int subpassIndex, int attachmentIndex)
 	{
 		if (subpassIndex < 0 || subpassIndex >= subpassInfos.size())
 			return;
@@ -93,7 +93,7 @@ namespace RHI
 		data.colorAttachmentReferences.push_back(reference);
 	}
 
-	void VulkanRenderPass::addColorResolveAttachmentReference(int subpassIndex, int attachmentIndex)
+	void RenderPass::addColorResolveAttachmentReference(int subpassIndex, int attachmentIndex)
 	{
 		if (subpassIndex < 0 || subpassIndex >= subpassInfos.size())
 			return;
@@ -109,7 +109,7 @@ namespace RHI
 		data.colorAttachmentResolveReferences.push_back(reference);
 	}
 
-	void VulkanRenderPass::setDepthStencilAttachmentReference(int subpassIndex, int attachmentIndex)
+	void RenderPass::setDepthStencilAttachmentReference(int subpassIndex, int attachmentIndex)
 	{
 		if (subpassIndex < 0 || subpassIndex >= subpassInfos.size())
 			return;
@@ -127,7 +127,7 @@ namespace RHI
 		data.depthStencilAttachmentReference->layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
-	VkRenderPass VulkanRenderPass::build()
+	VkRenderPass RenderPass::build()
 	{
 		for (int i = 0; i < subpassInfos.size(); i++)
 		{

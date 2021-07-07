@@ -1,9 +1,9 @@
-#include "VulkanDescriptorSet.h"
+#include "DescriptorSet.h"
 #include <stdexcept>
 
 namespace RHI
 {
-	std::vector<VkDescriptorSet> VulkanDescriptorSet::build(VkDescriptorSetLayout descriptorSetLayout)
+	std::vector<VkDescriptorSet> DescriptorSet::build(VkDescriptorSetLayout descriptorSetLayout)
 	{
 		std::vector<VkDescriptorSetLayout> layouts(imageCount, descriptorSetLayout);
 

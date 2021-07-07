@@ -1,10 +1,10 @@
-#include "VulkanGraphicsPipeline.h"
+#include "GraphicsPipeline.h"
 #include "VulkanUtils.h"
 #include <stdexcept>
 
 namespace RHI
 {
-	void VulkanGraphicsPipeline::addShaderStage(
+	void GraphicsPipeline::addShaderStage(
 		VkShaderModule shader,
 		VkShaderStageFlagBits stage,
 		const char* entry)
@@ -18,12 +18,12 @@ namespace RHI
 		shaderStages.push_back(shaderStageInfo);
 	}
 
-	void VulkanGraphicsPipeline::addDynamicState(VkDynamicState state)
+	void GraphicsPipeline::addDynamicState(VkDynamicState state)
 	{
 		dynamicStates.push_back(state);
 	}
 
-	void VulkanGraphicsPipeline::addVertexInput(
+	void GraphicsPipeline::addVertexInput(
 		const VkVertexInputBindingDescription& binding,
 		const std::vector<VkVertexInputAttributeDescription>& attributes)
 	{
@@ -33,20 +33,20 @@ namespace RHI
 			vertexInputAttributes.push_back(attribute);
 	}
 
-	void VulkanGraphicsPipeline::addViewport(
+	void GraphicsPipeline::addViewport(
 		const VkViewport& viewport)
 	{
 		viewports.push_back(viewport);
 	}
 
-	void VulkanGraphicsPipeline::addScissor(
+	void GraphicsPipeline::addScissor(
 		const VkRect2D& scissor)
 	{
 		scissors.push_back(scissor);
 
 	}
 
-	void VulkanGraphicsPipeline::addBlendColorAttachment(
+	void GraphicsPipeline::addBlendColorAttachment(
 		bool blend,
 		VkBlendFactor srcColorBlendFactor,
 		VkBlendFactor dstColorBlendFactor,
@@ -70,7 +70,7 @@ namespace RHI
 
 	}
 
-	void VulkanGraphicsPipeline::setInputAssemblyState(
+	void GraphicsPipeline::setInputAssemblyState(
 		VkPrimitiveTopology topology,
 		bool primitiveRestart)
 	{
@@ -80,7 +80,7 @@ namespace RHI
 		inputAssemblyState.primitiveRestartEnable = primitiveRestart;
 	}
 
-	void VulkanGraphicsPipeline::setRasterizerState(
+	void GraphicsPipeline::setRasterizerState(
 		bool depthClamp,
 		bool rasterizerDiscard,
 		VkPolygonMode polygonMode,
@@ -106,7 +106,7 @@ namespace RHI
 		rasterizerState.depthBiasSlopeFactor = depthBiasSlopeFactor;
 	}
 
-	void VulkanGraphicsPipeline::setMultisampleState(
+	void GraphicsPipeline::setMultisampleState(
 		VkSampleCountFlagBits msaaSamples,
 		bool sampleShading,
 		float minSampleShading)
@@ -123,7 +123,7 @@ namespace RHI
 		multisamplingState.alphaToOneEnable = VK_FALSE; // Optional
 	}
 
-	void VulkanGraphicsPipeline::setDepthStencilState(
+	void GraphicsPipeline::setDepthStencilState(
 		bool depthTest,
 		bool depthWrite,
 		VkCompareOp depthCompareOp)
@@ -145,7 +145,7 @@ namespace RHI
 		depthStencilState.maxDepthBounds = 1.0f; // Optional
 	}
 
-	VkPipeline VulkanGraphicsPipeline::build()
+	VkPipeline GraphicsPipeline::build()
 	{
 		VkPipelineVertexInputStateCreateInfo vertexInputState = {};
 		vertexInputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

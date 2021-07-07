@@ -1,15 +1,15 @@
-#include "VulkanPipelineLayout.h"
+#include "PipelineLayout.h"
 #include "VulkanUtils.h"
 #include <stdexcept>
 
 namespace RHI
 {
-	void VulkanPipelineLayout::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+	void PipelineLayout::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
 	{
 		descriptorSetLayouts.push_back(descriptorSetLayout);
 	}
 
-	VkPipelineLayout VulkanPipelineLayout::build()
+	VkPipelineLayout PipelineLayout::build()
 	{
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

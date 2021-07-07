@@ -6,7 +6,7 @@
 
 #include <glm/glm.hpp>
 
-#include "RHI/VulkanRendererContext.h"
+#include "RHI/RendererContext.h"
 
 // Forward declaration
 struct GLFWwindow;
@@ -85,7 +85,7 @@ private:
 	RHI::Renderer* renderer{ nullptr };
 
 	RHI::SwapChain* swapChain{ nullptr };
-	VulkanRendererContext context{};
+	RendererContext context{};
 
 	VkInstance instance{ VK_NULL_HANDLE };
 	VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };

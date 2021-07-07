@@ -1,9 +1,9 @@
-#include "VulkanApplication.h"
+#include "../Application.h"
 #include "SwapChain.h"
 #include "VulkanUtils.h"
 
-#include "VulkanDescriptorSetLayout.h"
-#include "VulkanRenderPass.h"
+#include "DescriptorSetLayout.h"
+#include "RenderPass.h"
 
 #include <array>
 #include <algorithm>
@@ -12,7 +12,7 @@
 
 using namespace RHI;
 
-SwapChain::SwapChain(const VulkanRendererContext& context, VkDeviceSize uboSize)
+SwapChain::SwapChain(const RendererContext& context, VkDeviceSize uboSize)
 	: context(context)
 	, uboSize(uboSize)
 {
@@ -327,11 +327,11 @@ void SwapChain::initPersistent()
 	}
 
 	// Create descriptor set layout and render pass
-	VulkanDescriptorSetLayout descriptorSetLayoutBuilder(context);
+	DescriptorSetLayout descriptorSetLayoutBuilder(context);
 	descriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL);
 	descriptorSetLayout = descriptorSetLayoutBuilder.build();
 
-	VulkanRenderPass renderPassBuilder(context);
+	RenderPass renderPassBuilder(context);
 	renderPassBuilder.addColorAttachment(swapChainImageFormat, context.msaaSamples, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
 	renderPassBuilder.addColorResolveAttachment(swapChainImageFormat, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE);
 	renderPassBuilder.addDepthStencilAttachment(depthFormat, context.msaaSamples, VK_ATTACHMENT_LOAD_OP_CLEAR);
@@ -341,7 +341,7 @@ void SwapChain::initPersistent()
 	renderPassBuilder.setDepthStencilAttachmentReference(0, 2);
 	renderPass = renderPassBuilder.build();
 
-	VulkanRenderPass noClearRenderPassBuilder(context);
+	RenderPass noClearRenderPassBuilder(context);
 	noClearRenderPassBuilder.addColorAttachment(swapChainImageFormat, context.msaaSamples, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE);
 	noClearRenderPassBuilder.addColorResolveAttachment(swapChainImageFormat, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE);
 	noClearRenderPassBuilder.addDepthStencilAttachment(depthFormat, context.msaaSamples);

@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
 namespace RHI
 {
@@ -23,7 +23,7 @@ namespace RHI
 	class SwapChain
 	{
 	public:
-		SwapChain(const VulkanRendererContext& context, VkDeviceSize uboSize);
+		SwapChain(const RendererContext& context, VkDeviceSize uboSize);
 		virtual ~SwapChain();
 
 		void init(int width, int height);
@@ -67,7 +67,7 @@ namespace RHI
 		void shutdownFrames();
 
 	private:
-		VulkanRendererContext context;
+		RendererContext context;
 		std::vector<VulkanRenderFrame> frames;
 		VkDeviceSize uboSize;
 

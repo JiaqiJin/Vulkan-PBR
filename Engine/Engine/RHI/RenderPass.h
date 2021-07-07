@@ -3,16 +3,16 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
 namespace RHI
 {
-	class VulkanRenderPass
+	class RenderPass
 	{
 	public:
-		VulkanRenderPass(const VulkanRendererContext& context)
+		RenderPass(const RendererContext& context)
 			: context(context) { }
-		~VulkanRenderPass();
+		~RenderPass();
 
 		inline VkRenderPass getRenderPass() const { return renderPass; }
 
@@ -54,7 +54,7 @@ namespace RHI
 			VkAttachmentReference* depthStencilAttachmentReference{ nullptr };
 		};
 
-		VulkanRendererContext context;
+		RendererContext context;
 
 		std::vector<VkAttachmentDescription> attachments;
 		std::vector<VkSubpassDescription> subpassInfos;

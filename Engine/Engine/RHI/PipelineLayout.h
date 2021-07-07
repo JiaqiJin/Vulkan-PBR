@@ -3,14 +3,14 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
 namespace RHI
 {
-	class VulkanPipelineLayout
+	class PipelineLayout
 	{
 	public:
-		VulkanPipelineLayout(const VulkanRendererContext& context)
+		PipelineLayout(const RendererContext& context)
 			: context(context) { }
 
 		inline VkPipelineLayout getPipelineLayout() const { return pipelineLayout; }
@@ -19,7 +19,7 @@ namespace RHI
 
 		VkPipelineLayout build();
 	private:
-		VulkanRendererContext context;
+		RendererContext context;
 
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 

@@ -1,5 +1,5 @@
 #include "RenderScene.h"
-#include "../RHI/VulkanShader.h"
+#include "../RHI/Shader.h"
 
 #include <fstream>
 #include <iostream>

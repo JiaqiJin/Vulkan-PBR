@@ -1,13 +1,13 @@
 #include "ResourceManager.h"
 #include "Mesh.h"
-#include "../RHI/VulkanShader.h"
+#include "../RHI/Shader.h"
 #include "Texture.h"
 
 #include <iostream>
 
 using namespace RHI;
 
-ResourceManager::ResourceManager(const VulkanRendererContext& context)
+ResourceManager::ResourceManager(const RendererContext& context)
 	: context(context)
 {
 
@@ -65,7 +65,7 @@ void ResourceManager::unloadMesh(int id)
 	meshes.erase(it);
 }
 
-VulkanShader* ResourceManager::getShader(int id) const
+Shader* ResourceManager::getShader(int id) const
 {
 	auto it = shaders.find(id);
 	if (it != shaders.end())
@@ -74,7 +74,7 @@ VulkanShader* ResourceManager::getShader(int id) const
 	return nullptr;
 }
 
-VulkanShader* ResourceManager::loadShader(int id, const char* path)
+Shader* ResourceManager::loadShader(int id, const char* path)
 {
 	auto it = shaders.find(id);
 	if (it != shaders.end())
@@ -83,7 +83,7 @@ VulkanShader* ResourceManager::loadShader(int id, const char* path)
 		return nullptr;
 	}
 
-	VulkanShader* shader = new VulkanShader(context);
+	Shader* shader = new Shader(context);
 	if (!shader->compileFromFile(path))
 		return nullptr;
 
@@ -91,7 +91,7 @@ VulkanShader* ResourceManager::loadShader(int id, const char* path)
 	return shader;
 }
 
-VulkanShader* ResourceManager::loadShader(int id, VulkanShaderKind kind, const char* path)
+Shader* ResourceManager::loadShader(int id, ShaderKind kind, const char* path)
 {
 	auto it = shaders.find(id);
 	if (it != shaders.end())
@@ -100,7 +100,7 @@ VulkanShader* ResourceManager::loadShader(int id, VulkanShaderKind kind, const c
 		return nullptr;
 	}
 
-	VulkanShader* shader = new VulkanShader(context);
+	Shader* shader = new Shader(context);
 	if (!shader->compileFromFile(path, kind))
 		return nullptr;
 

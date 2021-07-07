@@ -1,5 +1,5 @@
 #include "VulkanUtils.h"
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -7,7 +7,7 @@
 namespace RHI
 {
 	VkFormat VulkanUtils::selectOptimalImageFormat(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		const std::vector<VkFormat>& candidates,
 		VkImageTiling tiling,
 		VkFormatFeatureFlags features)
@@ -27,7 +27,7 @@ namespace RHI
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	VkFormat VulkanUtils::selectOptimalDepthFormat(const VulkanRendererContext& context)
+	VkFormat VulkanUtils::selectOptimalDepthFormat(const RendererContext& context)
 	{
 		return selectOptimalImageFormat(
 			context,
@@ -37,7 +37,7 @@ namespace RHI
 	}
 
 	uint32_t VulkanUtils::findMemoryType(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		uint32_t typeFilter,
 		VkMemoryPropertyFlags properties)
 	{
@@ -55,7 +55,7 @@ namespace RHI
 	}
 
 	VkShaderModule VulkanUtils::createShaderModule(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		const uint32_t* bytecode,
 		size_t bytecodeSize)
 	{
@@ -72,7 +72,7 @@ namespace RHI
 	}
 
 	VkSampler VulkanUtils::createSampler(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		uint32_t mipLevels)
 	{
 		VkSamplerCreateInfo samplerInfo = {};
@@ -100,7 +100,7 @@ namespace RHI
 	}
 
 	VkImageView VulkanUtils::createImageView(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkImage image,
 		VkFormat format,
 		VkImageAspectFlags aspectFlags,
@@ -129,7 +129,7 @@ namespace RHI
 		return imageView;
 	}
 
-	void VulkanUtils::createImage2D(const VulkanRendererContext& context,
+	void VulkanUtils::createImage2D(const RendererContext& context,
 		uint32_t width,
 		uint32_t height,
 		uint32_t mipLevels,
@@ -178,7 +178,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::createImageCube(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		uint32_t width,
 		uint32_t height,
 		uint32_t mipLevels,
@@ -227,7 +227,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::createBuffer(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkDeviceSize size,
 		VkBufferUsageFlags usage,
 		VkMemoryPropertyFlags memoryProperties,
@@ -260,7 +260,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::copyBuffer(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkBuffer src,
 		VkBuffer dst,
 		VkDeviceSize size)
@@ -275,7 +275,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::copyBufferToImage(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkBuffer src,
 		VkImage dst,
 		uint32_t width,
@@ -305,7 +305,7 @@ namespace RHI
 
 	// Command buffer requier the image in right layout first
 	void VulkanUtils::transitionImageLayout(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkImage image,
 		VkFormat format,
 		VkImageLayout oldLayout,
@@ -423,7 +423,7 @@ namespace RHI
 		endSingleTimeCommands(context, commandBuffer);
 	}
 
-	VkCommandBuffer VulkanUtils::beginSingleTimeCommands(const VulkanRendererContext& context)
+	VkCommandBuffer VulkanUtils::beginSingleTimeCommands(const RendererContext& context)
 	{
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -443,7 +443,7 @@ namespace RHI
 		return commandBuffer;
 	}
 
-	void VulkanUtils::endSingleTimeCommands(const VulkanRendererContext& context, VkCommandBuffer commandBuffer)
+	void VulkanUtils::endSingleTimeCommands(const RendererContext& context, VkCommandBuffer commandBuffer)
 	{
 		vkEndCommandBuffer(commandBuffer);
 
@@ -471,7 +471,7 @@ namespace RHI
 		vkFreeCommandBuffers(context.device, context.commandPool, 1, &commandBuffer);
 	}
 
-	VkSampleCountFlagBits VulkanUtils::getMaxUsableSampleCount(const VulkanRendererContext& context)
+	VkSampleCountFlagBits VulkanUtils::getMaxUsableSampleCount(const RendererContext& context)
 	{
 		VkPhysicalDeviceProperties physicalDeviceProperties;
 		vkGetPhysicalDeviceProperties(context.physicalDevice, &physicalDeviceProperties);
@@ -492,7 +492,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::generateImage2DMipmaps(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkImage image,
 		uint32_t width,
 		uint32_t height,
@@ -597,7 +597,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::bindUniformBuffer(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkDescriptorSet descriptorSet,
 		int binding,
 		VkBuffer buffer,
@@ -622,7 +622,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::bindCombinedImageSampler(
-		const VulkanRendererContext& context,
+		const RendererContext& context,
 		VkDescriptorSet descriptorSet,
 		int binding,
 		VkImageView imageView,

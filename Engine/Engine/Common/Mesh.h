@@ -7,12 +7,12 @@
 #include <vector>
 #include <string>
 
-#include "../RHI/VulkanRendererContext.h"
+#include "../RHI/RendererContext.h"
 
 class Mesh
 {
 public:
-	Mesh(const VulkanRendererContext& context)
+	Mesh(const RendererContext& context)
 		: context(context) { }
 
 	~Mesh();
@@ -39,7 +39,7 @@ private:
 	void createIndexBuffer();
 
 private:
-	VulkanRendererContext context;
+	RendererContext context;
 
 	struct Vertex
 	{

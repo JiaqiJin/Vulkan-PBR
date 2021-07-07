@@ -9,7 +9,7 @@
 
 #include <array>
 
-ImGuiRenderer::ImGuiRenderer(const VulkanRendererContext& context, VkExtent2D extent, VkRenderPass renderPass)
+ImGuiRenderer::ImGuiRenderer(const RendererContext& context, VkExtent2D extent, VkRenderPass renderPass)
 	: context(context)
 	, extent(extent)
 	, renderPass(renderPass)
@@ -38,7 +38,7 @@ void ImGuiRenderer::init(const RHI::UniformBufferObject* ubo, const RHI::RenderS
 
 	ImGui_ImplVulkan_Init(&init_info, renderPass);
 
-	VulkanRendererContext imGuiContext = {};
+	RendererContext imGuiContext = {};
 	imGuiContext.commandPool = context.commandPool;
 	imGuiContext.descriptorPool = context.descriptorPool;
 	imGuiContext.device = context.device;

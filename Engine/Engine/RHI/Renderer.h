@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "VulkanRendererContext.h"
+#include "RendererContext.h"
 
-#include "VulkanCubemapRenderer.h"
+#include "CubemapRenderer.h"
 #include "../Common/Texture.h"
-#include "VulkanShader.h"
+#include "Shader.h"
 
 namespace RHI
 {
@@ -20,7 +20,7 @@ namespace RHI
 	class Renderer
 	{
 	public:
-		Renderer(const VulkanRendererContext& context, VkExtent2D extent, VkDescriptorSetLayout descriptorSetLayout, VkRenderPass renderPass);
+		Renderer(const RendererContext& context, VkExtent2D extent, VkDescriptorSetLayout descriptorSetLayout, VkRenderPass renderPass);
 
 		virtual ~Renderer();
 
@@ -35,14 +35,14 @@ namespace RHI
 		void setEnvironment(const RenderScene* scene, int index);
 
 	private:
-		VulkanRendererContext context;
+		RendererContext context;
 		VkExtent2D extent;
 		VkRenderPass renderPass{ VK_NULL_HANDLE };
 		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
 
 		//
-		VulkanCubemapRenderer hdriToCubeRenderer;
-		VulkanCubemapRenderer diffuseIrradianceRenderer;
+		CubemapRenderer hdriToCubeRenderer;
+		CubemapRenderer diffuseIrradianceRenderer;
 
 		Texture environmentCubemap;
 		Texture diffuseIrradianceCubemap;

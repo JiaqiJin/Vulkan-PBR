@@ -27,34 +27,34 @@
     <ClCompile Include="Common\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanRenderer.cpp">
+    <ClCompile Include="RHI\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Common\RenderScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanShader.cpp">
+    <ClCompile Include="RHI\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanGraphicsPipeline.cpp">
+    <ClCompile Include="RHI\GraphicsPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanPipelineLayout.cpp">
+    <ClCompile Include="RHI\PipelineLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanDescriptorSetLayout.cpp">
+    <ClCompile Include="RHI\DescriptorSetLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanDescriptorSet.cpp">
+    <ClCompile Include="RHI\DescriptorSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanRenderPass.cpp">
+    <ClCompile Include="RHI\RenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanCubemapRenderer.cpp">
+    <ClCompile Include="RHI\CubemapRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vendor\imgui\imgui.cpp">
@@ -89,7 +89,7 @@
     <ClInclude Include="Common\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanRendererContext.h">
+    <ClInclude Include="RHI\RendererContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\VulkanUtils.h">
@@ -98,34 +98,34 @@
     <ClInclude Include="Common\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanRenderer.h">
+    <ClInclude Include="RHI\Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Common\RenderScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanShader.h">
+    <ClInclude Include="RHI\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanGraphicsPipeline.h">
+    <ClInclude Include="RHI\GraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanPipelineLayout.h">
+    <ClInclude Include="RHI\PipelineLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanDescriptorSetLayout.h">
+    <ClInclude Include="RHI\DescriptorSetLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanDescriptorSet.h">
+    <ClInclude Include="RHI\DescriptorSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanRenderPass.h">
+    <ClInclude Include="RHI\RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanCubemapRenderer.h">
+    <ClInclude Include="RHI\CubemapRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vendor\imgui\imconfig.h">
