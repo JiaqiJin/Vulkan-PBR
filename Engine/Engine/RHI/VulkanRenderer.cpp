@@ -1,14 +1,14 @@
 #include "VulkanRenderer.h"	
-#include "VulkanMesh.h"
+#include "../Common/Mesh.h"
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanPipelineLayout.h"
 #include "VulkanDescriptorSetLayout.h"
 #include "VulkanDescriptorSet.h"
 #include "VulkanRenderPass.h"
 #include "VulkanUtils.h"
-#include "VulkanApplication.h"
+#include "../Application.h"
 #include "SwapChain.h"
-#include "RenderScene.h"
+#include "../Common/RenderScene.h"
 
 #include "../Vendor/imgui/imgui.h"
 #include "../Vendor/imgui/imgui_impl_vulkan.h"
@@ -73,7 +73,7 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	VulkanGraphicsPipeline pbrPipelineBuilder(context, pipelineLayout, renderPass);
 	pbrPipelineBuilder.addShaderStage(pbrVertexShader->getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
 	pbrPipelineBuilder.addShaderStage(pbrFragmentShader->getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
-	pbrPipelineBuilder.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
+	pbrPipelineBuilder.addVertexInput(Mesh::getVertexInputBindingDescription(), Mesh::getAttributeDescriptions());
 	pbrPipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 	pbrPipelineBuilder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
 	pbrPipelineBuilder.addDynamicState(VK_DYNAMIC_STATE_VIEWPORT);
@@ -89,7 +89,7 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	VulkanGraphicsPipeline skyboxPipelineBuilder(context, pipelineLayout, renderPass);
 	skyboxPipelineBuilder.addShaderStage(skyboxVertexShader->getShaderModule(), VK_SHADER_STAGE_VERTEX_BIT);
 	skyboxPipelineBuilder.addShaderStage(skyboxFragmentShader->getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
-	skyboxPipelineBuilder.addVertexInput(VulkanMesh::getVertexInputBindingDescription(), VulkanMesh::getAttributeDescriptions());
+	skyboxPipelineBuilder.addVertexInput(Mesh::getVertexInputBindingDescription(), Mesh::getAttributeDescriptions());
 	skyboxPipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 	skyboxPipelineBuilder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
 	skyboxPipelineBuilder.addDynamicState(VK_DYNAMIC_STATE_VIEWPORT);
@@ -313,7 +313,7 @@ void Renderer::render(const UniformBufferObject* state, const RenderScene* scene
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, skyboxPipeline);
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 	{
-		const VulkanMesh* skybox = scene->getSkybox();
+		const Mesh* skybox = scene->getSkybox();
 
 		VkBuffer vertexBuffers[] = { skybox->getVertexBuffer() };
 		VkBuffer indexBuffer = skybox->getIndexBuffer();
@@ -326,7 +326,7 @@ void Renderer::render(const UniformBufferObject* state, const RenderScene* scene
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pbrPipeline);
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 	{
-		const VulkanMesh* mesh = scene->getMesh();
+		const Mesh* mesh = scene->getMesh();
 
 		VkBuffer vertexBuffers[] = { mesh->getVertexBuffer() };
 		VkBuffer indexBuffer = mesh->getIndexBuffer();

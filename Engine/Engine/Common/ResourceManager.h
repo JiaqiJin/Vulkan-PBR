@@ -8,19 +8,20 @@ namespace RHI
 {
 	enum class VulkanShaderKind;
 
-	class VulkanMesh;
 	class VulkanShader;
 	class VulkanTexture;
 }
+
+class Mesh;
 
 class ResourceManager
 {
 public:
 	ResourceManager(const VulkanRendererContext& context);
 
-	RHI::VulkanMesh* getMesh(int id) const;
-	RHI::VulkanMesh* createCubeMesh(int id, float size);
-	RHI::VulkanMesh* loadMesh(int id, const char* path);
+	Mesh* getMesh(int id) const;
+	Mesh* createCubeMesh(int id, float size);
+	Mesh* loadMesh(int id, const char* path);
 	void unloadMesh(int id);
 
 	RHI::VulkanShader* getShader(int id) const;
@@ -35,7 +36,7 @@ public:
 private:
 	VulkanRendererContext context;
 	
-	std::unordered_map<int, RHI::VulkanMesh*> meshes;
+	std::unordered_map<int, Mesh*> meshes;
 	std::unordered_map<int, RHI::VulkanShader*> shaders;
 	std::unordered_map<int, RHI::VulkanTexture*> textures;
 };

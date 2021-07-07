@@ -1,15 +1,15 @@
 #define VK_USE_PLATFORM_WIN32_KHR
-#include "VulkanApplication.h"
-#include "VulkanRenderer.h"
-#include "VulkanUtils.h"
-#include "SwapChain.h"
+#include "Application.h"
+#include "RHI/VulkanRenderer.h"
+#include "RHI/VulkanUtils.h"
+#include "RHI/SwapChain.h"
 
-#include "RenderScene.h"
+#include "Common/RenderScene.h"
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
 
-#include "../GUI/ImGuiRenderer.h"
+#include "GUI/ImGuiRenderer.h"
 
 #include <GLFW/glfw3.h>
 
@@ -307,8 +307,9 @@ void Application::shutdownVulkan()
 
 void Application::initVulkanSwapChain()
 {
+	VkDeviceSize ubosize = sizeof(UniformBufferObject);
 	if (!swapChain)
-		swapChain = new SwapChain(context, sizeof(UniformBufferObject));
+		swapChain = new SwapChain(context, ubosize);
 
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);

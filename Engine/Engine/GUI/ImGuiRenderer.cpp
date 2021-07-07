@@ -1,8 +1,8 @@
 #include "ImGuiRenderer.h"
-#include "../RHI/VulkanApplication.h"
+#include "../Application.h"
 #include "../RHI/SwapChain.h"
 #include "../RHI/VulkanUtils.h"
-#include "../RHI/RenderScene.h"
+#include "../Common/RenderScene.h"
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_vulkan.h"

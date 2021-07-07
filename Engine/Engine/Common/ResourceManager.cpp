@@ -1,5 +1,5 @@
 #include "ResourceManager.h"
-#include "../RHI/VulkanMesh.h"
+#include "Mesh.h"
 #include "../RHI/VulkanShader.h"
 #include "../RHI/VulkanTexture.h"
 
@@ -13,7 +13,7 @@ ResourceManager::ResourceManager(const VulkanRendererContext& context)
 
 }
 
-VulkanMesh* ResourceManager::getMesh(int id) const
+Mesh* ResourceManager::getMesh(int id) const
 {
 	auto it = meshes.find(id);
 	if (it != meshes.end())
@@ -22,7 +22,7 @@ VulkanMesh* ResourceManager::getMesh(int id) const
 	return nullptr;
 }
 
-VulkanMesh* ResourceManager::createCubeMesh(int id, float size)
+Mesh* ResourceManager::createCubeMesh(int id, float size)
 {
 	auto it = meshes.find(id);
 	if (it != meshes.end())
@@ -31,14 +31,14 @@ VulkanMesh* ResourceManager::createCubeMesh(int id, float size)
 		return nullptr;
 	}
 
-	VulkanMesh* mesh = new VulkanMesh(context);
+	Mesh* mesh = new Mesh(context);
 	mesh->createSkybox(size);
 
 	meshes.insert(std::make_pair(id, mesh));
 	return mesh;
 }
 
-VulkanMesh* ResourceManager::loadMesh(int id, const char* path)
+Mesh* ResourceManager::loadMesh(int id, const char* path)
 {
 	auto it = meshes.find(id);
 	if (it != meshes.end())
@@ -47,7 +47,7 @@ VulkanMesh* ResourceManager::loadMesh(int id, const char* path)
 		return nullptr;
 	}
 
-	VulkanMesh* mesh = new VulkanMesh(context);
+	Mesh* mesh = new Mesh(context);
 	if (!mesh->loadFromFile(path))
 		return nullptr;
 
@@ -118,8 +118,6 @@ void ResourceManager::unloadShader(int id)
 	shaders.erase(it);
 }
 
-/*
- */
 VulkanTexture* ResourceManager::getTexture(int id) const
 {
 	auto it = textures.find(id);

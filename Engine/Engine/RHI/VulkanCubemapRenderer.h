@@ -7,7 +7,7 @@
 #include "VulkanRendererContext.h"
 #include "VulkanShader.h"
 #include "VulkanTexture.h"
-#include "VulkanMesh.h"
+#include "../Common/Mesh.h"
 
 namespace RHI
 {
@@ -26,7 +26,7 @@ namespace RHI
 
 	private:
 		VulkanRendererContext context;
-		VulkanMesh rendererQuad;
+		Mesh rendererQuad;
 		VkExtent2D targetExtent;
 
 		VkImageView faceViews[6]{ VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE };

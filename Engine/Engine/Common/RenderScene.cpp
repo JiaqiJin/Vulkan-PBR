@@ -1,5 +1,5 @@
 #include "RenderScene.h"
-#include "VulkanShader.h"
+#include "../RHI/VulkanShader.h"
 
 #include <fstream>
 #include <iostream>
@@ -84,3 +84,4 @@ namespace RHI
 			resources.unloadTexture(config::Textures::Environment + i);
 	}
 }
+

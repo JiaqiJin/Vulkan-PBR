@@ -1,11 +1,10 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "RHI/VulkanApplication.h"
+#include "Application.h"
 
 #include <GLFW/glfw3.h>
 
-using namespace RHI;
 int main(void)
 {
 	if (!glfwInit())

@@ -24,19 +24,19 @@
     <ClCompile Include="RHI\VulkanUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanMesh.cpp">
+    <ClCompile Include="Common\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RHI\VulkanRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\RenderScene.cpp">
+    <ClCompile Include="Common\RenderScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RHI\VulkanShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\VulkanApplication.cpp">
+    <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RHI\VulkanGraphicsPipeline.cpp">
@@ -95,19 +95,19 @@
     <ClInclude Include="RHI\VulkanUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanMesh.h">
+    <ClInclude Include="Common\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\VulkanRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\RenderScene.h">
+    <ClInclude Include="Common\RenderScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\VulkanShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\VulkanApplication.h">
+    <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\VulkanGraphicsPipeline.h">

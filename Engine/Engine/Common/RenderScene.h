@@ -3,8 +3,8 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
-#include "VulkanRendererContext.h"
-#include "../Common/ResourceManager.h"
+#include "../RHI/VulkanRendererContext.h"
+#include "ResourceManager.h"
 
 namespace RHI
 {
@@ -48,7 +48,6 @@ namespace RHI
 
 		void shutdown();
 
-
 		inline const VulkanShader* getPBRVertexShader() const { return resources.getShader(config::Shaders::PBRVertex); }
 		inline const VulkanShader* getPBRFragmentShader() const { return resources.getShader(config::Shaders::PBRFragment); }
 		inline const VulkanShader* getSkyboxVertexShader() const { return resources.getShader(config::Shaders::SkyboxVertex); }
@@ -64,8 +63,8 @@ namespace RHI
 		inline const VulkanTexture* getEmissionTexture() const { return resources.getTexture(config::Textures::Emission); }
 		inline const VulkanTexture* getHDRTexture(int index) const { return resources.getTexture(config::Textures::Environment + index); }
 
-		inline const VulkanMesh* getMesh() const { return resources.getMesh(config::Meshes::Helmet); }
-		inline const VulkanMesh* getSkybox() const { return resources.getMesh(config::Meshes::Skybox); }
+		inline const Mesh* getMesh() const { return resources.getMesh(config::Meshes::Helmet); }
+		inline const Mesh* getSkybox() const { return resources.getMesh(config::Meshes::Skybox); }
 
 		const char* getHDRTexturePath(int index) const;
 		size_t getNumHDRTextures() const;
