@@ -56,12 +56,12 @@ namespace RHI
 		inline const VulkanShader* getHDRIToFragmentShader() const { return resources.getShader(config::Shaders::HDRIToCubeFragment); }
 		inline const VulkanShader* getDiffuseIrradianceFragmentShader() const { return resources.getShader(config::Shaders::DiffuseIrradianceFragment); }
 
-		inline const VulkanTexture* getAlbedoTexture() const { return resources.getTexture(config::Textures::Albedo); }
-		inline const VulkanTexture* getNormalTexture() const { return resources.getTexture(config::Textures::Normal); }
-		inline const VulkanTexture* getAOTexture() const { return resources.getTexture(config::Textures::AO); }
-		inline const VulkanTexture* getShadingTexture() const { return resources.getTexture(config::Textures::Shading); }
-		inline const VulkanTexture* getEmissionTexture() const { return resources.getTexture(config::Textures::Emission); }
-		inline const VulkanTexture* getHDRTexture(int index) const { return resources.getTexture(config::Textures::Environment + index); }
+		inline const Texture* getAlbedoTexture() const { return resources.getTexture(config::Textures::Albedo); }
+		inline const Texture* getNormalTexture() const { return resources.getTexture(config::Textures::Normal); }
+		inline const Texture* getAOTexture() const { return resources.getTexture(config::Textures::AO); }
+		inline const Texture* getShadingTexture() const { return resources.getTexture(config::Textures::Shading); }
+		inline const Texture* getEmissionTexture() const { return resources.getTexture(config::Textures::Emission); }
+		inline const Texture* getHDRTexture(int index) const { return resources.getTexture(config::Textures::Environment + index); }
 
 		inline const Mesh* getMesh() const { return resources.getMesh(config::Meshes::Helmet); }
 		inline const Mesh* getSkybox() const { return resources.getMesh(config::Meshes::Skybox); }

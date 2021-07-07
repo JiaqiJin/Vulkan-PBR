@@ -7,12 +7,11 @@
 namespace RHI
 {
 	enum class VulkanShaderKind;
-
 	class VulkanShader;
-	class VulkanTexture;
 }
 
 class Mesh;
+class Texture;
 
 class ResourceManager
 {
@@ -29,8 +28,8 @@ public:
 	RHI::VulkanShader* loadShader(int id, RHI::VulkanShaderKind kind, const char* path);
 	void unloadShader(int id);
 
-	RHI::VulkanTexture* getTexture(int id) const;
-	RHI::VulkanTexture* loadTexture(int id, const char* path);
+	Texture* getTexture(int id) const;
+	Texture* loadTexture(int id, const char* path);
 	void unloadTexture(int id);
 
 private:
@@ -38,6 +37,6 @@ private:
 	
 	std::unordered_map<int, Mesh*> meshes;
 	std::unordered_map<int, RHI::VulkanShader*> shaders;
-	std::unordered_map<int, RHI::VulkanTexture*> textures;
+	std::unordered_map<int, Texture*> textures;
 };
 

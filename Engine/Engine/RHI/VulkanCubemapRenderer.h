@@ -6,7 +6,7 @@
 
 #include "VulkanRendererContext.h"
 #include "VulkanShader.h"
-#include "VulkanTexture.h"
+#include "../Common/Texture.h"
 #include "../Common/Mesh.h"
 
 namespace RHI
@@ -18,11 +18,11 @@ namespace RHI
 			: context(context)
 			, rendererQuad(context)	{ }
 
-		void init(const VulkanShader& vertexShader, const VulkanShader& fragmentShader, const VulkanTexture& targetTexture);
+		void init(const VulkanShader& vertexShader, const VulkanShader& fragmentShader, const Texture& targetTexture);
 
 		void shutdown();
 
-		void render(const VulkanTexture& inputTexture);
+		void render(const Texture& inputTexture);
 
 	private:
 		VulkanRendererContext context;

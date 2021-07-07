@@ -25,7 +25,7 @@ namespace RHI
 	void VulkanCubemapRenderer::init(
 		const VulkanShader& vertexShader,
 		const VulkanShader& fragmentShader,
-		const VulkanTexture& targetTexture)
+		const Texture& targetTexture)
 	{
 		rendererQuad.createQuad(2.0f);
 
@@ -251,7 +251,7 @@ namespace RHI
 		rendererQuad.clearCPUData();
 	}
 
-	void VulkanCubemapRenderer::render(const VulkanTexture& inputTexture)
+	void VulkanCubemapRenderer::render(const Texture& inputTexture)
 	{
 		VulkanUtils::bindCombinedImageSampler(
 			context,

@@ -7,7 +7,7 @@
 #include "VulkanRendererContext.h"
 
 #include "VulkanCubemapRenderer.h"
-#include "VulkanTexture.h"
+#include "../Common/Texture.h"
 #include "VulkanShader.h"
 
 namespace RHI
@@ -44,8 +44,8 @@ namespace RHI
 		VulkanCubemapRenderer hdriToCubeRenderer;
 		VulkanCubemapRenderer diffuseIrradianceRenderer;
 
-		VulkanTexture environmentCubemap;
-		VulkanTexture diffuseIrradianceCubemap;
+		Texture environmentCubemap;
+		Texture diffuseIrradianceCubemap;
 
 		VkPipeline skyboxPipeline{ VK_NULL_HANDLE };
 		VkPipeline pbrPipeline{ VK_NULL_HANDLE };

@@ -114,7 +114,7 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 
 	initEnvironment(state, scene);
 
-	std::array<const VulkanTexture*, 7> textures =
+	std::array<const Texture*, 7> textures =
 	{
 		scene->getAlbedoTexture(),
 		scene->getNormalTexture(),
@@ -198,7 +198,7 @@ void Renderer::setEnvironment(const RenderScene* scene, int index)
 			0, diffuseIrradianceCubemap.getNumLayers());
 	}
 
-	std::array<const VulkanTexture*, 2> textures =
+	std::array<const Texture*, 2> textures =
 	{
 		&environmentCubemap,
 		&diffuseIrradianceCubemap,

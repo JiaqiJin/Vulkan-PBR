@@ -1,7 +1,7 @@
 #include "ResourceManager.h"
 #include "Mesh.h"
 #include "../RHI/VulkanShader.h"
-#include "../RHI/VulkanTexture.h"
+#include "Texture.h"
 
 #include <iostream>
 
@@ -118,7 +118,7 @@ void ResourceManager::unloadShader(int id)
 	shaders.erase(it);
 }
 
-VulkanTexture* ResourceManager::getTexture(int id) const
+Texture* ResourceManager::getTexture(int id) const
 {
 	auto it = textures.find(id);
 	if (it != textures.end())
@@ -127,7 +127,7 @@ VulkanTexture* ResourceManager::getTexture(int id) const
 	return nullptr;
 }
 
-VulkanTexture* ResourceManager::loadTexture(int id, const char* path)
+Texture* ResourceManager::loadTexture(int id, const char* path)
 {
 	auto it = textures.find(id);
 	if (it != textures.end())
@@ -136,7 +136,7 @@ VulkanTexture* ResourceManager::loadTexture(int id, const char* path)
 		return nullptr;
 	}
 
-	VulkanTexture* texture = new VulkanTexture(context);
+	Texture* texture = new Texture(context);
 	if (!texture->loadFromFile(path))
 		return nullptr;
 
