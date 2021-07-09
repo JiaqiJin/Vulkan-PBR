@@ -6,8 +6,8 @@
 
 #include "Common/RenderScene.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
+#include "Vendor/imgui/imgui.h"
+#include "Vendor/imgui/imgui_impl_glfw.h"
 
 #include "GUI/ImGuiRenderer.h"
 

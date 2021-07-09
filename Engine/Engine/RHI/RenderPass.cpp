@@ -24,7 +24,7 @@ namespace RHI
 		colorAttachment.stencilLoadOp = stencilLoadOp;
 		colorAttachment.stencilStoreOp = stencilStoreOp;
 		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // Images used as color attachment
 
 		attachments.push_back(colorAttachment);
 	}
@@ -43,7 +43,7 @@ namespace RHI
 		colorAttachmentResolve.stencilLoadOp = stencilLoadOp;
 		colorAttachmentResolve.stencilStoreOp = stencilStoreOp;
 		colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;  // Images used as color attachment
 
 		attachments.push_back(colorAttachmentResolve);
 	}
@@ -70,10 +70,10 @@ namespace RHI
 
 	void RenderPass::addSubpass(VkPipelineBindPoint bindPoint)
 	{
-		VkSubpassDescription info = {};
-		info.pipelineBindPoint = bindPoint;
+		VkSubpassDescription subpassInfo = {};
+		subpassInfo.pipelineBindPoint = bindPoint; // almost VK_PIPELINE_BIND_POINT_GRAPHICS 
 
-		subpassInfos.push_back(info);
+		subpassInfos.push_back(subpassInfo);
 		subpassDatas.push_back(SubpassData());
 	}
 

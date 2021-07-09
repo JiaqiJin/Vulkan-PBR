@@ -208,8 +208,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		stagingBuffer,
-		stagingBufferMemory
-	);
+		stagingBufferMemory);
 
 	// Fill staging buffer
 	void* data = nullptr;
@@ -228,8 +227,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		image,
-		imageMemory
-	);
+		imageMemory);
 
 	// Prepare the image for transfer
 	VulkanUtils::transitionImageLayout(
@@ -239,8 +237,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		VK_IMAGE_LAYOUT_UNDEFINED,
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		0,
-		mipLevels
-	);
+		mipLevels);
 
 	// Copy to the image memory on GPU
 	VulkanUtils::copyBufferToImage(
@@ -248,8 +245,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		stagingBuffer,
 		image,
 		width,
-		height
-	);
+		height);
 
 	// Generate mipmaps on GPU with linear filtering
 	VulkanUtils::generateImage2DMipmaps(
@@ -259,8 +255,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		height,
 		mipLevels,
 		imageFormat,
-		VK_FILTER_LINEAR
-	);
+		VK_FILTER_LINEAR);
 
 	// Prepare the image for shader access
 	VulkanUtils::transitionImageLayout(
@@ -270,8 +265,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		0,
-		mipLevels
-	);
+		mipLevels);
 
 	// Destroy staging buffer
 	vkDestroyBuffer(context.device, stagingBuffer, nullptr);
@@ -285,8 +279,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		VK_IMAGE_ASPECT_COLOR_BIT,
 		VK_IMAGE_VIEW_TYPE_2D,
 		0, mipLevels,
-		0, layers
-	);
+		0, layers);
 
 	imageSampler = VulkanUtils::createSampler(context, mipLevels);
 }

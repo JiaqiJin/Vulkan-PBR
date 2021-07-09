@@ -32,6 +32,7 @@ namespace RHI
 			const uint32_t* bytecode,
 			size_t bytecodeSize);
 
+		// Create the basic image view for every image
 		static VkImageView createImageView(
 			const RendererContext& context,
 			VkImage image,

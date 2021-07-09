@@ -7,6 +7,7 @@
 
 namespace RHI
 {
+	// Access to descriptor sets from a pipeline is accomplished through a pipeline layout (uniform).
 	class PipelineLayout
 	{
 	public:

@@ -67,7 +67,6 @@ namespace RHI
 		colorBlendAttachment.colorWriteMask = colorWriteMask;
 
 		colorBlendAttachments.push_back(colorBlendAttachment);
-
 	}
 
 	void GraphicsPipeline::setInputAssemblyState(

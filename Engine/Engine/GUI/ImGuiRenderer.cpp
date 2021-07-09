@@ -4,8 +4,8 @@
 #include "../RHI/VulkanUtils.h"
 #include "../Common/RenderScene.h"
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_vulkan.h"
+#include "../Vendor/imgui/imgui.h"
+#include "../Vendor/imgui/imgui_impl_vulkan.h"
 
 #include <array>
 

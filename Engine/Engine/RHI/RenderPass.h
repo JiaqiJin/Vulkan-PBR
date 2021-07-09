@@ -7,6 +7,8 @@
 
 namespace RHI
 {
+	// A render pass describes the scope of a rendering operation by specifying the collection of attachments, 
+	// subpasses, and dependencies used during the rendering operation. Specify how many color buffer, depth buffer and sampler to use.
 	class RenderPass
 	{
 	public:
@@ -49,7 +51,7 @@ namespace RHI
 	private:
 		struct SubpassData
 		{
-			std::vector<VkAttachmentReference> colorAttachmentReferences;
+			std::vector<VkAttachmentReference> colorAttachmentReferences; // color attachments
 			std::vector<VkAttachmentReference> colorAttachmentResolveReferences;
 			VkAttachmentReference* depthStencilAttachmentReference{ nullptr };
 		};

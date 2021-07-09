@@ -40,18 +40,20 @@ namespace RHI
 		inline VkRenderPass getNoClearRenderPass() const { return noClearRenderPass; }
 
 	private:
+		// Querying details of swap chain support
 		struct SupportDetails
 		{
-			VkSurfaceCapabilitiesKHR capabilities;
-			std::vector<VkSurfaceFormatKHR> formats;
-			std::vector<VkPresentModeKHR> presentModes;
+			VkSurfaceCapabilitiesKHR capabilities; // Basic surface capabilities (min/max number of images in SwapChain, min/max w/h of images)
+			std::vector<VkSurfaceFormatKHR> formats; // surface formats
+			std::vector<VkPresentModeKHR> presentModes; // Available presentation modes
 		};
 
-		struct Settings
+		// Choosing the right settings for the swap chain
+		struct Settings 
 		{
-			VkSurfaceFormatKHR format;
-			VkPresentModeKHR presentMode;
-			VkExtent2D extent;
+			VkSurfaceFormatKHR format; // Surface format (color depth)
+			VkPresentModeKHR presentMode; // Presentation mode (conditions for "swapping" images to the screen)
+			VkExtent2D extent; // Swap extent (resolution of images in swap chain)
 		};
 
 		SupportDetails fetchSwapChainSupportDetails() const;
@@ -71,10 +73,9 @@ namespace RHI
 		std::vector<VulkanRenderFrame> frames;
 		VkDeviceSize uboSize;
 
-		//
 		VkSwapchainKHR swapChain{ VK_NULL_HANDLE };
 
-		std::vector<VkImage> swapChainImages;
+		std::vector<VkImage> swapChainImages; 
 		std::vector<VkImageView> swapChainImageViews;
 
 		VkFormat swapChainImageFormat;
