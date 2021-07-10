@@ -170,5 +170,11 @@
     <None Include="Assert\Shader\commonCube.vert" />
     <None Include="Assert\Shader\hdriToCube.frag" />
     <None Include="Assert\Shader\diffuseIrradiance.frag" />
+    <None Include="Assert\Shader\Common\Uniform.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Assert\Shader\Common\SceneTextures.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

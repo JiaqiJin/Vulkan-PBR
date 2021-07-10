@@ -200,6 +200,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assert\Shader\commonCube.vert" />
+    <None Include="Assert\Shader\Common\SceneTextures.inc" />
+    <None Include="Assert\Shader\Common\Uniform.inc" />
     <None Include="Assert\Shader\diffuseIrradiance.frag" />
     <None Include="Assert\Shader\hdriToCube.frag" />
     <None Include="Assert\Shader\Pbrshader.frag" />
