@@ -116,14 +116,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC ;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\lib-vc2019;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\lib\Release\x64;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\lib;C:\VulkanSDK\1.2.154.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\lib;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\lib-vc2019;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\lib\Release\x64;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\lib;C:\VulkanSDK\1.2.154.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;spdlogd.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -134,7 +134,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC ;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -142,8 +142,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\lib-vc2019;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\lib\Release\x64;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\lib;C:\VulkanSDK\1.2.154.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\lib;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\lib-vc2019;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\lib\Release\x64;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\lib;C:\VulkanSDK\1.2.154.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;glew32s.lib;shaderc_shared.lib;assimp-vc140-mt.lib;spdlogd.lib;glslang.lib;SPIRV.lib;spirv-cross-c.lib;spirv-cross-cpp.lib;spirv-cross-glsl.lib;spirv-cross-reflect.lib;spirv-cross-util.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -163,6 +163,7 @@
     <ClCompile Include="RHI\RenderPass.cpp" />
     <ClCompile Include="RHI\Shader.cpp" />
     <ClCompile Include="Common\Texture.cpp" />
+    <ClCompile Include="RHI\VulkanContext.cpp" />
     <ClCompile Include="RHI\VulkanUtils.cpp" />
     <ClCompile Include="Vendor\imgui\imgui.cpp" />
     <ClCompile Include="Vendor\imgui\imgui_demo.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="RHI\RenderPass.h" />
     <ClInclude Include="RHI\Shader.h" />
     <ClInclude Include="Common\Texture.h" />
+    <ClInclude Include="RHI\VulkanContext.h" />
     <ClInclude Include="RHI\VulkanUtils.h" />
     <ClInclude Include="Vendor\imgui\imconfig.h" />
     <ClInclude Include="Vendor\imgui\imgui.h" />
