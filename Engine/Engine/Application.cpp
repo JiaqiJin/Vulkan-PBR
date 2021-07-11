@@ -3,6 +3,7 @@
 #include "RHI/Renderer.h"
 #include "RHI/VulkanUtils.h"
 #include "RHI/SwapChain.h"
+#include "RHI/VulkanContext.h"
 
 #include "Common/RenderScene.h"
 
@@ -105,7 +106,7 @@ void Application::mainloop()
 		render();
 		glfwPollEvents();
 	}
-
+	//context->wait();
 	vkDeviceWaitIdle(device);
 }
 

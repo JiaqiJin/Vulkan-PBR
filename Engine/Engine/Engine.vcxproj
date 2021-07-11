@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\Logger.cpp" />
     <ClCompile Include="Common\ResourceManager.cpp" />
     <ClCompile Include="GUI\ImGuiRenderer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="Vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\Logger.h" />
     <ClInclude Include="Common\ResourceManager.h" />
     <ClInclude Include="GUI\ImGuiRenderer.h" />
     <ClInclude Include="Common\RenderScene.h" />

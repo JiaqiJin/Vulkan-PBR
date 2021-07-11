@@ -17,6 +17,7 @@ namespace RHI
 	class Renderer;
 	class RenderScene;
 	class SwapChain;
+	class VulkanContext;
 
 	struct UniformBufferObject
 	{
@@ -78,6 +79,8 @@ private:
 	static void onFramebufferResize(GLFWwindow* window, int width, int height);
 
 private:
+	VulkanContext* context;
+
 	GLFWwindow* window{ nullptr };
 	RHI::RenderScene* scene{ nullptr };
 	RHI::UniformBufferObject ubo;

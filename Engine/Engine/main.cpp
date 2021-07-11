@@ -2,13 +2,16 @@
 #include <stdexcept>
 
 #include "Application.h"
-
+#include "Common/Logger.h"
 #include <GLFW/glfw3.h>
 
 int main(void)
 {
 	if (!glfwInit())
 		return EXIT_FAILURE;
+
+	Log::Init();
+	K_INFO("Init Kawaii Vulkan");
 
 	try
 	{

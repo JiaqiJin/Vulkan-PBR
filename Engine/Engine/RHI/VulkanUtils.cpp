@@ -4,8 +4,50 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "../Common/Logger.h"
+
 namespace RHI
 {
+	bool VulkanUtils::checkPhysicalDeviceExtensions(
+		VkPhysicalDevice physicalDevice,
+		const std::vector<const char*>& requiredExtensions,
+		bool verbose
+	)
+	{
+		uint32_t availableDeviceExtensionCount = 0;
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &availableDeviceExtensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availableDeviceExtensions(availableDeviceExtensionCount);
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &availableDeviceExtensionCount, availableDeviceExtensions.data());
+
+		for (const char* requiredExtension : requiredExtensions)
+		{
+			bool supported = false;
+			for (const VkExtensionProperties& availableDeviceExtension : availableDeviceExtensions)
+			{
+				if (strcmp(requiredExtension, availableDeviceExtension.extensionName) == 0)
+				{
+					supported = true;
+					break;
+				}
+			}
+
+			if (!supported)
+			{
+				if (verbose)
+					K_ERROR("This extension is not supported on this physical device", requiredExtension);
+					
+				return false;
+			}
+
+			if (verbose)
+				K_INFO("HAVE", requiredExtension);
+		}
+
+		return true;
+	}
+
+
 	VkFormat VulkanUtils::selectOptimalImageFormat(
 		const RendererContext& context,
 		const std::vector<VkFormat>& candidates,
@@ -471,10 +513,10 @@ namespace RHI
 		vkFreeCommandBuffers(context.device, context.commandPool, 1, &commandBuffer);
 	}
 
-	VkSampleCountFlagBits VulkanUtils::getMaxUsableSampleCount(const RendererContext& context)
+	VkSampleCountFlagBits VulkanUtils::getMaxUsableSampleCount(VkPhysicalDevice physicalDevice)
 	{
 		VkPhysicalDeviceProperties physicalDeviceProperties;
-		vkGetPhysicalDeviceProperties(context.physicalDevice, &physicalDeviceProperties);
+		vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
 		VkSampleCountFlags counts = std::min(
 			physicalDeviceProperties.limits.framebufferColorSampleCounts,

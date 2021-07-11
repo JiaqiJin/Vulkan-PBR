@@ -10,6 +10,11 @@ namespace RHI
 	class VulkanUtils
 	{
 	public:
+		static bool checkPhysicalDeviceExtensions(
+			VkPhysicalDevice physicalDevice,
+			const std::vector<const char*>& requiredExtensions,
+			bool verbose = false);
+
 		static VkFormat selectOptimalImageFormat(
 			const RendererContext& context,
 			const std::vector<VkFormat>& candidates,
@@ -126,7 +131,7 @@ namespace RHI
 			VkDeviceSize offset,
 			VkDeviceSize size);
 
-		static VkSampleCountFlagBits getMaxUsableSampleCount(const RendererContext& context);
+		static VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice);
 
 		// Helper functions recording and excuting a command buffer
 		static VkCommandBuffer beginSingleTimeCommands(const RendererContext& context);
