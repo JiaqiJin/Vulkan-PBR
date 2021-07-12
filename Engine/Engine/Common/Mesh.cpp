@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "../RHI/VulkanUtils.h"
+#include "../RHI/VulkanContext.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -65,10 +66,12 @@ bool Mesh::loadFromFile(const std::string& path)
 	vertices.resize(mesh->mNumVertices);
 	indices.resize(mesh->mNumFaces * 3);
 
+	// Vertices
 	aiVector3D* meshVertices = mesh->mVertices;
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		vertices[i].position = glm::vec3(meshVertices[i].x, meshVertices[i].y, meshVertices[i].z);
 
+	// Tangents
 	aiVector3D* meshTangents = mesh->mTangents;
 	if (meshTangents)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -77,6 +80,7 @@ bool Mesh::loadFromFile(const std::string& path)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			vertices[i].tangent = glm::vec3(0.0f, 0.0f, 0.0f);
 
+	// Bitangents
 	aiVector3D* meshBinormals = mesh->mBitangents;
 	if (meshBinormals)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -85,6 +89,7 @@ bool Mesh::loadFromFile(const std::string& path)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			vertices[i].binormal = glm::vec3(0.0f, 0.0f, 0.0f);
 
+	// Normal
 	aiVector3D* meshNormals = mesh->mNormals;
 	if (meshNormals)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -93,6 +98,7 @@ bool Mesh::loadFromFile(const std::string& path)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			vertices[i].normal = glm::vec3(0.0f, 0.0f, 0.0f);
 
+	// UV
 	aiVector3D* meshUVs = mesh->mTextureCoords[0];
 	if (meshUVs)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -101,6 +107,7 @@ bool Mesh::loadFromFile(const std::string& path)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			vertices[i].uv = glm::vec2(0.0f, 0.0f);
 
+	// Color
 	aiColor4D* meshColors = mesh->mColors[0];
 	if (meshColors)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -109,6 +116,7 @@ bool Mesh::loadFromFile(const std::string& path)
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			vertices[i].color = glm::vec3(1.0f, 1.0f, 1.0f);
 
+	// Indices
 	aiFace* meshFaces = mesh->mFaces;
 	unsigned int index = 0;
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -186,40 +194,39 @@ void Mesh::createVertexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(Vertex) * vertices.size();
 
+	// StagingBuffer definition
 	VkBuffer stagingBuffer = VK_NULL_HANDLE;
 	VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
 
 	VulkanUtils::createBuffer(
 		context,
 		bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,  // Buffer can be used as the destination of transfer command
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, // Specifies that memory allocated with this type is the most efficient for device access
 		vertexBuffer,
-		vertexBufferMemory
-	);
+		vertexBufferMemory);
 
 	// Create staging buffer
 	VulkanUtils::createBuffer(
 		context,
 		bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, // The buffer can be used as the source of transfer command
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // The memory allocated can be mapped for host access using vkMapMemory.
 		stagingBuffer,
-		stagingBufferMemory
-	);
+		stagingBufferMemory);
 
 	// Fill staging buffer
 	void* data = nullptr;
-	vkMapMemory(context.device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	vkMapMemory(context->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 	memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-	vkUnmapMemory(context.device, stagingBufferMemory);
+	vkUnmapMemory(context->getDevice(), stagingBufferMemory);
 
 	// Transfer to GPU local memory
 	VulkanUtils::copyBuffer(context, stagingBuffer, vertexBuffer, bufferSize);
 
 	// Destroy staging buffer
-	vkDestroyBuffer(context.device, stagingBuffer, nullptr);
-	vkFreeMemory(context.device, stagingBufferMemory, nullptr);
+	vkDestroyBuffer(context->getDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
 }
 
 void Mesh::createIndexBuffer()
@@ -232,34 +239,32 @@ void Mesh::createIndexBuffer()
 	VulkanUtils::createBuffer(
 		context,
 		bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, // Buffer can be used as the destination of transfer command
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, // Specifies that memory allocated with this type is the most efficient for device access
 		indexBuffer,
-		indexBufferMemory
-	);
+		indexBufferMemory);
 
 	// Create staging buffer
 	VulkanUtils::createBuffer(
 		context,
 		bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, // The buffer can be used as the source of transfer command
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // The memory allocated can be mapped for host access using vkMapMemory.
 		stagingBuffer,
-		stagingBufferMemory
-	);
+		stagingBufferMemory);
 
 	// Fill staging buffer
 	void* data = nullptr;
-	vkMapMemory(context.device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	vkMapMemory(context->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 	memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-	vkUnmapMemory(context.device, stagingBufferMemory);
+	vkUnmapMemory(context->getDevice(), stagingBufferMemory);
 
 	// Transfer to GPU local memory
 	VulkanUtils::copyBuffer(context, stagingBuffer, indexBuffer, bufferSize);
 
 	// Destroy staging buffer
-	vkDestroyBuffer(context.device, stagingBuffer, nullptr);
-	vkFreeMemory(context.device, stagingBufferMemory, nullptr);
+	vkDestroyBuffer(context->getDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
 }
 
 void Mesh::uploadToGPU()
@@ -270,16 +275,16 @@ void Mesh::uploadToGPU()
 
 void Mesh::clearGPUData()
 {
-	vkDestroyBuffer(context.device, vertexBuffer, nullptr);
+	vkDestroyBuffer(context->getDevice(), vertexBuffer, nullptr);
 	vertexBuffer = VK_NULL_HANDLE;
 
-	vkFreeMemory(context.device, vertexBufferMemory, nullptr);
+	vkFreeMemory(context->getDevice(), vertexBufferMemory, nullptr);
 	vertexBufferMemory = VK_NULL_HANDLE;
 
-	vkDestroyBuffer(context.device, indexBuffer, nullptr);
+	vkDestroyBuffer(context->getDevice(), indexBuffer, nullptr);
 	indexBuffer = VK_NULL_HANDLE;
 
-	vkFreeMemory(context.device, indexBufferMemory, nullptr);
+	vkFreeMemory(context->getDevice(), indexBufferMemory, nullptr);
 	indexBufferMemory = VK_NULL_HANDLE;
 }
 

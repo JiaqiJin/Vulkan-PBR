@@ -1,6 +1,7 @@
 #include "../Application.h"
 #include "SwapChain.h"
 #include "VulkanUtils.h"
+#include "VulkanContext.h"
 
 #include "DescriptorSetLayout.h"
 #include "RenderPass.h"
@@ -12,7 +13,7 @@
 
 using namespace RHI;
 
-SwapChain::SwapChain(const RendererContext& context, VkDeviceSize uboSize)
+SwapChain::SwapChain(const VulkanContext* context, VkDeviceSize uboSize)
 	: context(context)
 	, uboSize(uboSize)
 {
@@ -47,12 +48,12 @@ void SwapChain::shutdown()
 	shutdownPersistent();
 }
 
-bool SwapChain::acquire(const UniformBufferObject& state, VulkanRenderFrame& frame)
+bool SwapChain::acquire(void* ubo, VulkanRenderFrame& frame)
 {
-	vkWaitForFences(context.device, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+	vkWaitForFences(context->getDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
 	VkResult result = vkAcquireNextImageKHR(
-		context.device,
+		context->getDevice(),
 		swapChain,
 		std::numeric_limits<uint64_t>::max(),
 		imageAvailableSemaphores[currentFrame],
@@ -68,10 +69,10 @@ bool SwapChain::acquire(const UniformBufferObject& state, VulkanRenderFrame& fra
 	frame = frames[imageIndex];
 
 	// copy render state to ubo
-	void* ubo = nullptr;
-	vkMapMemory(context.device, frame.uniformBufferMemory, 0, uboSize, 0, &ubo);
-	memcpy(ubo, &state, uboSize);
-	vkUnmapMemory(context.device, frame.uniformBufferMemory);
+	void* data = nullptr;
+	vkMapMemory(context->getDevice(), frame.uniformBufferMemory, 0, uboSize, 0, &data);
+	memcpy(data, ubo, uboSize);
+	vkUnmapMemory(context->getDevice(), frame.uniformBufferMemory);
 
 	// reset command buffer
 	if (vkResetCommandBuffer(frame.commandBuffer, 0) != VK_SUCCESS)
@@ -108,8 +109,8 @@ bool SwapChain::present(const VulkanRenderFrame& frame)
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	vkResetFences(context.device, 1, &inFlightFences[currentFrame]);
-	if (vkQueueSubmit(context.graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+	vkResetFences(context->getDevice(), 1, &inFlightFences[currentFrame]);
+	if (vkQueueSubmit(context->getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
 		throw std::runtime_error("Can't submit command buffer");
 
 	VkSwapchainKHR swapChains[] = { swapChain };
@@ -129,7 +130,7 @@ bool SwapChain::present(const VulkanRenderFrame& frame)
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	VkResult result = vkQueuePresentKHR(context.presentQueue, &presentInfo);
+	VkResult result = vkQueuePresentKHR(context->getPresentQueue(), &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		return false;
 
@@ -159,7 +160,7 @@ void SwapChain::initTransient(int width, int height)
 
 	VkSwapchainCreateInfoKHR swapChainInfo = {};
 	swapChainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	swapChainInfo.surface = context.surface;
+	swapChainInfo.surface = context->getSurface();
 	swapChainInfo.minImageCount = imageCount;
 	swapChainInfo.imageFormat = settings.format.format;
 	swapChainInfo.imageColorSpace = settings.format.colorSpace;
@@ -167,9 +168,9 @@ void SwapChain::initTransient(int width, int height)
 	swapChainInfo.imageArrayLayers = 1;
 	swapChainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	if (context.graphicsQueueFamily != context.presentQueueFamily)
+	if (context->getGraphicsQueueFamily() != context->getPresentQueueFamily())
 	{
-		uint32_t queueFamilies[] = { context.graphicsQueueFamily, context.presentQueueFamily };
+		uint32_t queueFamilies[] = { context->getGraphicsQueueFamily(), context->getPresentQueueFamily() };
 		swapChainInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		swapChainInfo.queueFamilyIndexCount = 2;
 		swapChainInfo.pQueueFamilyIndices = queueFamilies;
@@ -187,15 +188,15 @@ void SwapChain::initTransient(int width, int height)
 	swapChainInfo.clipped = VK_TRUE;
 	swapChainInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(context.device, &swapChainInfo, nullptr, &swapChain) != VK_SUCCESS)
+	if (vkCreateSwapchainKHR(context->getDevice(), &swapChainInfo, nullptr, &swapChain) != VK_SUCCESS)
 		throw std::runtime_error("Can't create swapchain");
 
 	uint32_t swapChainImageCount = 0;
-	vkGetSwapchainImagesKHR(context.device, swapChain, &swapChainImageCount, nullptr);
+	vkGetSwapchainImagesKHR(context->getDevice(), swapChain, &swapChainImageCount, nullptr);
 	assert(swapChainImageCount != 0);
 
 	swapChainImages.resize(swapChainImageCount);
-	vkGetSwapchainImagesKHR(context.device, swapChain, &swapChainImageCount, swapChainImages.data());
+	vkGetSwapchainImagesKHR(context->getDevice(), swapChain, &swapChainImageCount, swapChainImages.data());
 
 	swapChainImageFormat = settings.format.format;
 	swapChainExtent = settings.extent;
@@ -216,7 +217,7 @@ void SwapChain::initTransient(int width, int height)
 		swapChainExtent.width,
 		swapChainExtent.height,
 		1,
-		context.msaaSamples,
+		context->getMaxMSAASamples(),
 		swapChainImageFormat,
 		VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
@@ -246,7 +247,7 @@ void SwapChain::initTransient(int width, int height)
 		swapChainExtent.width,
 		swapChainExtent.height,
 		1,
-		context.msaaSamples,
+		context->getMaxMSAASamples(),
 		depthFormat,
 		VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -271,31 +272,31 @@ void SwapChain::initTransient(int width, int height)
 
 void SwapChain::shutdownTransient()
 {
-	vkDestroyImageView(context.device, colorImageView, nullptr);
+	vkDestroyImageView(context->getDevice(), colorImageView, nullptr);
 	colorImageView = VK_NULL_HANDLE;
 
-	vkDestroyImage(context.device, colorImage, nullptr);
+	vkDestroyImage(context->getDevice(), colorImage, nullptr);
 	colorImage = VK_NULL_HANDLE;
 
-	vkFreeMemory(context.device, colorImageMemory, nullptr);
+	vkFreeMemory(context->getDevice(), colorImageMemory, nullptr);
 	colorImageMemory = VK_NULL_HANDLE;
 
-	vkDestroyImageView(context.device, depthImageView, nullptr);
+	vkDestroyImageView(context->getDevice(), depthImageView, nullptr);
 	depthImageView = VK_NULL_HANDLE;
 
-	vkDestroyImage(context.device, depthImage, nullptr);
+	vkDestroyImage(context->getDevice(), depthImage, nullptr);
 	depthImage = VK_NULL_HANDLE;
 
-	vkFreeMemory(context.device, depthImageMemory, nullptr);
+	vkFreeMemory(context->getDevice(), depthImageMemory, nullptr);
 	depthImageMemory = VK_NULL_HANDLE;
 
 	for (auto imageView : swapChainImageViews)
-		vkDestroyImageView(context.device, imageView, nullptr);
+		vkDestroyImageView(context->getDevice(), imageView, nullptr);
 
 	swapChainImageViews.clear();
 	swapChainImages.clear();
 
-	vkDestroySwapchainKHR(context.device, swapChain, nullptr);
+	vkDestroySwapchainKHR(context->getDevice(), swapChain, nullptr);
 	swapChain = VK_NULL_HANDLE;
 }
 
@@ -312,17 +313,17 @@ void SwapChain::initPersistent()
 		VkSemaphoreCreateInfo semaphoreInfo = {};
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-		if (vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS)
+		if (vkCreateSemaphore(context->getDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS)
 			throw std::runtime_error("Can't create 'image available' semaphore");
 
-		if (vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
+		if (vkCreateSemaphore(context->getDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS)
 			throw std::runtime_error("Can't create 'render finished' semaphore");
 
 		VkFenceCreateInfo fenceInfo = {};
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		if (vkCreateFence(context.device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+		if (vkCreateFence(context->getDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
 			throw std::runtime_error("Can't create in flight frame fence");
 	}
 
@@ -332,9 +333,9 @@ void SwapChain::initPersistent()
 	descriptorSetLayout = descriptorSetLayoutBuilder.build();
 
 	RenderPass renderPassBuilder(context);
-	renderPassBuilder.addColorAttachment(swapChainImageFormat, context.msaaSamples, VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
+	renderPassBuilder.addColorAttachment(swapChainImageFormat, context->getMaxMSAASamples(), VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE);
 	renderPassBuilder.addColorResolveAttachment(swapChainImageFormat, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE);
-	renderPassBuilder.addDepthStencilAttachment(depthFormat, context.msaaSamples, VK_ATTACHMENT_LOAD_OP_CLEAR);
+	renderPassBuilder.addDepthStencilAttachment(depthFormat, context->getMaxMSAASamples(), VK_ATTACHMENT_LOAD_OP_CLEAR);
 	renderPassBuilder.addSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS);
 	renderPassBuilder.addColorAttachmentReference(0, 0);
 	renderPassBuilder.addColorResolveAttachmentReference(0, 1);
@@ -342,9 +343,9 @@ void SwapChain::initPersistent()
 	renderPass = renderPassBuilder.build();
 
 	RenderPass noClearRenderPassBuilder(context);
-	noClearRenderPassBuilder.addColorAttachment(swapChainImageFormat, context.msaaSamples, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE);
+	noClearRenderPassBuilder.addColorAttachment(swapChainImageFormat, context->getMaxMSAASamples(), VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE);
 	noClearRenderPassBuilder.addColorResolveAttachment(swapChainImageFormat, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE);
-	noClearRenderPassBuilder.addDepthStencilAttachment(depthFormat, context.msaaSamples);
+	noClearRenderPassBuilder.addDepthStencilAttachment(depthFormat, context->getMaxMSAASamples());
 	noClearRenderPassBuilder.addSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS);
 	noClearRenderPassBuilder.addColorAttachmentReference(0, 0);
 	noClearRenderPassBuilder.addColorResolveAttachmentReference(0, 1);
@@ -357,23 +358,23 @@ void SwapChain::shutdownPersistent()
 {
 	for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		vkDestroySemaphore(context.device, imageAvailableSemaphores[i], nullptr);
+		vkDestroySemaphore(context->getDevice(), imageAvailableSemaphores[i], nullptr);
 		imageAvailableSemaphores[i] = VK_NULL_HANDLE;
 
-		vkDestroySemaphore(context.device, renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(context->getDevice(), renderFinishedSemaphores[i], nullptr);
 		renderFinishedSemaphores[i] = VK_NULL_HANDLE;
 
-		vkDestroyFence(context.device, inFlightFences[i], nullptr);
+		vkDestroyFence(context->getDevice(), inFlightFences[i], nullptr);
 		inFlightFences[i] = VK_NULL_HANDLE;
 	}
 
-	vkDestroyDescriptorSetLayout(context.device, descriptorSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(context->getDevice(), descriptorSetLayout, nullptr);
 	descriptorSetLayout = nullptr;
 
-	vkDestroyRenderPass(context.device, renderPass, nullptr);
+	vkDestroyRenderPass(context->getDevice(), renderPass, nullptr);
 	renderPass = VK_NULL_HANDLE;
 
-	vkDestroyRenderPass(context.device, noClearRenderPass, nullptr);
+	vkDestroyRenderPass(context->getDevice(), noClearRenderPass, nullptr);
 	noClearRenderPass = VK_NULL_HANDLE;
 }
 
@@ -399,11 +400,11 @@ void SwapChain::initFrames(VkDeviceSize uboSize)
 		// Create & fill descriptor set
 		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
 		descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocInfo.descriptorPool = context.descriptorPool;
+		descriptorSetAllocInfo.descriptorPool = context->getDescriptorPool();
 		descriptorSetAllocInfo.descriptorSetCount = 1;
 		descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
 
-		if (vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, &frame.descriptorSet) != VK_SUCCESS)
+		if (vkAllocateDescriptorSets(context->getDevice(), &descriptorSetAllocInfo, &frame.descriptorSet) != VK_SUCCESS)
 			throw std::runtime_error("Can't allocate swap chain descriptor sets");
 
 		VulkanUtils::bindUniformBuffer(
@@ -430,16 +431,16 @@ void SwapChain::initFrames(VkDeviceSize uboSize)
 		framebufferInfo.height = swapChainExtent.height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(context.device, &framebufferInfo, nullptr, &frame.frameBuffer) != VK_SUCCESS)
+		if (vkCreateFramebuffer(context->getDevice(), &framebufferInfo, nullptr, &frame.frameBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't create framebuffer");
 		// Create commandbuffer
 		VkCommandBufferAllocateInfo allocateInfo = {};
 		allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocateInfo.commandPool = context.commandPool;
+		allocateInfo.commandPool = context->getCommandPool();
 		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocateInfo.commandBufferCount = 1;
 
-		if (vkAllocateCommandBuffers(context.device, &allocateInfo, &frame.commandBuffer) != VK_SUCCESS)
+		if (vkAllocateCommandBuffers(context->getDevice(), &allocateInfo, &frame.commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't create command buffers");
 	}
 }
@@ -448,11 +449,11 @@ void SwapChain::shutdownFrames()
 {
 	for (VulkanRenderFrame& frame : frames)
 	{
-		vkFreeCommandBuffers(context.device, context.commandPool, 1, &frame.commandBuffer);
-		vkFreeDescriptorSets(context.device, context.descriptorPool, 1, &frame.descriptorSet);
-		vkDestroyBuffer(context.device, frame.uniformBuffer, nullptr);
-		vkFreeMemory(context.device, frame.uniformBufferMemory, nullptr);
-		vkDestroyFramebuffer(context.device, frame.frameBuffer, nullptr);
+		vkFreeCommandBuffers(context->getDevice(), context->getCommandPool(), 1, &frame.commandBuffer);
+		vkFreeDescriptorSets(context->getDevice(), context->getDescriptorPool(), 1, &frame.descriptorSet);
+		vkDestroyBuffer(context->getDevice(), frame.uniformBuffer, nullptr);
+		vkFreeMemory(context->getDevice(), frame.uniformBufferMemory, nullptr);
+		vkDestroyFramebuffer(context->getDevice(), frame.frameBuffer, nullptr);
 	}
 	frames.clear();
 }
@@ -463,24 +464,24 @@ SwapChain::SupportDetails SwapChain::fetchSwapChainSupportDetails() const
 {
 	SwapChain::SupportDetails details;
 
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(context.physicalDevice, context.surface, &details.capabilities);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(context->getPhysicalDevice(), context->getSurface(), &details.capabilities);
 
 	uint32_t formatCount = 0;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(context.physicalDevice, context.surface, &formatCount, nullptr);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(context->getPhysicalDevice(), context->getSurface(), &formatCount, nullptr);
 
 	if (formatCount > 0)
 	{
 		details.formats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(context.physicalDevice, context.surface, &formatCount, details.formats.data());
+		vkGetPhysicalDeviceSurfaceFormatsKHR(context->getPhysicalDevice(), context->getSurface(), &formatCount, details.formats.data());
 	}
 
 	uint32_t presentModeCount = 0;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(context.physicalDevice, context.surface, &presentModeCount, nullptr);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(context->getPhysicalDevice(), context->getSurface(), &presentModeCount, nullptr);
 
 	if (presentModeCount > 0)
 	{
 		details.presentModes.resize(presentModeCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(context.physicalDevice, context.surface, &presentModeCount, details.presentModes.data());
+		vkGetPhysicalDeviceSurfacePresentModesKHR(context->getPhysicalDevice(), context->getSurface(), &presentModeCount, details.presentModes.data());
 	}
 
 	return details;

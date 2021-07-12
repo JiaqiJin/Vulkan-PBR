@@ -3,17 +3,18 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "RendererContext.h"
-
 namespace RHI
 {
+	class VulkanContext;
+
 	// A render pass describes the scope of a rendering operation by specifying the collection of attachments, 
 	// subpasses, and dependencies used during the rendering operation. Specify how many color buffer, depth buffer and sampler to use.
 	class RenderPass
 	{
 	public:
-		RenderPass(const RendererContext& context)
+		RenderPass(const VulkanContext* context)
 			: context(context) { }
+
 		~RenderPass();
 
 		inline VkRenderPass getRenderPass() const { return renderPass; }
@@ -56,7 +57,7 @@ namespace RHI
 			VkAttachmentReference* depthStencilAttachmentReference{ nullptr };
 		};
 
-		RendererContext context;
+		const VulkanContext* context{ nullptr };;
 
 		std::vector<VkAttachmentDescription> attachments;
 		std::vector<VkSubpassDescription> subpassInfos;

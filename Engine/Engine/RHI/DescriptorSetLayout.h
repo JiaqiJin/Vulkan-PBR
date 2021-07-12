@@ -3,14 +3,15 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "RendererContext.h"
-
 namespace RHI
 {
+	class VulkanContext;
+
+	// A Descriptor is a way for shader to freely access respirces likes buffers and images
 	class DescriptorSetLayout
 	{
 	public:
-		DescriptorSetLayout(const RendererContext& context)
+		DescriptorSetLayout(const VulkanContext* context)
 			: context(context) { }
 
 		inline VkDescriptorSetLayout getDescriptorSetLayout() const { return descriptorSetLayout; }
@@ -19,10 +20,11 @@ namespace RHI
 
 		VkDescriptorSetLayout build();
 	private:
-		RendererContext context;
+		const VulkanContext* context{ nullptr };
 
+		// Descriptor binding provides detail for shader pipeline creation (uniform buffer or image samples etc)
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
-
+		// Descriptor set layout
 		VkDescriptorSetLayout descriptorSetLayout{ VK_NULL_HANDLE };
 	};
 }

@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
-#include "../RHI/RendererContext.h"
+#include "../RHI/VulkanContext.h"
 #include "ResourceManager.h"
 
 namespace RHI
@@ -41,7 +41,7 @@ namespace RHI
 	class RenderScene
 	{
 	public:
-		RenderScene(const RendererContext& context)
+		RenderScene(const VulkanContext* context)
 			: resources(context) { }
 
 		void init();

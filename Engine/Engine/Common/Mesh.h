@@ -7,20 +7,24 @@
 #include <vector>
 #include <string>
 
-#include "../RHI/RendererContext.h"
+namespace RHI
+{
+	class VulkanContext;
+}
 
 class Mesh
 {
 public:
-	Mesh(const RendererContext& context)
+	Mesh(const RHI::VulkanContext* context)
 		: context(context) { }
 
 	~Mesh();
 
-	// How passing model data format to vertex shader
+	// Passing model data format to vertex shader
 	static VkVertexInputBindingDescription getVertexInputBindingDescription();
 	static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 
+	// Getters
 	inline VkBuffer getVertexBuffer() const { return vertexBuffer; }
 	inline VkBuffer getIndexBuffer() const { return indexBuffer; }
 	inline uint32_t getNumIndices() const { return static_cast<uint32_t>(indices.size()); }
@@ -39,8 +43,9 @@ private:
 	void createIndexBuffer();
 
 private:
-	RendererContext context;
+	const RHI::VulkanContext* context{ nullptr };
 
+	// Vertex datas
 	struct Vertex
 	{
 		glm::vec3 position;
@@ -51,12 +56,14 @@ private:
 		glm::vec2 uv;
 	};
 
-	std::vector<Vertex> vertices;
+	std::vector<Vertex> vertices; 
 	std::vector<uint32_t> indices;
 
+	// Vertex buffer
 	VkBuffer vertexBuffer{ VK_NULL_HANDLE };
 	VkDeviceMemory vertexBufferMemory{ VK_NULL_HANDLE };
 
+	// Index buffer
 	VkBuffer indexBuffer{ VK_NULL_HANDLE };
 	VkDeviceMemory indexBufferMemory{ VK_NULL_HANDLE };
 };

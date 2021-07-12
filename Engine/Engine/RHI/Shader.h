@@ -19,16 +19,19 @@ namespace RHI
 		TessellationEvaulation,
 	};
 
+	class VulkanContext;
+
 	class Shader
 	{
 	public:
-		Shader(const RendererContext& context)
+		Shader(const VulkanContext* context)
 			: context(context) { }
 
 		~Shader();
 
 		bool compileFromFile(const char* path);
 		bool compileFromFile(const char* path, ShaderKind kind);
+		bool reload();
 		void clear();
 
 		inline VkShaderModule getShaderModule() const { return shaderModule; }
@@ -37,8 +40,9 @@ namespace RHI
 		bool compileFromSourceInternal(const char* path, const char* sourceData, size_t sourceSize, shaderc_shader_kind kind);
 
 	private:
-		RendererContext context;
+		const VulkanContext* context;
 
+		std::string shaderPath;
 		VkShaderModule shaderModule{ VK_NULL_HANDLE };
 	};
 

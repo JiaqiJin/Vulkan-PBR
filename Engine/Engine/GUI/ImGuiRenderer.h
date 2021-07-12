@@ -8,12 +8,13 @@ namespace RHI
 	class SwapChain;
 	struct UniformBufferObject;
 	struct VulkanRenderFrame;
+	class VulkanContext;
 }
 
 class ImGuiRenderer
 {
 public:
-	ImGuiRenderer(const RendererContext& context,
+	ImGuiRenderer(const RHI::VulkanContext* context,
 		VkExtent2D extent,
 		VkRenderPass renderPass);
 	virtual ~ImGuiRenderer();
@@ -25,7 +26,7 @@ public:
 	void shutdown();
 
 private:
-	RendererContext context;
+	const RHI::VulkanContext* context{nullptr};
 	VkExtent2D extent;
 	VkRenderPass renderPass;
 };

@@ -6,6 +6,8 @@
 #include "RenderPass.h"
 #include "GraphicsPipeline.h"
 
+#include "VulkanContext.h"
+
 #include "VulkanUtils.h"
 
 #define GLM_FORCE_RADIANS
@@ -123,11 +125,11 @@ namespace RHI
 		// Create descriptor set
 		VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
 		descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorSetAllocInfo.descriptorPool = context.descriptorPool;
+		descriptorSetAllocInfo.descriptorPool = context->getDescriptorPool();
 		descriptorSetAllocInfo.descriptorSetCount = 1;
 		descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
 
-		if (vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, &descriptorSet) != VK_SUCCESS)
+		if (vkAllocateDescriptorSets(context->getDevice(), &descriptorSetAllocInfo, &descriptorSet) != VK_SUCCESS)
 			throw std::runtime_error("Can't allocate descriptor sets");
 
 		// Create framebuffer
@@ -140,22 +142,22 @@ namespace RHI
 		framebufferInfo.height = targetExtent.height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(context.device, &framebufferInfo, nullptr, &frameBuffer) != VK_SUCCESS)
+		if (vkCreateFramebuffer(context->getDevice(), &framebufferInfo, nullptr, &frameBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't create framebuffer");
 
 		// Create command buffer
 		VkCommandBufferAllocateInfo allocateInfo = {};
 		allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocateInfo.commandPool = context.commandPool;
+		allocateInfo.commandPool = context->getCommandPool();
 		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocateInfo.commandBufferCount = 1;
 
-		if (vkAllocateCommandBuffers(context.device, &allocateInfo, &commandBuffer) != VK_SUCCESS)
+		if (vkAllocateCommandBuffers(context->getDevice(), &allocateInfo, &commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't create command buffers");
 
 		// Fill uniform buffer
 		CubemapFaceOrientationData* ubo = nullptr;
-		vkMapMemory(context.device, uniformBufferMemory, 0, sizeof(CubemapFaceOrientationData), 0, reinterpret_cast<void**>(&ubo));
+		vkMapMemory(context->getDevice(), uniformBufferMemory, 0, sizeof(CubemapFaceOrientationData), 0, reinterpret_cast<void**>(&ubo));
 
 		const glm::mat4& translateZ = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -189,7 +191,7 @@ namespace RHI
 		for (int i = 0; i < 6; i++)
 			ubo->faces[i] = faceRotations[i] * glm::lookAtRH(glm::vec3(0.0f), faceDirs[i], faceUps[i]) * translateZ;
 
-		vkUnmapMemory(context.device, uniformBufferMemory);
+		vkUnmapMemory(context->getDevice(), uniformBufferMemory);
 
 		// Bind data to descriptor set
 		VulkanUtils::bindUniformBuffer(
@@ -205,46 +207,46 @@ namespace RHI
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = 0;
 
-		if (vkCreateFence(context.device, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
+		if (vkCreateFence(context->getDevice(), &fenceInfo, nullptr, &fence) != VK_SUCCESS)
 			throw std::runtime_error("Can't create fence");
 	}
 
 	void CubemapRenderer::shutdown()
 	{
-		vkDestroyBuffer(context.device, uniformBuffer, nullptr);
+		vkDestroyBuffer(context->getDevice(), uniformBuffer, nullptr);
 		uniformBuffer = VK_NULL_HANDLE;
 
-		vkFreeMemory(context.device, uniformBufferMemory, nullptr);
+		vkFreeMemory(context->getDevice(), uniformBufferMemory, nullptr);
 		uniformBufferMemory = VK_NULL_HANDLE;
 
-		vkDestroyFramebuffer(context.device, frameBuffer, nullptr);
+		vkDestroyFramebuffer(context->getDevice(), frameBuffer, nullptr);
 		frameBuffer = VK_NULL_HANDLE;
 
-		vkDestroyPipeline(context.device, pipeline, nullptr);
+		vkDestroyPipeline(context->getDevice(), pipeline, nullptr);
 		pipeline = VK_NULL_HANDLE;
 
-		vkDestroyPipelineLayout(context.device, pipelineLayout, nullptr);
+		vkDestroyPipelineLayout(context->getDevice(), pipelineLayout, nullptr);
 		pipelineLayout = VK_NULL_HANDLE;
 
-		vkDestroyDescriptorSetLayout(context.device, descriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(context->getDevice(), descriptorSetLayout, nullptr);
 		descriptorSetLayout = nullptr;
 
-		vkDestroyRenderPass(context.device, renderPass, nullptr);
+		vkDestroyRenderPass(context->getDevice(), renderPass, nullptr);
 		renderPass = VK_NULL_HANDLE;
 
 		for (int i = 0; i < 6; i++)
 		{
-			vkDestroyImageView(context.device, faceViews[i], nullptr);
+			vkDestroyImageView(context->getDevice(), faceViews[i], nullptr);
 			faceViews[i] = VK_NULL_HANDLE;
 		}
 
-		vkFreeCommandBuffers(context.device, context.commandPool, 1, &commandBuffer);
+		vkFreeCommandBuffers(context->getDevice(), context->getCommandPool(), 1, &commandBuffer);
 		commandBuffer = VK_NULL_HANDLE;
 
-		vkFreeDescriptorSets(context.device, context.descriptorPool, 1, &descriptorSet);
+		vkFreeDescriptorSets(context->getDevice(), context->getDescriptorPool(), 1, &descriptorSet);
 		descriptorSet = VK_NULL_HANDLE;
 
-		vkDestroyFence(context.device, fence, nullptr);
+		vkDestroyFence(context->getDevice(), fence, nullptr);
 		fence = VK_NULL_HANDLE;
 
 		rendererQuad.clearGPUData();
@@ -310,13 +312,13 @@ namespace RHI
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
-		if (vkResetFences(context.device, 1, &fence) != VK_SUCCESS)
+		if (vkResetFences(context->getDevice(), 1, &fence) != VK_SUCCESS)
 			throw std::runtime_error("Can't reset fence");
 
-		if (vkQueueSubmit(context.graphicsQueue, 1, &submitInfo, fence) != VK_SUCCESS)
+		if (vkQueueSubmit(context->getGraphicsQueue(), 1, &submitInfo, fence) != VK_SUCCESS)
 			throw std::runtime_error("Can't submit command buffer");
 
-		if (vkWaitForFences(context.device, 1, &fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS)
+		if (vkWaitForFences(context->getDevice(), 1, &fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS)
 			throw std::runtime_error("Can't wait for a fence");
 	}
 }

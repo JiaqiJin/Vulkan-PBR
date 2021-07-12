@@ -6,6 +6,7 @@
 #include "DescriptorSet.h"
 #include "RenderPass.h"
 #include "VulkanUtils.h"
+#include "VulkanContext.h"
 #include "../Application.h"
 #include "SwapChain.h"
 #include "../Common/RenderScene.h"
@@ -22,7 +23,7 @@
 
 using namespace RHI;
 
-Renderer::Renderer(const RendererContext& context,
+Renderer::Renderer(const VulkanContext* context,
 	VkExtent2D extent,
 	VkDescriptorSetLayout descriptorSetLayout,
 	VkRenderPass renderPass)
@@ -80,7 +81,7 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	pbrPipelineBuilder.addViewport(VkViewport());
 	pbrPipelineBuilder.addScissor(VkRect2D());
 	pbrPipelineBuilder.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
-	pbrPipelineBuilder.setMultisampleState(context.msaaSamples, true);
+	pbrPipelineBuilder.setMultisampleState(context->getMaxMSAASamples(), true);
 	pbrPipelineBuilder.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
 	pbrPipelineBuilder.addBlendColorAttachment();
 	pbrPipeline = pbrPipelineBuilder.build();
@@ -96,7 +97,7 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	skyboxPipelineBuilder.addViewport(VkViewport());
 	skyboxPipelineBuilder.addScissor(VkRect2D());
 	skyboxPipelineBuilder.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
-	skyboxPipelineBuilder.setMultisampleState(context.msaaSamples, true);
+	skyboxPipelineBuilder.setMultisampleState(context->getMaxMSAASamples(), true);
 	skyboxPipelineBuilder.setDepthStencilState(true, true, VK_COMPARE_OP_LESS);
 	skyboxPipelineBuilder.addBlendColorAttachment();
 
@@ -105,11 +106,11 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	// Create scene descriptor set
 	VkDescriptorSetAllocateInfo sceneDescriptorSetAllocInfo = {};
 	sceneDescriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	sceneDescriptorSetAllocInfo.descriptorPool = context.descriptorPool;
+	sceneDescriptorSetAllocInfo.descriptorPool = context->getDescriptorPool();
 	sceneDescriptorSetAllocInfo.descriptorSetCount = 1;
 	sceneDescriptorSetAllocInfo.pSetLayouts = &sceneDescriptorSetLayout;
 
-	if (vkAllocateDescriptorSets(context.device, &sceneDescriptorSetAllocInfo, &sceneDescriptorSet) != VK_SUCCESS)
+	if (vkAllocateDescriptorSets(context->getDevice(), &sceneDescriptorSetAllocInfo, &sceneDescriptorSet) != VK_SUCCESS)
 		throw std::runtime_error("Can't allocate scene descriptor set");
 
 	initEnvironment(state, scene);
@@ -215,19 +216,19 @@ void Renderer::setEnvironment(const RenderScene* scene, int index)
 
 void Renderer::shutdown()
 {
-	vkDestroyPipeline(context.device, pbrPipeline, nullptr);
+	vkDestroyPipeline(context->getDevice(), pbrPipeline, nullptr);
 	pbrPipeline = VK_NULL_HANDLE;
 
-	vkDestroyPipeline(context.device, skyboxPipeline, nullptr);
+	vkDestroyPipeline(context->getDevice(), skyboxPipeline, nullptr);
 	skyboxPipeline = VK_NULL_HANDLE;
 
-	vkDestroyPipelineLayout(context.device, pipelineLayout, nullptr);
+	vkDestroyPipelineLayout(context->getDevice(), pipelineLayout, nullptr);
 	pipelineLayout = VK_NULL_HANDLE;
 
-	vkDestroyDescriptorSetLayout(context.device, sceneDescriptorSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(context->getDevice(), sceneDescriptorSetLayout, nullptr);
 	sceneDescriptorSetLayout = nullptr;
 
-	vkFreeDescriptorSets(context.device, context.descriptorPool, 1, &sceneDescriptorSet);
+	vkFreeDescriptorSets(context->getDevice(), context->getDescriptorPool(), 1, &sceneDescriptorSet);
 	sceneDescriptorSet = VK_NULL_HANDLE;
 
 	hdriToCubeRenderer.shutdown();

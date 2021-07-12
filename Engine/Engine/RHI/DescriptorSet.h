@@ -3,20 +3,20 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "RendererContext.h"
-
 namespace RHI
 {
+	class VulkanContext;
+
 	class DescriptorSet
 	{
 	public:
-		DescriptorSet(const RendererContext& context, uint32_t imageCount)
+		DescriptorSet(const VulkanContext* context, uint32_t imageCount)
 			: context(context), imageCount(imageCount) { }
 
 		std::vector<VkDescriptorSet> build(VkDescriptorSetLayout layouts);
 
 	private:
-		RendererContext context;
+		const VulkanContext* context{nullptr};
 		std::vector<VkDescriptorSet> descriptorSets;
 		uint32_t imageCount = 0;
 	};

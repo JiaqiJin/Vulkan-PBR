@@ -1,5 +1,6 @@
 #include "DescriptorSetLayout.h"
 #include "VulkanUtils.h"
+#include "VulkanContext.h"
 #include <stdexcept>
 
 namespace RHI
@@ -22,7 +23,7 @@ namespace RHI
 		descriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
 		descriptorSetLayoutInfo.pBindings = bindings.data();
 
-		if (vkCreateDescriptorSetLayout(context.device, &descriptorSetLayoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+		if (vkCreateDescriptorSetLayout(context->getDevice(), &descriptorSetLayoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
 			throw std::runtime_error("Can't create descriptor set layout");
 
 		return descriptorSetLayout;

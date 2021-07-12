@@ -1,5 +1,6 @@
 #include "Texture.h"
 #include "../RHI/VulkanUtils.h"
+#include "../RHI/VulkanContext.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -212,9 +213,9 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 
 	// Fill staging buffer
 	void* data = nullptr;
-	vkMapMemory(context.device, stagingBufferMemory, 0, static_cast<VkDeviceSize>(imageSize), 0, &data);
+	vkMapMemory(context->getDevice(), stagingBufferMemory, 0, static_cast<VkDeviceSize>(imageSize), 0, &data);
 	memcpy(data, pixels, imageSize);
-	vkUnmapMemory(context.device, stagingBufferMemory);
+	vkUnmapMemory(context->getDevice(), stagingBufferMemory);
 
 	VulkanUtils::createImage2D(
 		context,
@@ -234,8 +235,8 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		context,
 		image,
 		imageFormat,
-		VK_IMAGE_LAYOUT_UNDEFINED,
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		VK_IMAGE_LAYOUT_UNDEFINED, // The layout is unknown. This layout can be used as the initialLayout 
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, // Must only be used as a destination image of a transfer command
 		0,
 		mipLevels);
 
@@ -262,14 +263,14 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		context,
 		image,
 		imageFormat,
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, // Must only be used as a destination image of a transfer command
+		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, // Specifies a layout allowing read-only access in a shader as a sampled image,
 		0,
 		mipLevels);
 
 	// Destroy staging buffer
-	vkDestroyBuffer(context.device, stagingBuffer, nullptr);
-	vkFreeMemory(context.device, stagingBufferMemory, nullptr);
+	vkDestroyBuffer(context->getDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
 
 	// Create image view & sampler
 	imageView = VulkanUtils::createImageView(
@@ -286,16 +287,16 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 
 void Texture::clearGPUData()
 {
-	vkDestroySampler(context.device, imageSampler, nullptr);
+	vkDestroySampler(context->getDevice(), imageSampler, nullptr);
 	imageSampler = nullptr;
 
-	vkDestroyImageView(context.device, imageView, nullptr);
+	vkDestroyImageView(context->getDevice(), imageView, nullptr);
 	imageView = nullptr;
 
-	vkDestroyImage(context.device, image, nullptr);
+	vkDestroyImage(context->getDevice(), image, nullptr);
 	image = nullptr;
 
-	vkFreeMemory(context.device, imageMemory, nullptr);
+	vkFreeMemory(context->getDevice(), imageMemory, nullptr);
 	imageMemory = nullptr;
 
 	imageFormat = VK_FORMAT_UNDEFINED;

@@ -3,17 +3,17 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "RendererContext.h"
-
 namespace RHI
 {
-	//  The graphics pipeline is the sequence of operations that take the vertices and textures of your meshes 
+	class VulkanContext;
+
+	// The graphics pipeline is the sequence of operations that take the vertices and textures of your meshes 
 	// all the way to the pixels in the render targets. 
 	// Vertex/Index buffer -> Input Assambler -> VS -> Tessellation -> GS -> Rasterization -> FS -> Color Blending -> Framebuffer
 	class GraphicsPipeline
 	{
 	public:
-		GraphicsPipeline(const RendererContext& context, VkPipelineLayout pipelineLayout, VkRenderPass renderPass)
+		GraphicsPipeline(const class VulkanContext* context, VkPipelineLayout pipelineLayout, VkRenderPass renderPass)
 			: context(context), renderPass(renderPass), pipelineLayout(pipelineLayout) { }
 
 		inline VkPipeline getPipeline() const { return pipeline; }
@@ -47,8 +47,7 @@ namespace RHI
 			VkBlendFactor srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
 			VkBlendFactor dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
 			VkBlendOp alphaBlendOp = VK_BLEND_OP_ADD,
-			VkColorComponentFlags colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
-		);
+			VkColorComponentFlags colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 		void setInputAssemblyState(
 			VkPrimitiveTopology topology,
@@ -82,18 +81,18 @@ namespace RHI
 		VkPipeline build();
 
 	private:
-		RendererContext context;
-		VkRenderPass renderPass{ VK_NULL_HANDLE };
-		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
+		const VulkanContext* context;
+		VkRenderPass renderPass{ VK_NULL_HANDLE }; // Render Pass
+		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE }; // Pipeline layout
 
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages; // shader stage
 		std::vector<VkVertexInputBindingDescription> vertexInputBindings; // Vertex Input Stage
-		std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
-		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
+		std::vector<VkVertexInputAttributeDescription> vertexInputAttributes; // Vertex attributes
+		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments; // Color blend attachments
 		std::vector<VkDynamicState> dynamicStates;
 
-		std::vector<VkViewport> viewports;
-		std::vector<VkRect2D> scissors;
+		std::vector<VkViewport> viewports; // view port
+		std::vector<VkRect2D> scissors; // scissors
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState{};
 		VkPipelineRasterizationStateCreateInfo rasterizerState{};

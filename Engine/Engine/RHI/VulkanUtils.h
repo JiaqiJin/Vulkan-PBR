@@ -3,10 +3,10 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-struct RendererContext;
-
 namespace RHI
 {
+	class VulkanContext;
+
 	class VulkanUtils
 	{
 	public:
@@ -16,30 +16,30 @@ namespace RHI
 			bool verbose = false);
 
 		static VkFormat selectOptimalImageFormat(
-			const RendererContext& context,
+			const VulkanContext* context,
 			const std::vector<VkFormat>& candidates,
 			VkImageTiling tiling,
 			VkFormatFeatureFlags features);
 
-		static VkFormat selectOptimalDepthFormat(const RendererContext& context);
+		static VkFormat selectOptimalDepthFormat(const VulkanContext* context);
 
 		static uint32_t findMemoryType(
-			const RendererContext& context,
+			const VulkanContext* context,
 			uint32_t typeFilter,
 			VkMemoryPropertyFlags properties);
 
 		static VkSampler createSampler(
-			const RendererContext& context,
+			const VulkanContext* context,
 			uint32_t mipLevels);
 
 		static VkShaderModule createShaderModule(
-			const RendererContext& context,
+			const VulkanContext* context,
 			const uint32_t* bytecode,
 			size_t bytecodeSize);
 
 		// Create the basic image view for every image
 		static VkImageView createImageView(
-			const RendererContext& context,
+			const VulkanContext* context,
 			VkImage image,
 			VkFormat format,
 			VkImageAspectFlags aspectFlags,
@@ -50,7 +50,7 @@ namespace RHI
 			uint32_t numLayers = 1);
 
 		static void createImageCube(
-			const RendererContext& context,
+			const VulkanContext* context,
 			uint32_t width,
 			uint32_t height,
 			uint32_t mipLevels,
@@ -62,7 +62,7 @@ namespace RHI
 			VkImage& image,
 			VkDeviceMemory& memory);
 
-		static void createImage2D(const RendererContext& context,
+		static void createImage2D(const VulkanContext* context,
 			uint32_t width,
 			uint32_t height,
 			uint32_t mipLevels,
@@ -74,7 +74,7 @@ namespace RHI
 			VkImage& image,
 			VkDeviceMemory& memory);
 
-		static void createBuffer(const RendererContext& context,
+		static void createBuffer(const VulkanContext* context,
 			VkDeviceSize size,
 			VkBufferUsageFlags usage,
 			VkMemoryPropertyFlags memoryProperties,
@@ -83,7 +83,7 @@ namespace RHI
 
 		// Helper functions recording and excuting a command buffer
 		static void transitionImageLayout(
-			const RendererContext& context,
+			const VulkanContext* context,
 			VkImage image,
 			VkFormat format,
 			VkImageLayout oldLayout,
@@ -94,21 +94,21 @@ namespace RHI
 			uint32_t numLayers = 1);
 
 		static void copyBuffer(
-			const RendererContext& context,
+			const VulkanContext* context,
 			VkBuffer src,
 			VkBuffer dst,
 			VkDeviceSize size);
 
 		// Which part of the buffer is going to be copied and which part of the image
 		static void copyBufferToImage(
-			const RendererContext& context,
+			const VulkanContext* context,
 			VkBuffer src,
 			VkImage dst,
 			uint32_t width,
 			uint32_t height);
 
 		static void generateImage2DMipmaps(
-			const RendererContext& context,
+			const VulkanContext* context,
 			VkImage image,
 			uint32_t width,
 			uint32_t height,
@@ -117,14 +117,14 @@ namespace RHI
 			VkFilter filter);
 
 		static void bindCombinedImageSampler(
-			const RendererContext& context,
+			const VulkanContext* context,
 			VkDescriptorSet descriptorSet,
 			int binding,
 			VkImageView imageView,
 			VkSampler sampler);
 
 		static void bindUniformBuffer(
-			const RendererContext& context,
+			const VulkanContext* context,
 			VkDescriptorSet descriptorSet,
 			int binding,
 			VkBuffer buffer,
@@ -134,8 +134,8 @@ namespace RHI
 		static VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice);
 
 		// Helper functions recording and excuting a command buffer
-		static VkCommandBuffer beginSingleTimeCommands(const RendererContext& context);
-		static void endSingleTimeCommands(const RendererContext& context, VkCommandBuffer commandBuffer);
+		static VkCommandBuffer beginSingleTimeCommands(const VulkanContext* context);
+		static void endSingleTimeCommands(const VulkanContext* context, VkCommandBuffer commandBuffer);
 	private:
 		static bool hasStencilComponent(VkFormat format);
 	};

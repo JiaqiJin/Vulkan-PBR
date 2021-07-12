@@ -32,14 +32,6 @@ namespace RHI
 	};
 }
 
-struct QueueFamilyIndices
-{
-	std::optional<uint32_t> graphicsFamily{ std::nullopt };
-	std::optional<uint32_t> presentFamily{ std::nullopt };
-
-	inline bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
-};
-
 class Application
 {
 public:
@@ -48,13 +40,6 @@ public:
 private:
 	void initWindow();
 	void shutdownWindow();
-
-	bool checkRequiredValidationLayers(std::vector<const char*>& layers) const;
-	bool checkRequiredExtensions(std::vector<const char*>& extensions) const;
-	bool checkRequiredPhysicalDeviceExtensions(VkPhysicalDevice device, std::vector<const char*>& extensions) const;
-	bool checkPhysicalDevice(VkPhysicalDevice device, VkSurfaceKHR surface) const;
-
-	QueueFamilyIndices fetchQueueFamilyIndices(VkPhysicalDevice device) const;
 
 	void initVulkan();
 	void shutdownVulkan();
@@ -79,30 +64,16 @@ private:
 	static void onFramebufferResize(GLFWwindow* window, int width, int height);
 
 private:
-	VulkanContext* context;
 
 	GLFWwindow* window{ nullptr };
+	bool windowResized{ false };
+
 	RHI::RenderScene* scene{ nullptr };
 	RHI::UniformBufferObject ubo;
 
 	RHI::Renderer* renderer{ nullptr };
+	ImGuiRenderer* imguiRenderer{ nullptr };
 
 	RHI::SwapChain* swapChain{ nullptr };
-	RendererContext context{};
-
-	VkInstance instance{ VK_NULL_HANDLE };
-	VkPhysicalDevice physicalDevice{ VK_NULL_HANDLE };
-	VkDevice device{ VK_NULL_HANDLE };
-	VkSurfaceKHR surface{ VK_NULL_HANDLE };
-
-	VkQueue graphicsQueue{ VK_NULL_HANDLE };
-	VkQueue presentQueue{ VK_NULL_HANDLE };
-
-	VkCommandPool commandPool{ VK_NULL_HANDLE };
-	VkDescriptorPool descriptorPool{ VK_NULL_HANDLE };
-
-	bool windowResized{ false };
-
-	// GUI
-	ImGuiRenderer* imguiRenderer = nullptr;
+	RHI::VulkanContext* context{ nullptr };
 };

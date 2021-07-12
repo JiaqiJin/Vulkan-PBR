@@ -1,6 +1,6 @@
 #include "Shader.h"
 #include "VulkanUtils.h"
-
+#include "VulkanContext.h"
 
 #include <fstream>
 #include <iostream>
@@ -181,13 +181,19 @@ namespace RHI
 		shaderc_compile_options_release(options);
 		shaderc_compiler_release(compiler);
 
+		shaderPath = path;
+
 		return true;
 	}
 
+	bool Shader::reload()
+	{
+		return compileFromFile(shaderPath.c_str());
+	}
 
 	void Shader::clear()
 	{
-		vkDestroyShaderModule(context.device, shaderModule, nullptr);
+		vkDestroyShaderModule(context->getDevice(), shaderModule, nullptr);
 		shaderModule = VK_NULL_HANDLE;
 	}
 }

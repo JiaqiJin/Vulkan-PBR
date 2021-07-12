@@ -1,5 +1,6 @@
 #include "VulkanUtils.h"
-#include "RendererContext.h"
+#include "VulkanContext.h"
+#include "VulkanContext.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -49,7 +50,7 @@ namespace RHI
 
 
 	VkFormat VulkanUtils::selectOptimalImageFormat(
-		const RendererContext& context,
+		const VulkanContext* context,
 		const std::vector<VkFormat>& candidates,
 		VkImageTiling tiling,
 		VkFormatFeatureFlags features)
@@ -57,7 +58,7 @@ namespace RHI
 		for (VkFormat format : candidates)
 		{
 			VkFormatProperties properties;
-			vkGetPhysicalDeviceFormatProperties(context.physicalDevice, format, &properties);
+			vkGetPhysicalDeviceFormatProperties(context->getPhysicalDevice(), format, &properties);
 
 			if (tiling == VK_IMAGE_TILING_LINEAR && (properties.linearTilingFeatures & features) == features)
 				return format;
@@ -69,7 +70,7 @@ namespace RHI
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	VkFormat VulkanUtils::selectOptimalDepthFormat(const RendererContext& context)
+	VkFormat VulkanUtils::selectOptimalDepthFormat(const VulkanContext* context)
 	{
 		return selectOptimalImageFormat(
 			context,
@@ -79,12 +80,12 @@ namespace RHI
 	}
 
 	uint32_t VulkanUtils::findMemoryType(
-		const RendererContext& context,
+		const VulkanContext* context,
 		uint32_t typeFilter,
 		VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(context.physicalDevice, &memProperties);
+		vkGetPhysicalDeviceMemoryProperties(context->getPhysicalDevice(), &memProperties);
 
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 		{
@@ -97,7 +98,7 @@ namespace RHI
 	}
 
 	VkShaderModule VulkanUtils::createShaderModule(
-		const RendererContext& context,
+		const VulkanContext* context,
 		const uint32_t* bytecode,
 		size_t bytecodeSize)
 	{
@@ -107,14 +108,14 @@ namespace RHI
 		shaderInfo.pCode = bytecode;
 
 		VkShaderModule shader;
-		if (vkCreateShaderModule(context.device, &shaderInfo, nullptr, &shader) != VK_SUCCESS)
+		if (vkCreateShaderModule(context->getDevice(), &shaderInfo, nullptr, &shader) != VK_SUCCESS)
 			throw std::runtime_error("Can't create shader module");
 
 		return shader;
 	}
 
 	VkSampler VulkanUtils::createSampler(
-		const RendererContext& context,
+		const VulkanContext* context,
 		uint32_t mipLevels)
 	{
 		VkSamplerCreateInfo samplerInfo = {};
@@ -135,14 +136,14 @@ namespace RHI
 		samplerInfo.maxLod = static_cast<float>(mipLevels);
 
 		VkSampler sampler = VK_NULL_HANDLE;
-		if (vkCreateSampler(context.device, &samplerInfo, nullptr, &sampler) != VK_SUCCESS)
+		if (vkCreateSampler(context->getDevice(), &samplerInfo, nullptr, &sampler) != VK_SUCCESS)
 			throw std::runtime_error("Can't create texture sampler");
 
 		return sampler;
 	}
 
 	VkImageView VulkanUtils::createImageView(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkImage image,
 		VkFormat format,
 		VkImageAspectFlags aspectFlags,
@@ -165,13 +166,13 @@ namespace RHI
 		viewInfo.subresourceRange.layerCount = numLayers;
 
 		VkImageView imageView;
-		if (vkCreateImageView(context.device, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
+		if (vkCreateImageView(context->getDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
 			throw std::runtime_error("Can't create image view!");
 
 		return imageView;
 	}
 
-	void VulkanUtils::createImage2D(const RendererContext& context,
+	void VulkanUtils::createImage2D(const VulkanContext* context,
 		uint32_t width,
 		uint32_t height,
 		uint32_t mipLevels,
@@ -200,27 +201,27 @@ namespace RHI
 		imageInfo.samples = numSamples;
 		imageInfo.flags = 0; // Optional
 
-		if (vkCreateImage(context.device, &imageInfo, nullptr, &image) != VK_SUCCESS)
+		if (vkCreateImage(context->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS)
 			throw std::runtime_error("Can't create image");
 
 		// Allocate memory for the image
 		VkMemoryRequirements memoryRequirements = {};
-		vkGetImageMemoryRequirements(context.device, image, &memoryRequirements);
+		vkGetImageMemoryRequirements(context->getDevice(), image, &memoryRequirements);
 
 		VkMemoryAllocateInfo memoryAllocateInfo = {};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		memoryAllocateInfo.allocationSize = memoryRequirements.size;
 		memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
 
-		if (vkAllocateMemory(context.device, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
+		if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
 			throw std::runtime_error("Can't allocate image memory");
 
-		if (vkBindImageMemory(context.device, image, memory, 0) != VK_SUCCESS)
+		if (vkBindImageMemory(context->getDevice(), image, memory, 0) != VK_SUCCESS)
 			throw std::runtime_error("Can't bind image memory");
 	}
 
 	void VulkanUtils::createImageCube(
-		const RendererContext& context,
+		const VulkanContext* context,
 		uint32_t width,
 		uint32_t height,
 		uint32_t mipLevels,
@@ -249,27 +250,27 @@ namespace RHI
 		imageInfo.samples = numSamples;
 		imageInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
-		if (vkCreateImage(context.device, &imageInfo, nullptr, &image) != VK_SUCCESS)
+		if (vkCreateImage(context->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS)
 			throw std::runtime_error("Can't create image");
 
 		// Allocate memory for the buffer
 		VkMemoryRequirements memoryRequirements = {};
-		vkGetImageMemoryRequirements(context.device, image, &memoryRequirements);
+		vkGetImageMemoryRequirements(context->getDevice(), image, &memoryRequirements);
 
 		VkMemoryAllocateInfo memoryAllocateInfo = {};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		memoryAllocateInfo.allocationSize = memoryRequirements.size;
 		memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
 
-		if (vkAllocateMemory(context.device, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
+		if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
 			throw std::runtime_error("Can't allocate image memory");
 
-		if (vkBindImageMemory(context.device, image, memory, 0) != VK_SUCCESS)
+		if (vkBindImageMemory(context->getDevice(), image, memory, 0) != VK_SUCCESS)
 			throw std::runtime_error("Can't bind image memory");
 	}
 
 	void VulkanUtils::createBuffer(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkDeviceSize size,
 		VkBufferUsageFlags usage,
 		VkMemoryPropertyFlags memoryProperties,
@@ -282,27 +283,27 @@ namespace RHI
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		if (vkCreateBuffer(context.device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+		if (vkCreateBuffer(context->getDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't create buffer");
 
 		// Allocate memory for the buffer
 		VkMemoryRequirements memoryRequirements = {};
-		vkGetBufferMemoryRequirements(context.device, buffer, &memoryRequirements);
+		vkGetBufferMemoryRequirements(context->getDevice(), buffer, &memoryRequirements);
 
 		VkMemoryAllocateInfo memoryAllocateInfo = {};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		memoryAllocateInfo.allocationSize = memoryRequirements.size;
 		memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
 
-		if (vkAllocateMemory(context.device, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
+		if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
 			throw std::runtime_error("Can't allocate buffer memory");
 
-		if (vkBindBufferMemory(context.device, buffer, memory, 0) != VK_SUCCESS)
+		if (vkBindBufferMemory(context->getDevice(), buffer, memory, 0) != VK_SUCCESS)
 			throw std::runtime_error("Can't bind buffer memory");
 	}
 
 	void VulkanUtils::copyBuffer(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkBuffer src,
 		VkBuffer dst,
 		VkDeviceSize size)
@@ -317,7 +318,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::copyBufferToImage(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkBuffer src,
 		VkImage dst,
 		uint32_t width,
@@ -347,7 +348,7 @@ namespace RHI
 
 	// Command buffer requier the image in right layout first
 	void VulkanUtils::transitionImageLayout(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkImage image,
 		VkFormat format,
 		VkImageLayout oldLayout,
@@ -465,16 +466,16 @@ namespace RHI
 		endSingleTimeCommands(context, commandBuffer);
 	}
 
-	VkCommandBuffer VulkanUtils::beginSingleTimeCommands(const RendererContext& context)
+	VkCommandBuffer VulkanUtils::beginSingleTimeCommands(const VulkanContext* context)
 	{
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = context.commandPool;
+		allocInfo.commandPool = context->getCommandPool();
 		allocInfo.commandBufferCount = 1;
 
 		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(context.device, &allocInfo, &commandBuffer);
+		vkAllocateCommandBuffers(context->getDevice(), &allocInfo, &commandBuffer);
 
 		VkCommandBufferBeginInfo beginInfo = {};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -485,7 +486,7 @@ namespace RHI
 		return commandBuffer;
 	}
 
-	void VulkanUtils::endSingleTimeCommands(const RendererContext& context, VkCommandBuffer commandBuffer)
+	void VulkanUtils::endSingleTimeCommands(const VulkanContext* context, VkCommandBuffer commandBuffer)
 	{
 		vkEndCommandBuffer(commandBuffer);
 
@@ -494,7 +495,7 @@ namespace RHI
 		fenceInfo.flags = 0;
 
 		VkFence fence;
-		if (vkCreateFence(context.device, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
+		if (vkCreateFence(context->getDevice(), &fenceInfo, nullptr, &fence) != VK_SUCCESS)
 			throw std::runtime_error("Can't create fence");
 
 		VkSubmitInfo submitInfo = {};
@@ -502,15 +503,15 @@ namespace RHI
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
-		if (vkQueueSubmit(context.graphicsQueue, 1, &submitInfo, fence) != VK_SUCCESS)
+		if (vkQueueSubmit(context->getGraphicsQueue(), 1, &submitInfo, fence) != VK_SUCCESS)
 			throw std::runtime_error("Can't submit command buffer");
 
-		if (vkWaitForFences(context.device, 1, &fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS)
+		if (vkWaitForFences(context->getDevice(), 1, &fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS)
 			throw std::runtime_error("Can't wait for a fence");
 
-		vkDestroyFence(context.device, fence, nullptr);
+		vkDestroyFence(context->getDevice(), fence, nullptr);
 
-		vkFreeCommandBuffers(context.device, context.commandPool, 1, &commandBuffer);
+		vkFreeCommandBuffers(context->getDevice(), context->getCommandPool(), 1, &commandBuffer);
 	}
 
 	VkSampleCountFlagBits VulkanUtils::getMaxUsableSampleCount(VkPhysicalDevice physicalDevice)
@@ -534,7 +535,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::generateImage2DMipmaps(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkImage image,
 		uint32_t width,
 		uint32_t height,
@@ -546,7 +547,7 @@ namespace RHI
 			return;
 
 		VkFormatProperties formatProperties;
-		vkGetPhysicalDeviceFormatProperties(context.physicalDevice, format, &formatProperties);
+		vkGetPhysicalDeviceFormatProperties(context->getPhysicalDevice(), format, &formatProperties);
 
 		bool supportsLinearFiltering = (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) != 0;
 		bool supportsCubicFiltering = (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_EXT) != 0;
@@ -639,7 +640,7 @@ namespace RHI
 	}
 
 	void VulkanUtils::bindUniformBuffer(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkDescriptorSet descriptorSet,
 		int binding,
 		VkBuffer buffer,
@@ -660,11 +661,11 @@ namespace RHI
 		descriptorWrite.descriptorCount = 1;
 		descriptorWrite.pBufferInfo = &descriptorBufferInfo;
 
-		vkUpdateDescriptorSets(context.device, 1, &descriptorWrite, 0, nullptr);
+		vkUpdateDescriptorSets(context->getDevice(), 1, &descriptorWrite, 0, nullptr);
 	}
 
 	void VulkanUtils::bindCombinedImageSampler(
-		const RendererContext& context,
+		const VulkanContext* context,
 		VkDescriptorSet descriptorSet,
 		int binding,
 		VkImageView imageView,
@@ -684,6 +685,6 @@ namespace RHI
 		descriptorWrite.descriptorCount = 1;
 		descriptorWrite.pImageInfo = &descriptorImageInfo;
 
-		vkUpdateDescriptorSets(context.device, 1, &descriptorWrite, 0, nullptr);
+		vkUpdateDescriptorSets(context->getDevice(), 1, &descriptorWrite, 0, nullptr);
 	}
 }

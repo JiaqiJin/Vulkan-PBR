@@ -1,19 +1,18 @@
 #include "ResourceManager.h"
 #include "Mesh.h"
 #include "../RHI/Shader.h"
+#include "../RHI/VulkanContext.h"
 #include "Texture.h"
 
 #include <iostream>
 
-using namespace RHI;
-
-ResourceManager::ResourceManager(const RendererContext& context)
+ResourceManager::ResourceManager(const RHI::VulkanContext* context)
 	: context(context)
 {
 
 }
 
-Mesh* ResourceManager::getMesh(int id) const
+Mesh* ResourceManager::getMesh(unsigned int id) const
 {
 	auto it = meshes.find(id);
 	if (it != meshes.end())
@@ -22,7 +21,7 @@ Mesh* ResourceManager::getMesh(int id) const
 	return nullptr;
 }
 
-Mesh* ResourceManager::createCubeMesh(int id, float size)
+Mesh* ResourceManager::createCubeMesh(unsigned int id, float size)
 {
 	auto it = meshes.find(id);
 	if (it != meshes.end())
@@ -38,7 +37,7 @@ Mesh* ResourceManager::createCubeMesh(int id, float size)
 	return mesh;
 }
 
-Mesh* ResourceManager::loadMesh(int id, const char* path)
+Mesh* ResourceManager::loadMesh(unsigned int id, const char* path)
 {
 	auto it = meshes.find(id);
 	if (it != meshes.end())
@@ -55,7 +54,7 @@ Mesh* ResourceManager::loadMesh(int id, const char* path)
 	return mesh;
 }
 
-void ResourceManager::unloadMesh(int id)
+void ResourceManager::unloadMesh(unsigned int id)
 {
 	auto it = meshes.find(id);
 	if (it == meshes.end())
@@ -65,7 +64,7 @@ void ResourceManager::unloadMesh(int id)
 	meshes.erase(it);
 }
 
-Shader* ResourceManager::getShader(int id) const
+RHI::Shader* ResourceManager::getShader(unsigned int id) const
 {
 	auto it = shaders.find(id);
 	if (it != shaders.end())
@@ -74,7 +73,7 @@ Shader* ResourceManager::getShader(int id) const
 	return nullptr;
 }
 
-Shader* ResourceManager::loadShader(int id, const char* path)
+RHI::Shader* ResourceManager::loadShader(unsigned int id, const char* path)
 {
 	auto it = shaders.find(id);
 	if (it != shaders.end())
@@ -83,7 +82,7 @@ Shader* ResourceManager::loadShader(int id, const char* path)
 		return nullptr;
 	}
 
-	Shader* shader = new Shader(context);
+	RHI::Shader* shader = new RHI::Shader(context);
 	if (!shader->compileFromFile(path))
 		return nullptr;
 
@@ -91,7 +90,7 @@ Shader* ResourceManager::loadShader(int id, const char* path)
 	return shader;
 }
 
-Shader* ResourceManager::loadShader(int id, ShaderKind kind, const char* path)
+RHI::Shader* ResourceManager::loadShader(unsigned int id, RHI::ShaderKind kind, const char* path)
 {
 	auto it = shaders.find(id);
 	if (it != shaders.end())
@@ -100,7 +99,7 @@ Shader* ResourceManager::loadShader(int id, ShaderKind kind, const char* path)
 		return nullptr;
 	}
 
-	Shader* shader = new Shader(context);
+	RHI::Shader* shader = new RHI::Shader(context);
 	if (!shader->compileFromFile(path, kind))
 		return nullptr;
 
@@ -108,7 +107,16 @@ Shader* ResourceManager::loadShader(int id, ShaderKind kind, const char* path)
 	return shader;
 }
 
-void ResourceManager::unloadShader(int id)
+bool ResourceManager::reloadShader(unsigned int id)
+{
+	auto it = shaders.find(id);
+	if (it == shaders.end())
+		return false;
+
+	return it->second->reload();
+}
+
+void ResourceManager::unloadShader(unsigned int id)
 {
 	auto it = shaders.find(id);
 	if (it == shaders.end())
@@ -118,7 +126,7 @@ void ResourceManager::unloadShader(int id)
 	shaders.erase(it);
 }
 
-Texture* ResourceManager::getTexture(int id) const
+Texture* ResourceManager::getTexture(unsigned int id) const
 {
 	auto it = textures.find(id);
 	if (it != textures.end())
@@ -127,7 +135,7 @@ Texture* ResourceManager::getTexture(int id) const
 	return nullptr;
 }
 
-Texture* ResourceManager::loadTexture(int id, const char* path)
+Texture* ResourceManager::loadTexture(unsigned int id, const char* path)
 {
 	auto it = textures.find(id);
 	if (it != textures.end())
@@ -144,7 +152,7 @@ Texture* ResourceManager::loadTexture(int id, const char* path)
 	return texture;
 }
 
-void ResourceManager::unloadTexture(int id)
+void ResourceManager::unloadTexture(unsigned int id)
 {
 	auto it = textures.find(id);
 	if (it == textures.end())

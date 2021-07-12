@@ -3,11 +3,9 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "RendererContext.h"
-
 namespace RHI
 {
-	struct UniformBufferObject;
+	class VulkanContext;
 
 	struct VulkanRenderFrame
 	{
@@ -23,14 +21,14 @@ namespace RHI
 	class SwapChain
 	{
 	public:
-		SwapChain(const RendererContext& context, VkDeviceSize uboSize);
+		SwapChain(const VulkanContext* context, VkDeviceSize uboSize);
 		virtual ~SwapChain();
 
 		void init(int width, int height);
 		void reinit(int width, int height);
 		void shutdown();
 
-		bool acquire(const UniformBufferObject& state, VulkanRenderFrame& frame);
+		bool acquire(void* ubo, VulkanRenderFrame& frame);
 		bool present(const VulkanRenderFrame& frame);
 
 		inline uint32_t getNumImages() const { return static_cast<uint32_t>(swapChainImages.size()); }
@@ -69,7 +67,7 @@ namespace RHI
 		void shutdownFrames();
 
 	private:
-		RendererContext context;
+		const VulkanContext* context {nullptr};
 		std::vector<VulkanRenderFrame> frames;
 		VkDeviceSize uboSize;
 

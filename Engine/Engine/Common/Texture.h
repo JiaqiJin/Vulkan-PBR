@@ -3,12 +3,15 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
-#include "../RHI/RendererContext.h"
+namespace RHI
+{
+	class VulkanContext;
+}
 
 class Texture
 {
 public:
-	Texture(const RendererContext& context)
+	Texture(const RHI::VulkanContext* context)
 		: context(context) { }
 
 	~Texture();
@@ -34,7 +37,7 @@ private:
 	void uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSize);
 
 private:
-	RendererContext context;
+	const RHI::VulkanContext* context{ nullptr };
 
 	unsigned char* pixels{ nullptr };
 	int width{ 0 };

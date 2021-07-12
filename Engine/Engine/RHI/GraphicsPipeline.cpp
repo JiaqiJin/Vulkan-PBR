@@ -1,5 +1,6 @@
 #include "GraphicsPipeline.h"
 #include "VulkanUtils.h"
+#include "VulkanContext.h"
 #include <stdexcept>
 
 namespace RHI
@@ -193,7 +194,7 @@ namespace RHI
 		pipelineInfo.renderPass = renderPass;
 		pipelineInfo.subpass = 0;
 
-		if (vkCreateGraphicsPipelines(context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+		if (vkCreateGraphicsPipelines(context->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
 			throw std::runtime_error("Can't create graphics pipeline");
 
 		return pipeline;

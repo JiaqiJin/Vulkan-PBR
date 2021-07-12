@@ -1,6 +1,7 @@
 #include "ImGuiRenderer.h"
 #include "../Application.h"
 #include "../RHI/SwapChain.h"
+#include "../RHI/VulkanContext.h"
 #include "../RHI/VulkanUtils.h"
 #include "../Common/RenderScene.h"
 
@@ -9,7 +10,7 @@
 
 #include <array>
 
-ImGuiRenderer::ImGuiRenderer(const RendererContext& context, VkExtent2D extent, VkRenderPass renderPass)
+ImGuiRenderer::ImGuiRenderer(const RHI::VulkanContext* context, VkExtent2D extent, VkRenderPass renderPass)
 	: context(context)
 	, extent(extent)
 	, renderPass(renderPass)
@@ -26,30 +27,21 @@ void ImGuiRenderer::init(const RHI::UniformBufferObject* ubo, const RHI::RenderS
 {
 	// Init ImGui bindings for Vulkan
 	ImGui_ImplVulkan_InitInfo init_info = {};
-	init_info.Instance = context.instance;
-	init_info.PhysicalDevice = context.physicalDevice;
-	init_info.Device = context.device;
-	init_info.QueueFamily = context.graphicsQueueFamily;
-	init_info.Queue = context.graphicsQueue;
-	init_info.DescriptorPool = context.descriptorPool;
-	init_info.MSAASamples = context.msaaSamples;
+	init_info.Instance = context->getInstance();
+	init_info.PhysicalDevice = context->getPhysicalDevice();
+	init_info.Device = context->getDevice();
+	init_info.QueueFamily = context->getGraphicsQueueFamily();
+	init_info.Queue = context->getGraphicsQueue();
+	init_info.DescriptorPool = context->getDescriptorPool();
+	init_info.MSAASamples = context->getMaxMSAASamples();
 	init_info.MinImageCount = static_cast<uint32_t>(swapChain->getNumImages());
 	init_info.ImageCount = static_cast<uint32_t>(swapChain->getNumImages());
 
 	ImGui_ImplVulkan_Init(&init_info, renderPass);
 
-	RendererContext imGuiContext = {};
-	imGuiContext.commandPool = context.commandPool;
-	imGuiContext.descriptorPool = context.descriptorPool;
-	imGuiContext.device = context.device;
-	imGuiContext.graphicsQueue = context.graphicsQueue;
-	imGuiContext.msaaSamples = context.msaaSamples;
-	imGuiContext.physicalDevice = context.physicalDevice;
-	imGuiContext.presentQueue = context.presentQueue;
-
-	VkCommandBuffer imGuiCommandBuffer = RHI::VulkanUtils::beginSingleTimeCommands(imGuiContext);
+	VkCommandBuffer imGuiCommandBuffer = RHI::VulkanUtils::beginSingleTimeCommands(context);
 	ImGui_ImplVulkan_CreateFontsTexture(imGuiCommandBuffer);
-	RHI::VulkanUtils::endSingleTimeCommands(imGuiContext, imGuiCommandBuffer);
+	RHI::VulkanUtils::endSingleTimeCommands(context, imGuiCommandBuffer);
 }
 
 void ImGuiRenderer::resize(const RHI::SwapChain* swapChain)

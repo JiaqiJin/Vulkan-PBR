@@ -1,4 +1,5 @@
 #include "RenderPass.h"
+#include "VulkanContext.h"
 #include <stdexcept>
 
 namespace RHI
@@ -147,7 +148,7 @@ namespace RHI
 		renderPassInfo.subpassCount = static_cast<uint32_t>(subpassInfos.size());
 		renderPassInfo.pSubpasses = subpassInfos.data();
 
-		if (vkCreateRenderPass(context.device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
+		if (vkCreateRenderPass(context->getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
 			throw std::runtime_error("Can't create render pass");
 
 		return renderPass;

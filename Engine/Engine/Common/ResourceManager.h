@@ -8,6 +8,7 @@ namespace RHI
 {
 	enum class ShaderKind;
 	class Shader;
+	class VulkanContext;
 }
 
 class Mesh;
@@ -16,24 +17,25 @@ class Texture;
 class ResourceManager
 {
 public:
-	ResourceManager(const RendererContext& context);
+	ResourceManager(const RHI::VulkanContext* context);
 
-	Mesh* getMesh(int id) const;
-	Mesh* createCubeMesh(int id, float size);
-	Mesh* loadMesh(int id, const char* path);
-	void unloadMesh(int id);
+	Mesh* getMesh(unsigned int id) const;
+	Mesh* createCubeMesh(unsigned int id, float size);
+	Mesh* loadMesh(unsigned int id, const char* path);
+	void unloadMesh(unsigned int id);
 
-	RHI::Shader* getShader(int id) const;
-	RHI::Shader* loadShader(int id, const char* path);
-	RHI::Shader* loadShader(int id, RHI::ShaderKind kind, const char* path);
-	void unloadShader(int id);
+	RHI::Shader* getShader(unsigned int id) const;
+	RHI::Shader* loadShader(unsigned int id, const char* path);
+	RHI::Shader* loadShader(unsigned int id, RHI::ShaderKind kind, const char* path);
+	bool reloadShader(unsigned int id);
+	void unloadShader(unsigned int id);
 
-	Texture* getTexture(int id) const;
-	Texture* loadTexture(int id, const char* path);
-	void unloadTexture(int id);
+	Texture* getTexture(unsigned int id) const;
+	Texture* loadTexture(unsigned int id, const char* path);
+	void unloadTexture(unsigned int id);
 
 private:
-	RendererContext context;
+	const RHI::VulkanContext* context { nullptr };
 	
 	std::unordered_map<int, Mesh*> meshes;
 	std::unordered_map<int, RHI::Shader*> shaders;

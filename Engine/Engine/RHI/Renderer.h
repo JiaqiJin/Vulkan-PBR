@@ -16,11 +16,12 @@ namespace RHI
 	struct VulkanRenderFrame;
 	struct UniformBufferObject;
 	class SwapChain;
+	class VulkanContext;
 
 	class Renderer
 	{
 	public:
-		Renderer(const RendererContext& context, VkExtent2D extent, VkDescriptorSetLayout descriptorSetLayout, VkRenderPass renderPass);
+		Renderer(const VulkanContext* context, VkExtent2D extent, VkDescriptorSetLayout descriptorSetLayout, VkRenderPass renderPass);
 
 		virtual ~Renderer();
 
@@ -35,12 +36,11 @@ namespace RHI
 		void setEnvironment(const RenderScene* scene, int index);
 
 	private:
-		RendererContext context;
+		const VulkanContext* context{nullptr};
 		VkExtent2D extent;
 		VkRenderPass renderPass{ VK_NULL_HANDLE };
 		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
 
-		//
 		CubemapRenderer hdriToCubeRenderer;
 		CubemapRenderer diffuseIrradianceRenderer;
 
