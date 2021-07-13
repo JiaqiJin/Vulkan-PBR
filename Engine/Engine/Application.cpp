@@ -17,10 +17,8 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-#include <array>
 #include <iostream>
-#include <set>
-#include <limits>
+#include <chrono>
 
 using namespace RHI;
 
@@ -43,6 +41,7 @@ void Application::run()
 
 void Application::update()
 {
+	
 	renderer->update(&ubo, scene);
 	imguiRenderer->update(&ubo, scene);
 }

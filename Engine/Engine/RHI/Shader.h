@@ -3,8 +3,6 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
-#include "RendererContext.h"
-
 #include <shaderc/shaderc.h>
 
 namespace RHI

@@ -4,9 +4,10 @@
 #include <vector>
 #include <optional>
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
-
-#include "RHI/RendererContext.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 // Forward declaration
 struct GLFWwindow;

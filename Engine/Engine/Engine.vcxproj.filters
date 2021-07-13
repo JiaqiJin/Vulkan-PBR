@@ -95,9 +95,6 @@
     <ClInclude Include="Common\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\RendererContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RHI\VulkanUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>

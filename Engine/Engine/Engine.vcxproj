@@ -187,7 +187,6 @@
     <ClInclude Include="Common\Mesh.h" />
     <ClInclude Include="RHI\PipelineLayout.h" />
     <ClInclude Include="RHI\Renderer.h" />
-    <ClInclude Include="RHI\RendererContext.h" />
     <ClInclude Include="RHI\RenderPass.h" />
     <ClInclude Include="RHI\Shader.h" />
     <ClInclude Include="Common\Texture.h" />

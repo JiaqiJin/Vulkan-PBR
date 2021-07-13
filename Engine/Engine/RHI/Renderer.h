@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "RendererContext.h"
-
 #include "CubemapRenderer.h"
 #include "../Common/Texture.h"
 #include "Shader.h"

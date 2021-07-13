@@ -2,8 +2,6 @@
 
 #include <unordered_map>
 
-#include "../RHI/RendererContext.h"
-
 namespace RHI
 {
 	enum class ShaderKind;
