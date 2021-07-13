@@ -69,6 +69,8 @@ namespace RHI
 		const char* getHDRTexturePath(int index) const;
 		size_t getNumHDRTextures() const;
 
+		void reloadShaders();
+
 	private:
 		ResourceManager resources;
 	};

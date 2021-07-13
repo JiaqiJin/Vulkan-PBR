@@ -35,8 +35,8 @@ public:
 private:
 	const RHI::VulkanContext* context { nullptr };
 	
-	std::unordered_map<int, Mesh*> meshes;
-	std::unordered_map<int, RHI::Shader*> shaders;
-	std::unordered_map<int, Texture*> textures;
+	std::unordered_map<unsigned int, Mesh*> meshes;
+	std::unordered_map<unsigned int, RHI::Shader*> shaders;
+	std::unordered_map<unsigned int, Texture*> textures;
 };
 

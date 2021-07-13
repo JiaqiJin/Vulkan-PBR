@@ -83,5 +83,11 @@ namespace RHI
 		for (int i = 0; i < config::hdrTextures.size(); i++)
 			resources.unloadTexture(config::Textures::Environment + i);
 	}
+
+	void RenderScene::reloadShaders()
+	{
+		for (int i = 0; i < config::shaders.size(); i++)
+			resources.reloadShader(i);
+	}
 }
 
