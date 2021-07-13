@@ -19,10 +19,9 @@ public:
 		VkRenderPass renderPass);
 	virtual ~ImGuiRenderer();
 
-	void init(const RHI::UniformBufferObject* ubo, const RHI::RenderScene* scene, const RHI::SwapChain* swapChain);
+	void init(const RHI::RenderScene* scene, const RHI::SwapChain* swapChain);
 	void resize(const RHI::SwapChain* swapChain);
-	void update(RHI::UniformBufferObject* ubo, RHI::RenderScene* scene);
-	void render(const RHI::UniformBufferObject* ubo, const RHI::RenderScene* scene, const RHI::VulkanRenderFrame& frame);
+	void render(const RHI::RenderScene* scene, const RHI::VulkanRenderFrame& frame);
 	void shutdown();
 
 private:

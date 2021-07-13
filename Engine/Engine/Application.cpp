@@ -41,9 +41,71 @@ void Application::run()
 
 void Application::update()
 {
-	
-	renderer->update(&ubo, scene);
-	imguiRenderer->update(&ubo, scene);
+	static auto startTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+
+	const float rotationSpeed = 0.3f;
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+	const glm::vec3& up = { 0.0f, 0.0f, 1.0f };
+	const glm::vec3& zero = { 0.0f, 0.0f, 0.0f };
+
+	VkExtent2D extent = swapChain->getExtent();
+
+	const float aspect = extent.width / (float)extent.height;
+	const float zNear = 0.1f;
+	const float zFar = 1000.0f;
+
+	const glm::vec3& cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
+	const glm::mat4& rotation = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
+
+	ubo.world = glm::mat4(1.0f);
+	ubo.view = glm::lookAt(cameraPos, zero, up) * rotation;
+	ubo.proj = glm::perspective(glm::radians(60.0f), aspect, zNear, zFar);
+	ubo.proj[1][1] *= -1;
+	ubo.cameraPosWS = glm::vec3(glm::vec4(cameraPos, 1.0f) * rotation);
+
+	static float f = 0.0f;
+	static int counter = 0;
+	static bool show_demo_window = false;
+
+	if (show_demo_window)
+		ImGui::ShowDemoWindow(&show_demo_window);
+
+	ImGui::Begin("Material Parameters");
+
+	if (ImGui::Button("Reload Shaders"))
+	{
+		scene->reloadShaders();
+		renderer->reload(scene);
+		renderer->setEnvironment(scene->getHDRTexture(ubo.currentEnvironment));
+	}
+
+	int oldCurrentEnvironment = ubo.currentEnvironment;
+	if (ImGui::BeginCombo("Choose Your Destiny", scene->getHDRTexturePath(ubo.currentEnvironment)))
+	{
+		for (int i = 0; i < scene->getNumHDRTextures(); i++)
+		{
+			bool selected = (i == ubo.currentEnvironment);
+			if (ImGui::Selectable(scene->getHDRTexturePath(i), &selected))
+			{
+				ubo.currentEnvironment = i;
+				renderer->setEnvironment(scene->getHDRTexture(ubo.currentEnvironment));
+			}
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+
+	ImGui::Checkbox("Demo Window", &show_demo_window);
+
+	ImGui::SliderFloat("Lerp User Material", &ubo.lerpUserValues, 0.0f, 1.0f);
+	ImGui::SliderFloat("Metalness", &ubo.userMetalness, 0.0f, 1.0f);
+	ImGui::SliderFloat("Roughness", &ubo.userRoughness, 0.0f, 1.0f);
+
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	ImGui::End();
 }
 
 
@@ -56,8 +118,8 @@ void Application::render()
 		return;
 	}
 
-	renderer->render(&ubo, scene, frame);
-	imguiRenderer->render(&ubo, scene, frame);
+	renderer->render(scene, frame);
+	imguiRenderer->render(scene, frame);
 
 	if (!swapChain->present(frame) || windowResized)
 	{
@@ -178,10 +240,11 @@ void Application::shutdownRenderScene()
 void Application::initRenderers()
 {
 	renderer = new Renderer(context, swapChain->getExtent(), swapChain->getDescriptorSetLayout(), swapChain->getRenderPass());
-	renderer->init(&ubo, scene);
+	renderer->init(scene);
+	renderer->setEnvironment(scene->getHDRTexture(ubo.currentEnvironment));
 
 	imguiRenderer = new ImGuiRenderer(context, swapChain->getExtent(), swapChain->getNoClearRenderPass());
-	imguiRenderer->init(&ubo, scene, swapChain);
+	imguiRenderer->init(scene, swapChain);
 }
 
 void Application::shutdownRenderers()

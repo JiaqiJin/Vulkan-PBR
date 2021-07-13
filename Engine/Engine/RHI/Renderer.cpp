@@ -44,7 +44,7 @@ Renderer::~Renderer()
 }
 
 
-void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
+void Renderer::init(const RenderScene* scene)
 {
 	const Shader* pbrVertexShader = scene->getPBRVertexShader();
 	const Shader* pbrFragmentShader = scene->getPBRFragmentShader();
@@ -113,7 +113,20 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 	if (vkAllocateDescriptorSets(context->getDevice(), &sceneDescriptorSetAllocInfo, &sceneDescriptorSet) != VK_SUCCESS)
 		throw std::runtime_error("Can't allocate scene descriptor set");
 
-	initEnvironment(state, scene);
+	// Cubemap Initialization
+	environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
+	diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
+
+	hdriToCubeRenderer.init(
+		*scene->getCubeVertexShader(),
+		*scene->getHDRIToFragmentShader(),
+		environmentCubemap);
+
+	diffuseIrradianceRenderer.init(
+		*scene->getCubeVertexShader(),
+		*scene->getDiffuseIrradianceFragmentShader(),
+		diffuseIrradianceCubemap);
+
 
 	std::array<const Texture*, 7> textures =
 	{
@@ -135,25 +148,7 @@ void Renderer::init(const UniformBufferObject* state, const RenderScene* scene)
 			textures[k]->getSampler());
 }
 
-void Renderer::initEnvironment(const UniformBufferObject* state, const RenderScene* scene)
-{
-	environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
-	diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
-
-	hdriToCubeRenderer.init(
-		*scene->getCubeVertexShader(),
-		*scene->getHDRIToFragmentShader(),
-		environmentCubemap);
-
-	diffuseIrradianceRenderer.init(
-		*scene->getCubeVertexShader(),
-		*scene->getDiffuseIrradianceFragmentShader(),
-		diffuseIrradianceCubemap);
-
-	setEnvironment(scene, state->currentEnvironment);
-}
-
-void Renderer::setEnvironment(const RenderScene* scene, int index)
+void Renderer::setEnvironment(const Texture* texture)
 {
 	{
 		VulkanUtils::transitionImageLayout(
@@ -165,7 +160,7 @@ void Renderer::setEnvironment(const RenderScene* scene, int index)
 			0, environmentCubemap.getNumMipLevels(),
 			0, environmentCubemap.getNumLayers());
 
-		hdriToCubeRenderer.render(*scene->getHDRTexture(index));
+		hdriToCubeRenderer.render(*texture);
 
 		VulkanUtils::transitionImageLayout(
 			context,
@@ -213,6 +208,11 @@ void Renderer::setEnvironment(const RenderScene* scene, int index)
 			textures[k]->getImageView(),
 			textures[k]->getSampler());
 }
+void Renderer::reload(const RenderScene* scene)
+{
+	shutdown();
+	init(scene);
+}
 
 void Renderer::shutdown()
 {
@@ -238,40 +238,7 @@ void Renderer::shutdown()
 	diffuseIrradianceCubemap.clearGPUData();
 }
 
-
-void Renderer::update(UniformBufferObject* state, const RenderScene* scene)
-{
-	// Render state
-	static auto startTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-
-	const float rotationSpeed = 0.3f;
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-	const glm::vec3& up = { 0.0f, 0.0f, 1.0f };
-	const glm::vec3& zero = { 0.0f, 0.0f, 0.0f };
-
-	const float aspect = extent.width / (float)extent.height;
-	const float zNear = 0.1f;
-	const float zFar = 1000.0f;
-
-	const glm::vec3& cameraPos = glm::vec3(2.0f, 2.0f, 2.0f);
-	const glm::mat4& rotation = glm::rotate(glm::mat4(1.0f), time * rotationSpeed * glm::radians(90.0f), up);
-
-	state->world = glm::mat4(1.0f);
-	state->view = glm::lookAt(cameraPos, zero, up) * rotation;
-	state->proj = glm::perspective(glm::radians(60.0f), aspect, zNear, zFar);
-	state->proj[1][1] *= -1;
-	state->cameraPosWS = glm::vec3(glm::vec4(cameraPos, 1.0f) * rotation);
-
-	if (currentEnvironment != state->currentEnvironment)
-	{
-		currentEnvironment = state->currentEnvironment;
-		setEnvironment(scene, state->currentEnvironment);
-	}
-}
-
-void Renderer::render(const UniformBufferObject* state, const RenderScene* scene, const VulkanRenderFrame& frame)
+void Renderer::render(const RenderScene* scene, const VulkanRenderFrame& frame)
 {
 	VkCommandBuffer commandBuffer = frame.commandBuffer;
 	VkFramebuffer frameBuffer = frame.frameBuffer;

@@ -12,7 +12,6 @@ namespace RHI
 {
 	class RenderScene;
 	struct VulkanRenderFrame;
-	struct UniformBufferObject;
 	class SwapChain;
 	class VulkanContext;
 
@@ -23,15 +22,13 @@ namespace RHI
 
 		virtual ~Renderer();
 
-		void init(const UniformBufferObject* ubo, const RenderScene* scene);
-		void update(UniformBufferObject* ubo, const RenderScene* scene);
+		void init(const RenderScene* scene);
 		void resize(const SwapChain* swapChain);
-		void render(const UniformBufferObject* ubo, const RenderScene* scene, const VulkanRenderFrame& frame);
+		void render(const RenderScene* scene, const VulkanRenderFrame& frame);
 		void shutdown();
 
-	private:
-		void initEnvironment(const UniformBufferObject* ubo, const RenderScene* scene);
-		void setEnvironment(const RenderScene* scene, int index);
+		void reload(const RenderScene* scene);
+		void setEnvironment(const Texture* texture);
 
 	private:
 		const VulkanContext* context{nullptr};
