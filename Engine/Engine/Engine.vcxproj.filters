@@ -90,6 +90,9 @@
     <ClCompile Include="Common\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RHI\Texture2DRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Texture.h">
@@ -170,6 +173,9 @@
     <ClInclude Include="Common\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RHI\Texture2DRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assert\Shader\Pbrshader.vert" />
@@ -183,6 +189,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="Assert\Shader\Common\SceneTextures.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Assert\Shader\Common\brdf.inc">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

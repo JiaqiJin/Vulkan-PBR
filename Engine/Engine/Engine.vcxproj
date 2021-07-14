@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="Common\Logger.cpp" />
     <ClCompile Include="Common\ResourceManager.cpp" />
+    <ClCompile Include="RHI\Texture2DRenderer.cpp" />
     <ClCompile Include="GUI\ImGuiRenderer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Common\RenderScene.cpp" />
@@ -176,6 +177,7 @@
   <ItemGroup>
     <ClInclude Include="Common\Logger.h" />
     <ClInclude Include="Common\ResourceManager.h" />
+    <ClInclude Include="RHI\Texture2DRenderer.h" />
     <ClInclude Include="GUI\ImGuiRenderer.h" />
     <ClInclude Include="Common\RenderScene.h" />
     <ClInclude Include="RHI\SwapChain.h" />
@@ -203,6 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assert\Shader\commonCube.vert" />
+    <None Include="Assert\Shader\Common\brdf.inc" />
     <None Include="Assert\Shader\Common\SceneTextures.inc" />
     <None Include="Assert\Shader\Common\Uniform.inc" />
     <None Include="Assert\Shader\diffuseIrradiance.frag" />
