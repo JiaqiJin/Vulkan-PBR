@@ -148,6 +148,54 @@ bool Texture::loadFromFile(const std::string& path)
 	return true;
 }
 
+void Texture::create2D(VkFormat format, int w, int h, int mips)
+{
+	width = w;
+	height = h;
+	mipLevels = mips;
+	layers = 6;
+	imageFormat = format;
+
+	channels = deduceChannels(format);
+	VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL;
+
+	VulkanUtils::createImage2D(
+		context,
+		width,
+		height,
+		mipLevels,
+		VK_SAMPLE_COUNT_1_BIT,
+		imageFormat,
+		tiling,
+		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		image,
+		imageMemory);
+
+	// Prepare the image for shader access
+	VulkanUtils::transitionImageLayout(
+		context,
+		image,
+		imageFormat,
+		VK_IMAGE_LAYOUT_UNDEFINED,
+		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		0,
+		mipLevels,
+		0,
+		layers);
+
+	// Create Image view
+	imageView = VulkanUtils::createImageView(context,
+		image,
+		imageFormat,
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		VK_IMAGE_VIEW_TYPE_2D,
+		0, mipLevels,
+		0, layers);
+
+	imageSampler = VulkanUtils::createSampler(context, mipLevels);
+}
+
 void Texture::createCube(VkFormat format, int width_, int height_, int numMipLevels_)
 {
 	width = width_;

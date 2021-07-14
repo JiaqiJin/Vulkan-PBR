@@ -32,6 +32,7 @@ public:
 	void clearCPUData();;
 
 	void createCube(VkFormat format, int width, int height, int numMipLevels);
+	void create2D(VkFormat format, int width, int height, int numMipLevels);
 
 private:
 	void uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSize);
