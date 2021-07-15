@@ -9,7 +9,9 @@ Vulkan PBR renderer implementation
 git clone https://github.com/Jiaqidesune/Vulkan-PBR.git
 
 1 - Download VulkanSDK and install it following the instuctions.
+
 2 - Open Engine.sln under Engine folder.
+
 3 - Build with Visual Studio (2019).
 
 C++17 is needed to compile the project.
@@ -32,4 +34,4 @@ C++17 is needed to compile the project.
 [Vulkan Tutorial](https://vulkan-tutorial.com/) \
 [PBR Book](http://www.pbr-book.org/3ed-2018/contents.html) \
 [Vulkan AMD](https://gpuopen.com/learn/lets-learn-vulkan/) \
-[PBR](https://learnopengl.com/PBR/Theory) \
+[PBR](https://learnopengl.com/PBR/Theory)
