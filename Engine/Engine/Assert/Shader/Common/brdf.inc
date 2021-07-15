@@ -88,6 +88,20 @@ float DistributionGGX(Surface surface, float roughness)
 	return iPI * alpha2 / sqr(1.0f + dotNH * dotNH * (alpha2 - 1.0f));
 }
 
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a = roughness*roughness;
+    float a2 = a*a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return nom / denom;
+}
+
 // Geometry function approximates the relative surface area where it micro surface-detail overshadow each other
 // G = n · v / (n · v) (1 - k) + k
 // G(n,v,l,k) = Gsub(n,v,k) Gsub(n,l,k)
