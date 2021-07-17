@@ -36,7 +36,7 @@ Renderer::Renderer(const VulkanContext* context,
 	, environmentCubemap(context)
 	, diffuseIrradianceCubemap(context)
 	, bakedBRDFRenderer(context)
-	, bakeBRDFTexture(context)
+	, bakedBRDFTexture(context)
 {
 }
 
@@ -116,7 +116,7 @@ void Renderer::init(const RenderScene* scene)
 	if (vkAllocateDescriptorSets(context->getDevice(), &sceneDescriptorSetAllocInfo, &sceneDescriptorSet) != VK_SUCCESS)
 		throw std::runtime_error("Can't allocate scene descriptor set");
 
-	bakeBRDFTexture.create2D(VK_FORMAT_R16G16_SFLOAT, 256, 256, 1);
+	bakedBRDFTexture.create2D(VK_FORMAT_R16G16_SFLOAT, 256, 256, 1);
 	// Cubemap Initialization
 	environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 	diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
@@ -125,7 +125,7 @@ void Renderer::init(const RenderScene* scene)
 	bakedBRDFRenderer.init(
 		*scene->getBakedBRDFVertexShader(),
 		*scene->getBakedBRDFFragmentShader(), 
-		bakeBRDFTexture);
+		bakedBRDFTexture);
 
 	// Cube Render
 	hdriToCubeRenderer.init(
@@ -148,7 +148,7 @@ void Renderer::init(const RenderScene* scene)
 		scene->getEmissionTexture(),
 		&environmentCubemap,
 		&diffuseIrradianceCubemap,
-		& bakeBRDFTexture
+		& bakedBRDFTexture
 	};
 
 	for (int k = 0; k < textures.size(); k++)
@@ -247,7 +247,7 @@ void Renderer::shutdown()
 	diffuseIrradianceRenderer.shutdown();
 	bakedBRDFRenderer.shutdown();
 
-	bakeBRDFTexture.clearGPUData();
+	bakedBRDFTexture.clearGPUData();
 	environmentCubemap.clearGPUData();
 	diffuseIrradianceCubemap.clearGPUData();
 }

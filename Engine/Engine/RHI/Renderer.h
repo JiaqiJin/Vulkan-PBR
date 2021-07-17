@@ -41,7 +41,7 @@ namespace RHI
 		CubemapRenderer hdriToCubeRenderer;
 		CubemapRenderer diffuseIrradianceRenderer;
 
-		Texture bakeBRDFTexture;
+		Texture bakedBRDFTexture;
 		Texture environmentCubemap;
 		Texture diffuseIrradianceCubemap;
 
