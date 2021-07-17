@@ -153,7 +153,7 @@ void Texture::create2D(VkFormat format, int w, int h, int mips)
 	width = w;
 	height = h;
 	mipLevels = mips;
-	layers = 6;
+	layers = 1;
 	imageFormat = format;
 
 	channels = deduceChannels(format);
@@ -170,7 +170,8 @@ void Texture::create2D(VkFormat format, int w, int h, int mips)
 		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		image,
-		imageMemory);
+		imageMemory
+	);
 
 	// Prepare the image for shader access
 	VulkanUtils::transitionImageLayout(
@@ -182,17 +183,19 @@ void Texture::create2D(VkFormat format, int w, int h, int mips)
 		0,
 		mipLevels,
 		0,
-		layers);
+		layers
+	);
 
-	// Create Image view
-	imageView = VulkanUtils::createImageView(context,
+	// Create image view & sampler
+	imageView = VulkanUtils::createImageView(
+		context,
 		image,
 		imageFormat,
 		VK_IMAGE_ASPECT_COLOR_BIT,
 		VK_IMAGE_VIEW_TYPE_2D,
 		0, mipLevels,
-		0, layers);
-
+		0, layers
+	);
 	imageSampler = VulkanUtils::createSampler(context, mipLevels);
 }
 

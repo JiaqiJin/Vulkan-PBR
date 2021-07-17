@@ -116,16 +116,42 @@ void Renderer::init(const RenderScene* scene)
 	if (vkAllocateDescriptorSets(context->getDevice(), &sceneDescriptorSetAllocInfo, &sceneDescriptorSet) != VK_SUCCESS)
 		throw std::runtime_error("Can't allocate scene descriptor set");
 
-	bakedBRDFTexture.create2D(VK_FORMAT_R16G16_SFLOAT, 256, 256, 1);
+	
 	// Cubemap Initialization
 	environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 	diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
+	bakedBRDFTexture.create2D(VK_FORMAT_R16G16_SFLOAT, 256, 256, 1);
 
 	// bake BRDF
 	bakedBRDFRenderer.init(
 		*scene->getBakedBRDFVertexShader(),
 		*scene->getBakedBRDFFragmentShader(), 
 		bakedBRDFTexture);
+
+	{
+		VulkanUtils::transitionImageLayout(
+			context,
+			bakedBRDFTexture.getImage(),
+			bakedBRDFTexture.getImageFormat(),
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0, bakedBRDFTexture.getNumMipLevels(),
+			0, bakedBRDFTexture.getNumLayers()
+		);
+
+		bakedBRDFRenderer.render();
+
+		VulkanUtils::transitionImageLayout(
+			context,
+			bakedBRDFTexture.getImage(),
+			bakedBRDFTexture.getImageFormat(),
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			0, bakedBRDFTexture.getNumMipLevels(),
+			0, bakedBRDFTexture.getNumLayers()
+		);
+	}
+
 
 	// Cube Render
 	hdriToCubeRenderer.init(
@@ -148,7 +174,7 @@ void Renderer::init(const RenderScene* scene)
 		scene->getEmissionTexture(),
 		&environmentCubemap,
 		&diffuseIrradianceCubemap,
-		& bakedBRDFTexture
+		&bakedBRDFTexture
 	};
 
 	for (int k = 0; k < textures.size(); k++)

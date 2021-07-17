@@ -55,8 +55,8 @@ namespace RHI
 		pipelineBuilder.addShaderStage(fragmentShader.getShaderModule(), VK_SHADER_STAGE_FRAGMENT_BIT);
 		pipelineBuilder.addVertexInput(Mesh::getVertexInputBindingDescription(), Mesh::getAttributeDescriptions());
 		pipelineBuilder.setInputAssemblyState(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-		pipelineBuilder.addViewport(VkViewport());
-		pipelineBuilder.addScissor(VkRect2D());
+		pipelineBuilder.addViewport(viewport);
+		pipelineBuilder.addScissor(scissor);
 		pipelineBuilder.setRasterizerState(false, false, VK_POLYGON_MODE_FILL, 1.0f, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE);
 		pipelineBuilder.setMultisampleState(VK_SAMPLE_COUNT_1_BIT);
 		pipelineBuilder.setDepthStencilState(false, false, VK_COMPARE_OP_LESS);
