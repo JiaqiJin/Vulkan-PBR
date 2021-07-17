@@ -81,54 +81,6 @@ vec3 PrefilterSpecularEnvMap(vec3 V, vec3 N,float roughness)
     return prefilteredColor = prefilteredColor / totalWeight;
 }
 
-vec2 IntegrateBRDF(float NdotV, float roughness)
-{
-    vec3 V;
-    V.x = sqrt(1.0 - NdotV*NdotV);
-    V.y = 0.0;
-    V.z = NdotV;
-
-    float A = 0.0;
-    float B = 0.0;
-
-    vec3 N = vec3(0.0, 0.0, 1.0);
-
-    const uint SAMPLE_COUNT = 1024u;
-    for(uint i = 0u; i < SAMPLE_COUNT; ++i)
-    {
-        vec2 Xi = Hammersley(i, SAMPLE_COUNT);
-        vec3 H  = ImportanceSamplingGGX(Xi, N, roughness);
-        vec3 L  = normalize(2.0 * dot(V, H) * H - V);
-
-        float NdotL = max(L.z, 0.0);
-        float NdotH = max(H.z, 0.0);
-        float VdotH = max(dot(V, H), 0.0);
-
-        if(NdotL > 0.0)
-        {
-            float G = GeometrySmith(N, V, L, roughness);
-            float G_Vis = (G * VdotH) / (NdotH * NdotV);
-            float Fc = pow(1.0 - VdotH, 5.0);
-
-            A += (1.0 - Fc) * G_Vis;
-            B += Fc * G_Vis;
-        }
-    }
-    A /= float(SAMPLE_COUNT);
-    B /= float(SAMPLE_COUNT);
-    return vec2(A, B);
-}
-
-vec3 ApproximateSpecularIBL( vec3 SpecularColor , float Roughness, vec3 N, vec3 V )
-{
-float NoV = dot( N, V );
-vec3 R = 2 * dot( V, N ) * N - V;
-vec3 PrefilteredColor = PrefilterSpecularEnvMap(V,N, Roughness);
-vec2 EnvBRDF = IntegrateBRDF( Roughness, NoV );
-return PrefilteredColor * ( SpecularColor * EnvBRDF.x + EnvBRDF.y );
-}
-
-
 vec3 SpecularIBL(Surface surface, MicrofacetMaterial material)
 {
 	vec3 result = vec3(0.0);
@@ -214,8 +166,8 @@ void main() {
 	vec3 ibl_diffuse  = texture(diffuseIrradianceSampler, ibl.normal).rgb * microfacet_material.albedo;
 	ibl_diffuse  *= (1.0f - F_Shlick(ibl.dotNV, microfacet_material.f0, microfacet_material.roughness));
 
-	//vec3 ibl_specular = SpecularIBL(ibl, microfacet_material);
-	vec3 ibl_specular = PrefilterSpecularEnvMap(ibl.view, ibl.normal, microfacet_material.roughness);
+	vec3 ibl_specular = SpecularIBL(ibl, microfacet_material);
+	//vec3 ibl_specular = PrefilterSpecularEnvMap(ibl.view, ibl.normal, microfacet_material.roughness);
 
 	vec3 ambient = ibl_diffuse * iPI + ibl_specular;
 

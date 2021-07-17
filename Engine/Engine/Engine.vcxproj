@@ -204,6 +204,8 @@
     <ClInclude Include="Vendor\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assert\Shader\bakeBRDF.frag" />
+    <None Include="Assert\Shader\bakeBRDF.vert" />
     <None Include="Assert\Shader\commonCube.vert" />
     <None Include="Assert\Shader\Common\brdf.inc" />
     <None Include="Assert\Shader\Common\SceneTextures.inc" />

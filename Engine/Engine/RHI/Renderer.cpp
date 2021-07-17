@@ -35,6 +35,8 @@ Renderer::Renderer(const VulkanContext* context,
 	, diffuseIrradianceRenderer(context)
 	, environmentCubemap(context)
 	, diffuseIrradianceCubemap(context)
+	, bakedBRDFRenderer(context)
+	, bakeBRDFTexture(context)
 {
 }
 
@@ -55,6 +57,7 @@ void Renderer::init(const RenderScene* scene)
 
 	// Descriptor set Layout
 	DescriptorSetLayout sceneDescriptorSetLayoutBuilder(context);
+	sceneDescriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 	sceneDescriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 	sceneDescriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
 	sceneDescriptorSetLayoutBuilder.addDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage);
@@ -113,22 +116,30 @@ void Renderer::init(const RenderScene* scene)
 	if (vkAllocateDescriptorSets(context->getDevice(), &sceneDescriptorSetAllocInfo, &sceneDescriptorSet) != VK_SUCCESS)
 		throw std::runtime_error("Can't allocate scene descriptor set");
 
+	bakeBRDFTexture.create2D(VK_FORMAT_R16G16_SFLOAT, 256, 256, 1);
 	// Cubemap Initialization
 	environmentCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 	diffuseIrradianceCubemap.createCube(VK_FORMAT_R32G32B32A32_SFLOAT, 256, 256, 1);
 
+	// bake BRDF
+	bakedBRDFRenderer.init(
+		*scene->getBakedBRDFVertexShader(),
+		*scene->getBakedBRDFFragmentShader(), 
+		bakeBRDFTexture);
+
+	// Cube Render
 	hdriToCubeRenderer.init(
 		*scene->getCubeVertexShader(),
 		*scene->getHDRIToFragmentShader(),
 		environmentCubemap);
 
+	// Irradiance Renderer
 	diffuseIrradianceRenderer.init(
 		*scene->getCubeVertexShader(),
 		*scene->getDiffuseIrradianceFragmentShader(),
 		diffuseIrradianceCubemap);
 
-
-	std::array<const Texture*, 7> textures =
+	std::array<const Texture*, 8> textures =
 	{
 		scene->getAlbedoTexture(),
 		scene->getNormalTexture(),
@@ -137,6 +148,7 @@ void Renderer::init(const RenderScene* scene)
 		scene->getEmissionTexture(),
 		&environmentCubemap,
 		&diffuseIrradianceCubemap,
+		& bakeBRDFTexture
 	};
 
 	for (int k = 0; k < textures.size(); k++)
@@ -233,7 +245,9 @@ void Renderer::shutdown()
 
 	hdriToCubeRenderer.shutdown();
 	diffuseIrradianceRenderer.shutdown();
+	bakedBRDFRenderer.shutdown();
 
+	bakeBRDFTexture.clearGPUData();
 	environmentCubemap.clearGPUData();
 	diffuseIrradianceCubemap.clearGPUData();
 }

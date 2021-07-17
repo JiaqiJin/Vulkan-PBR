@@ -194,5 +194,7 @@
     <None Include="Assert\Shader\Common\brdf.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="Assert\Shader\bakeBRDF.vert" />
+    <None Include="Assert\Shader\bakeBRDF.frag" />
   </ItemGroup>
 </Project>

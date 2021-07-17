@@ -19,7 +19,7 @@ namespace RHI
 			: context(context), rendererQuad(context)
 		{}
 
-		void init();
+		void init(const Shader& vertexShader, const Shader& fragmentShader, const Texture& targetTexture);
 		void shutdown();
 		void render();
 

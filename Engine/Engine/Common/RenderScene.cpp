@@ -22,7 +22,9 @@ namespace RHI
 			 "Assert/Shader/skyBox.frag",
 			 "Assert/Shader/commonCube.vert",
 			 "Assert/Shader/hdriToCube.frag",
-			 "Assert/Shader/diffuseIrradiance.frag"
+			 "Assert/Shader/diffuseIrradiance.frag",
+			 "Assert/Shader/bakeBRDF.vert",
+			 "Assert/Shader/bakeBRDF.frag"
 		};
 
 		static std::vector<const char*> textures = {

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "CubemapRenderer.h"
+#include "Texture2DRenderer.h"
 #include "../Common/Texture.h"
 #include "Shader.h"
 
@@ -36,9 +37,11 @@ namespace RHI
 		VkRenderPass renderPass{ VK_NULL_HANDLE };
 		VkPipelineLayout pipelineLayout{ VK_NULL_HANDLE };
 
+		Texture2DRenderer bakedBRDFRenderer;
 		CubemapRenderer hdriToCubeRenderer;
 		CubemapRenderer diffuseIrradianceRenderer;
 
+		Texture bakeBRDFTexture;
 		Texture environmentCubemap;
 		Texture diffuseIrradianceCubemap;
 

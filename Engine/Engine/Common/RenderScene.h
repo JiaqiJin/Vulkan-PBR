@@ -25,6 +25,8 @@ namespace RHI
 			CubeVertex,
 			HDRIToCubeFragment,
 			DiffuseIrradianceFragment,
+			BakedBRDFVertex,
+			BakedBRDFFragment,
 		};
 
 		enum Textures
@@ -50,11 +52,16 @@ namespace RHI
 
 		inline const Shader* getPBRVertexShader() const { return resources.getShader(config::Shaders::PBRVertex); }
 		inline const Shader* getPBRFragmentShader() const { return resources.getShader(config::Shaders::PBRFragment); }
+
 		inline const Shader* getSkyboxVertexShader() const { return resources.getShader(config::Shaders::SkyboxVertex); }
 		inline const Shader* getSkyboxFragmentShader() const { return resources.getShader(config::Shaders::SkyboxFragment); }
+
 		inline const Shader* getCubeVertexShader() const { return resources.getShader(config::Shaders::CubeVertex); }
 		inline const Shader* getHDRIToFragmentShader() const { return resources.getShader(config::Shaders::HDRIToCubeFragment); }
 		inline const Shader* getDiffuseIrradianceFragmentShader() const { return resources.getShader(config::Shaders::DiffuseIrradianceFragment); }
+
+		inline const Shader* getBakedBRDFVertexShader() const { return resources.getShader(config::Shaders::BakedBRDFVertex); }
+		inline const Shader* getBakedBRDFFragmentShader() const { return resources.getShader(config::Shaders::BakedBRDFFragment); }
 
 		inline const Texture* getAlbedoTexture() const { return resources.getTexture(config::Textures::Albedo); }
 		inline const Texture* getNormalTexture() const { return resources.getTexture(config::Textures::Normal); }
