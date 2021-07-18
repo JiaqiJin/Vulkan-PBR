@@ -1,11 +1,11 @@
 #include "Texture2DRenderer.h"
-#include "VulkanContext.h"
-#include "GraphicsPipeline.h"
-#include "PipelineLayout.h"
-#include "DescriptorSetLayout.h"
-#include "DescriptorSet.h"
-#include "RenderPass.h"
-#include "VulkanUtils.h"
+#include "../RHI/VulkanContext.h"
+#include "../RHI/GraphicsPipeline.h"
+#include "../RHI/PipelineLayout.h"
+#include "../RHI/DescriptorSetLayout.h"
+#include "../RHI/DescriptorSet.h"
+#include "../RHI/RenderPass.h"
+#include "../RHI/VulkanUtils.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

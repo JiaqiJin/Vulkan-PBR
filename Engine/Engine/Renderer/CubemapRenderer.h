@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Shader.h"
+#include "../RHI/Shader.h"
 #include "../Common/Texture.h"
 #include "../Common/Mesh.h"
 

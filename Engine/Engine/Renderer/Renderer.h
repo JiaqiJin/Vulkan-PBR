@@ -7,7 +7,7 @@
 #include "CubemapRenderer.h"
 #include "Texture2DRenderer.h"
 #include "../Common/Texture.h"
-#include "Shader.h"
+#include "../RHI/Shader.h"
 
 namespace RHI
 {
