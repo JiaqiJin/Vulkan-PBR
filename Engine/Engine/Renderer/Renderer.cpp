@@ -128,6 +128,28 @@ void Renderer::init(const RenderScene* scene)
 		*scene->getBakedBRDFFragmentShader(), 
 		bakedBRDFTexture);
 
+	{
+		VulkanUtils::transitionImageLayout(
+			context,
+			bakedBRDFTexture.getImage(),
+			bakedBRDFTexture.getImageFormat(),
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0, bakedBRDFTexture.getNumMipLevels(),
+			0, bakedBRDFTexture.getNumLayers());
+
+		bakedBRDFRenderer.render();
+
+		VulkanUtils::transitionImageLayout(
+			context,
+			bakedBRDFTexture.getImage(),
+			bakedBRDFTexture.getImageFormat(),
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			0, bakedBRDFTexture.getNumMipLevels(),
+			0, bakedBRDFTexture.getNumLayers());
+	}
+
 	// Cube Render
 	hdriToCubeRenderer.init(
 		*scene->getCubeVertexShader(),

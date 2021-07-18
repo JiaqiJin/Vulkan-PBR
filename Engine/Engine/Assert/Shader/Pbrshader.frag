@@ -115,6 +115,16 @@ vec3 SpecularIBL(Surface surface, MicrofacetMaterial material)
 	return result / float(SAMPLE_COUNT);
 }
 
+vec3 ApproximateSpecularIBL(vec3 f0, vec3 view, vec3 normal, float roughness)
+{
+	float dotNV = max(0.0f, dot(normal, view));
+
+	vec3 prefilteredLi = PrefilterSpecularEnvMap(view, normal, roughness);
+	vec2 integratedBRDF = texture(bakedBRDFSampler, vec2(roughness, dotNV)).xy;
+
+	return prefilteredLi * (f0 * integratedBRDF.x + integratedBRDF.y);
+}
+
 void main() {
 	vec3 lightPos = ubo.cameraPos;
 	vec3 lightDirWS = normalize(lightPos - fragPositionWS);
@@ -166,8 +176,9 @@ void main() {
 	vec3 ibl_diffuse  = texture(diffuseIrradianceSampler, ibl.normal).rgb * microfacet_material.albedo;
 	ibl_diffuse  *= (1.0f - F_Shlick(ibl.dotNV, microfacet_material.f0, microfacet_material.roughness));
 
-	vec3 ibl_specular = SpecularIBL(ibl, microfacet_material);
+	//vec3 ibl_specular = SpecularIBL(ibl, microfacet_material);
 	//vec3 ibl_specular = PrefilterSpecularEnvMap(ibl.view, ibl.normal, microfacet_material.roughness);
+	vec3 ibl_specular = ApproximateSpecularIBL(microfacet_material.f0, ibl.view, ibl.normal, microfacet_material.roughness);
 
 	vec3 ambient = ibl_diffuse * iPI + ibl_specular;
 
