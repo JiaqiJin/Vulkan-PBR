@@ -33,6 +33,23 @@ namespace RHI
 	};
 }
 
+struct CameraState
+{
+	double phi{ 0.0f };
+	double theta{ 0.0f };
+	double radius{ 2.0f };
+	glm::vec3 target;
+};
+
+struct InputState
+{
+	const double rotationSpeed{ 0.01 };
+	const double scrollSpeed{ 1.5 };
+	bool rotating{ false };
+	double lastMouseX{ 0.0 };
+	double lastMouseY{ 0.0 };
+};
+
 class Application
 {
 public:
@@ -65,6 +82,11 @@ private:
 	static void onFramebufferResize(GLFWwindow* window, int width, int height);
 
 private:
+	static void onMousePosition(GLFWwindow* window, double mouseX, double mouseY);
+	static void onMouseButton(GLFWwindow* window, int button, int action, int mods);
+	static void onScroll(GLFWwindow* window, double deltaX, double deltaY);
+
+private:
 
 	GLFWwindow* window{ nullptr };
 	bool windowResized{ false };
@@ -77,4 +99,8 @@ private:
 
 	RHI::SwapChain* swapChain{ nullptr };
 	RHI::VulkanContext* context{ nullptr };
+
+	// Input 
+	CameraState camera;
+	InputState input;
 };
