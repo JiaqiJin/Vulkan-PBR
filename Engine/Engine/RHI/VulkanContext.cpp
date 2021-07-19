@@ -266,7 +266,7 @@ namespace RHI
 
 		QueueFamilyIndices indices = {};
 
-		for (int i = 0; i < queueFamilies.size(); i++) {
+		for (uint32_t i = 0; i < queueFamilyCount; i++) {
 			const auto& queueFamily = queueFamilies[i];
 			if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 				indices.graphicsFamily = std::make_optional(i);

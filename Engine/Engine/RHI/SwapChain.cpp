@@ -71,7 +71,7 @@ bool SwapChain::acquire(void* ubo, VulkanRenderFrame& frame)
 	// copy render state to ubo
 	void* data = nullptr;
 	vkMapMemory(context->getDevice(), frame.uniformBufferMemory, 0, uboSize, 0, &data);
-	memcpy(data, ubo, uboSize);
+	memcpy(data, ubo, static_cast<size_t>(uboSize));
 	vkUnmapMemory(context->getDevice(), frame.uniformBufferMemory);
 
 	// reset command buffer
@@ -369,7 +369,7 @@ void SwapChain::shutdownPersistent()
 	}
 
 	vkDestroyDescriptorSetLayout(context->getDevice(), descriptorSetLayout, nullptr);
-	descriptorSetLayout = nullptr;
+	descriptorSetLayout = VK_NULL_HANDLE;
 
 	vkDestroyRenderPass(context->getDevice(), renderPass, nullptr);
 	renderPass = VK_NULL_HANDLE;
