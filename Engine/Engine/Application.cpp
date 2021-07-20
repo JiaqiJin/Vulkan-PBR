@@ -23,6 +23,9 @@
 
 using namespace RHI;
 
+int Application::width = 1024;
+int Application::height = 786;
+
 void Application::run()
 {
 	initWindow();
@@ -42,6 +45,10 @@ void Application::run()
 
 void Application::update()
 {
+	float currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -63,10 +70,12 @@ void Application::update()
 	cameraPos.z = static_cast<float>(glm::sin(camera.theta) * camera.radius);
 
 	ubo.world = glm::mat4(1.0f);
-	ubo.view = glm::lookAt(cameraPos, zero, up);
-	ubo.proj = glm::perspective(glm::radians(60.0f), aspect, zNear, zFar);
+	//ubo.view = glm::lookAt(cameraPos, zero, up);
+	ubo.view = FPSCamera->GetViewMatrix();
+	//ubo.proj = glm::perspective(glm::radians(60.0f), aspect, zNear, zFar);
+	ubo.proj = glm::perspective(glm::radians(FPSCamera->Zoom), aspect, 0.1f, 1000.0f);
 	ubo.proj[1][1] *= -1;
-	ubo.cameraPosWS = cameraPos;
+	ubo.cameraPosWS = FPSCamera->Position;
 
 	static float f = 0.0f;
 	static int counter = 0;
@@ -142,6 +151,8 @@ void Application::mainloop()
 		ImGui::NewFrame();
 
 		update();
+		
+		processInput(window);
 
 		ImGui::Render();
 
@@ -155,6 +166,8 @@ void Application::initWindow()
 {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	window = glfwCreateWindow(1024, 768, "Vulkan", nullptr, nullptr);
+
+	FPSCamera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, &Application::onFramebufferResize);
@@ -315,4 +328,24 @@ void Application::onScroll(GLFWwindow* window, double deltaX, double deltaY)
 	assert(application);
 
 	application->camera.radius -= deltaY * application->input.scrollSpeed;
+}
+
+void Application::OnKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+
+}
+
+void Application::processInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		FPSCamera->ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		FPSCamera->ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		FPSCamera->ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		FPSCamera->ProcessKeyboard(RIGHT, deltaTime);
 }

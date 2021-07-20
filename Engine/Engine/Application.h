@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Common/Camera.h"
+
 // Forward declaration
 struct GLFWwindow;
 class ImGuiRenderer;
@@ -55,6 +57,8 @@ class Application
 public:
 	void run();
 
+	static int GetWindowWidth() { return width; }
+	static int GetWindowHeight() { return height; }
 private:
 	void initWindow();
 	void shutdownWindow();
@@ -85,10 +89,11 @@ private:
 	static void onMousePosition(GLFWwindow* window, double mouseX, double mouseY);
 	static void onMouseButton(GLFWwindow* window, int button, int action, int mods);
 	static void onScroll(GLFWwindow* window, double deltaX, double deltaY);
-
+	static void OnKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	void processInput(GLFWwindow* window);
 private:
-
 	GLFWwindow* window{ nullptr };
+	static int width, height;
 	bool windowResized{ false };
 
 	RHI::RenderScene* scene{ nullptr };
@@ -103,4 +108,9 @@ private:
 	// Input 
 	CameraState camera;
 	InputState input;
+
+	Camera* FPSCamera;
+	// timing
+	float deltaTime = 0.0f;	// time between current frame and last frame
+	float lastFrame = 0.0f;
 };
