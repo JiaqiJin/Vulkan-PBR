@@ -150,7 +150,6 @@
     <ClCompile Include="Common\Camera.cpp" />
     <ClCompile Include="Common\Logger.cpp" />
     <ClCompile Include="Common\ResourceManager.cpp" />
-    <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="Renderer\Texture2DRenderer.cpp" />
     <ClCompile Include="GUI\ImGuiRenderer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -180,7 +179,6 @@
     <ClInclude Include="Common\Camera.h" />
     <ClInclude Include="Common\Logger.h" />
     <ClInclude Include="Common\ResourceManager.h" />
-    <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="Renderer\Texture2DRenderer.h" />
     <ClInclude Include="GUI\ImGuiRenderer.h" />
     <ClInclude Include="Common\RenderScene.h" />
