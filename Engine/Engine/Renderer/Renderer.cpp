@@ -279,7 +279,6 @@ void Renderer::render(const RenderScene* scene, const VulkanRenderFrame& frame)
 {
 	VkCommandBuffer commandBuffer = frame.commandBuffer;
 	VkFramebuffer frameBuffer = frame.frameBuffer;
-	VkDeviceMemory uniformBufferMemory = frame.uniformBufferMemory;
 	VkDescriptorSet descriptorSet = frame.descriptorSet;
 
 	VkRenderPassBeginInfo renderPassInfo = {};

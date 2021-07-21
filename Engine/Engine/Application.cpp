@@ -139,7 +139,7 @@ void Application::render()
 	}
 
 	renderer->render(scene, frame);
-	imguiRenderer->render(scene, frame);
+	imguiRenderer->render(frame);
 
 	if (!swapChain->present(frame) || windowResized)
 	{
@@ -268,8 +268,8 @@ void Application::initRenderers()
 	renderer->init(scene);
 	renderer->setEnvironment(scene->getHDRTexture(ubo.currentEnvironment));
 
-	imguiRenderer = new ImGuiRenderer(context, swapChain->getExtent(), swapChain->getNoClearRenderPass());
-	imguiRenderer->init(scene, swapChain);
+	imguiRenderer = new ImGuiRenderer(context, ImGui::GetCurrentContext(), swapChain->getExtent(), swapChain->getNoClearRenderPass());
+	imguiRenderer->init(swapChain);
 }
 
 void Application::shutdownRenderers()

@@ -10,8 +10,9 @@
 
 #include <array>
 
-ImGuiRenderer::ImGuiRenderer(const RHI::VulkanContext* context, VkExtent2D extent, VkRenderPass renderPass)
+ImGuiRenderer::ImGuiRenderer(const RHI::VulkanContext* context, ImGuiContext* imguiContext, VkExtent2D extent, VkRenderPass renderPass)
 	: context(context)
+	, imguiContext(imguiContext)
 	, extent(extent)
 	, renderPass(renderPass)
 {
@@ -23,7 +24,7 @@ ImGuiRenderer::~ImGuiRenderer()
 	shutdown();
 }
 
-void ImGuiRenderer::init(const RHI::RenderScene* scene, const RHI::SwapChain* swapChain)
+void ImGuiRenderer::init(const RHI::SwapChain* swapChain)
 {
 	// Init ImGui bindings for Vulkan
 	ImGui_ImplVulkan_InitInfo init_info = {};
@@ -50,7 +51,7 @@ void ImGuiRenderer::resize(const RHI::SwapChain* swapChain)
 	ImGui_ImplVulkan_SetMinImageCount(swapChain->getNumImages());
 }
 
-void ImGuiRenderer::render(const RHI::RenderScene* scene, const RHI::VulkanRenderFrame& frame)
+void ImGuiRenderer::render(const RHI::VulkanRenderFrame& frame)
 {
 	VkCommandBuffer commandBuffer = frame.commandBuffer;
 	VkFramebuffer frameBuffer = frame.frameBuffer;
