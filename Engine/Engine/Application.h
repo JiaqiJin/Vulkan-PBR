@@ -89,8 +89,7 @@ private:
 	static void onMousePosition(GLFWwindow* window, double mouseX, double mouseY);
 	static void onMouseButton(GLFWwindow* window, int button, int action, int mods);
 	static void onScroll(GLFWwindow* window, double deltaX, double deltaY);
-	static void OnKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-	void processInput(GLFWwindow* window);
+	static void processInput(GLFWwindow* window);
 private:
 	GLFWwindow* window{ nullptr };
 	static int width, height;
@@ -109,8 +108,11 @@ private:
 	CameraState camera;
 	InputState input;
 
-	Camera* FPSCamera;
+	static Camera FPSCamera;
 	// timing
-	float deltaTime = 0.0f;	// time between current frame and last frame
-	float lastFrame = 0.0f;
+	static float deltaTime;	// time between current frame and last frame
+	static float lastFrame;
+	static float lastX;
+	static float lastY;
+	static bool firstMouse;
 };

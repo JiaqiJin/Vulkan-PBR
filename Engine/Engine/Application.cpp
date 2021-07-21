@@ -14,9 +14,6 @@
 
 #include <GLFW/glfw3.h>
 
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
 #include <iostream>
 #include <chrono>
 #include <algorithm>
@@ -25,6 +22,13 @@ using namespace RHI;
 
 int Application::width = 1024;
 int Application::height = 786;
+Camera Application::FPSCamera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+float Application::deltaTime = 0.0f;	// time between current frame and last frame
+float Application::lastFrame = 0.0f;
+float Application::lastX = 0.0f;
+float Application::lastY = 0.0f;
+bool Application::firstMouse = true;
 
 void Application::run()
 {
@@ -70,12 +74,16 @@ void Application::update()
 	cameraPos.z = static_cast<float>(glm::sin(camera.theta) * camera.radius);
 
 	ubo.world = glm::mat4(1.0f);
-	//ubo.view = glm::lookAt(cameraPos, zero, up);
-	ubo.view = FPSCamera->GetViewMatrix();
-	//ubo.proj = glm::perspective(glm::radians(60.0f), aspect, zNear, zFar);
-	ubo.proj = glm::perspective(glm::radians(FPSCamera->Zoom), aspect, 0.1f, 1000.0f);
+	ubo.view = glm::lookAt(cameraPos, zero, up);
+	
+	ubo.proj = glm::perspective(glm::radians(60.0f), aspect, zNear, zFar);
 	ubo.proj[1][1] *= -1;
-	ubo.cameraPosWS = FPSCamera->Position;
+	ubo.cameraPosWS = cameraPos;
+
+	//ubo.world = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(90.0f, 0.0f, -90.0f));
+	//ubo.cameraPosWS = FPSCamera.Position;
+	//ubo.view = FPSCamera.GetViewMatrix();
+	//ubo.proj = glm::perspective(glm::radians(FPSCamera.Zoom), aspect, 0.1f, 1000.0f);
 
 	static float f = 0.0f;
 	static int counter = 0;
@@ -166,8 +174,6 @@ void Application::initWindow()
 {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	window = glfwCreateWindow(1024, 768, "Vulkan", nullptr, nullptr);
-
-	FPSCamera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, &Application::onFramebufferResize);
@@ -294,6 +300,21 @@ void Application::shutdownImGui()
 
 void Application::onMousePosition(GLFWwindow* window, double mouseX, double mouseY)
 {
+	//if (firstMouse)
+	//{
+	//	lastX = mouseX;
+	//	lastY = mouseY;
+	//	firstMouse = false;
+	//}
+
+	//float xoffset = mouseX - lastX;
+	//float yoffset = lastY - mouseY; // reversed since y-coordinates go from bottom to top
+
+	//lastX = mouseX;
+	//lastY = mouseY;
+
+	//FPSCamera.ProcessMouseMovement(xoffset, yoffset);
+
 	Application* application = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
 	assert(application != nullptr);
 
@@ -324,15 +345,11 @@ void Application::onMouseButton(GLFWwindow* window, int button, int action, int 
 
 void Application::onScroll(GLFWwindow* window, double deltaX, double deltaY)
 {
+	// FPSCamera.ProcessMouseScroll(deltaX);
 	Application* application = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
 	assert(application);
 
 	application->camera.radius -= deltaY * application->input.scrollSpeed;
-}
-
-void Application::OnKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-
 }
 
 void Application::processInput(GLFWwindow* window)
@@ -341,11 +358,11 @@ void Application::processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		FPSCamera->ProcessKeyboard(FORWARD, deltaTime);
+		FPSCamera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		FPSCamera->ProcessKeyboard(BACKWARD, deltaTime);
+		FPSCamera.ProcessKeyboard(BACKWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		FPSCamera->ProcessKeyboard(LEFT, deltaTime);
+		FPSCamera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		FPSCamera->ProcessKeyboard(RIGHT, deltaTime);
+		FPSCamera.ProcessKeyboard(RIGHT, deltaTime);
 }
