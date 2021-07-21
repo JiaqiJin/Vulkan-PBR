@@ -11,7 +11,6 @@
 
 #include "Common/Camera.h"
 
-// Forward declaration
 struct GLFWwindow;
 class ImGuiRenderer;
 
