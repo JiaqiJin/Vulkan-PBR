@@ -154,6 +154,7 @@
     <ClCompile Include="GUI\ImGuiRenderer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Common\RenderScene.cpp" />
+    <ClCompile Include="RHI\Device.cpp" />
     <ClCompile Include="RHI\SwapChain.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Renderer\CubemapRenderer.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Renderer\Texture2DRenderer.h" />
     <ClInclude Include="GUI\ImGuiRenderer.h" />
     <ClInclude Include="Common\RenderScene.h" />
+    <ClInclude Include="RHI\Device.h" />
     <ClInclude Include="RHI\SwapChain.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Renderer\CubemapRenderer.h" />
