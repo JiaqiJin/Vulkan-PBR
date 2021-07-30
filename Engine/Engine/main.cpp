@@ -7,13 +7,13 @@
 
 int main(void)
 {
-	if (!glfwInit())
-		return EXIT_FAILURE;
+	/*if (!glfwInit())
+		return EXIT_FAILURE;*/
 
 	Log::Init();
 	K_INFO("Init Kawaii Vulkan");
 
-	try
+	/*try
 	{
 		Application app;
 		app.run();
@@ -23,9 +23,9 @@ int main(void)
 		std::cerr << e.what() << std::endl;
 		glfwTerminate();
 		return EXIT_FAILURE;
-	}
+	}*/
 
-	glfwTerminate();
+	//glfwTerminate();
 	return EXIT_SUCCESS;
 }
 
