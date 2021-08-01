@@ -17,13 +17,13 @@ namespace RHI
 		TessellationEvaulation,
 	};
 
-	class VulkanContext;
+	class Device;
 
 	class Shader
 	{
 	public:
-		Shader(const VulkanContext* context)
-			: context(context) { }
+		Shader(const Device* device)
+			: device(device) { }
 
 		~Shader();
 
@@ -38,7 +38,7 @@ namespace RHI
 		bool compileFromSourceInternal(const char* path, const char* sourceData, size_t sourceSize, shaderc_shader_kind kind);
 
 	private:
-		const VulkanContext* context;
+		const Device* device;
 
 		std::string shaderPath;
 		VkShaderModule shaderModule{ VK_NULL_HANDLE };

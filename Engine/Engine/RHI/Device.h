@@ -14,6 +14,25 @@ namespace RHI
 		void shutdown();
 		void wait();
 
+	public:
+		const char* getInstanceExtension();
+		VkSurfaceKHR createSurface(void* native_window);
+		void destroySurface(VkSurfaceKHR surface);
+
+		// Getters
+		inline VkInstance getInstance() const { return instance; }
+		inline VkDevice getDevice() const { return device; }
+		inline VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; }
+		inline VkCommandPool getCommandPool() const { return commandPool; }
+		inline VkDescriptorPool getDescriptorPool() const { return descriptorPool; }
+		inline uint32_t getGraphicsQueueFamily() const { return graphicsQueueFamily; }
+		inline VkQueue getGraphicsQueue() const { return graphicsQueue; }
+		inline VkSampleCountFlagBits getMaxSampleCount() const { return maxMSAASamples; }
+		inline VmaAllocator getVRAMAllocator() const { return vram_allocator; }
+
+	private:
+		int examinePhysicalDevice(VkPhysicalDevice physicalDevice) const;
+
 	private:
 		VkInstance instance{ VK_NULL_HANDLE };
 
@@ -27,7 +46,6 @@ namespace RHI
 		VkQueue graphicsQueue { VK_NULL_HANDLE };
 
 		VkSampleCountFlagBits maxMSAASamples { VK_SAMPLE_COUNT_1_BIT };
-		VkDebugUtilsMessengerEXT debugMessenger { VK_NULL_HANDLE };
 
 		VmaAllocator vram_allocator { VK_NULL_HANDLE };
 	};

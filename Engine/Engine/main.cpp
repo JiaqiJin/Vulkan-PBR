@@ -5,6 +5,8 @@
 #include "Common/Logger.h"
 #include <GLFW/glfw3.h>
 
+#include "RHI/Device.h"
+
 int main(void)
 {
 	/*if (!glfwInit())
@@ -12,6 +14,10 @@ int main(void)
 
 	Log::Init();
 	K_INFO("Init Kawaii Vulkan");
+	const char* name = "kawaii";
+	const char* engine = "No Engine";
+	RHI::Device Dev;
+	Dev.init(name, engine);
 
 	/*try
 	{

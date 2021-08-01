@@ -1,6 +1,7 @@
 #include "Shader.h"
 #include "VulkanUtils.h"
 #include "VulkanContext.h"
+#include "Device.h"
 
 #include <fstream>
 #include <iostream>
@@ -175,7 +176,7 @@ namespace RHI
 		const uint32_t* data = reinterpret_cast<const uint32_t*>(shaderc_result_get_bytes(result));
 
 		clear();
-		shaderModule = VulkanUtils::createShaderModule(context, data, size);
+		shaderModule = Utils::createShaderModule(device, data, size);
 
 		shaderc_result_release(result);
 		shaderc_compile_options_release(options);
@@ -193,7 +194,7 @@ namespace RHI
 
 	void Shader::clear()
 	{
-		vkDestroyShaderModule(context->getDevice(), shaderModule, nullptr);
+		vkDestroyShaderModule(device->getDevice(), shaderModule, nullptr);
 		shaderModule = VK_NULL_HANDLE;
 	}
 }

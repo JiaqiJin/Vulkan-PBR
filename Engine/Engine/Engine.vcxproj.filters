@@ -96,10 +96,10 @@
     <ClCompile Include="Common\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp">
+    <ClCompile Include="RHI\Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\Device.cpp">
+    <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -188,10 +188,10 @@
     <ClInclude Include="Common\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vendor\vma\vk_mem_alloc.h">
+    <ClInclude Include="RHI\Device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RHI\Device.h">
+    <ClInclude Include="Vendor\vma\vk_mem_alloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
