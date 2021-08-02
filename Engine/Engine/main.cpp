@@ -5,21 +5,13 @@
 #include "Common/Logger.h"
 #include <GLFW/glfw3.h>
 
-#include "RHI/Device.h"
 
 int main(void)
 {
-	/*if (!glfwInit())
-		return EXIT_FAILURE;*/
+	if (!glfwInit())
+		return EXIT_FAILURE;
 
-	Log::Init();
-	K_INFO("Init Kawaii Vulkan");
-	const char* name = "kawaii";
-	const char* engine = "No Engine";
-	RHI::Device Dev;
-	Dev.init(name, engine);
-
-	/*try
+	try
 	{
 		Application app;
 		app.run();
@@ -29,9 +21,9 @@ int main(void)
 		std::cerr << e.what() << std::endl;
 		glfwTerminate();
 		return EXIT_FAILURE;
-	}*/
+	}
 
-	//glfwTerminate();
+	glfwTerminate();
 	return EXIT_SUCCESS;
 }
 
