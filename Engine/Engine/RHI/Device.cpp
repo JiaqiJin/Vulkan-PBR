@@ -1,8 +1,8 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #include "Device.h"
 #include "VulkanUtils.h"
-#include "Platform.h"
 #include "../Vendor/vma/vk_mem_alloc.h"
+#include "Platform.h"
 
 #include <array>
 #include <vector>

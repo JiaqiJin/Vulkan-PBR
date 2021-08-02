@@ -92,7 +92,7 @@ namespace RHI
 			}
 
 			if (verbose)
-				K_INFO("HAVE", requiredLayer);
+				std::cout << "Have " << requiredLayer << std::endl;
 		}
 
 		return true;
@@ -130,7 +130,7 @@ namespace RHI
 			}
 
 			if (verbose)
-				K_INFO("HAVE", requiredExtension);
+				std::cout << "Have " << requiredExtension << std::endl;
 		}
 
 		return true;
@@ -168,7 +168,7 @@ namespace RHI
 			}
 
 			if (verbose)
-				K_INFO("HAVE", requiredExtension);
+				std::cout << "Have " << requiredExtension << std::endl;
 		}
 
 		return true;

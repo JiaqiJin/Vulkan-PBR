@@ -15,7 +15,6 @@ namespace RHI
 		void wait();
 
 	public:
-		
 		// Getters
 		inline VkInstance getInstance() const { return instance; }
 		inline VkDevice getDevice() const { return device; }

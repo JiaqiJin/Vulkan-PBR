@@ -67,7 +67,6 @@ private:
 	GLFWwindow* window{ nullptr };
 	bool windowResized{ false };
 
-	RHI::SwapChain* swap_chain{ nullptr };
-	//RHI::GlobalDevice* global_device{ nullptr };
+	RHI::SwapChain* swap_chain;
+	RHI::GlobalDevice* global_device;
 };
-

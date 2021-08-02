@@ -9,9 +9,12 @@
 
 int main(void)
 {
-	RHI::Device* DEV = new RHI::Device();
-	DEV->init("SS", "No Engine");
+	/*if (!glfwInit())
+		return EXIT_FAILURE;*/
 
+	Log::Init();
+	K_INFO("Init Kawaii Vulkan");
+	
 	if (!glfwInit())
 		return EXIT_FAILURE;
 

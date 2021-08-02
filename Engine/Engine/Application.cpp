@@ -32,13 +32,13 @@ void Application::run()
 }
 void Application::update()
 {
-	
+
 }
 
 
 void Application::render()
 {
-	
+
 }
 
 
@@ -94,12 +94,12 @@ void Application::onFramebufferResize(GLFWwindow* window, int width, int height)
 
 void Application::onMousePosition(GLFWwindow* window, double mouseX, double mouseY)
 {
-	
+
 }
 
 void Application::onMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
-	
+
 }
 
 void Application::onScroll(GLFWwindow* window, double deltaX, double deltaY)
@@ -110,23 +110,23 @@ void Application::onScroll(GLFWwindow* window, double deltaX, double deltaY)
 
 void Application::initRenderScene()
 {
-	
+
 }
 
 void Application::shutdownRenderScene()
 {
-	
+
 }
 
 
 void Application::initRenderers()
 {
-	
+
 }
 
 void Application::shutdownRenderers()
 {
-	
+
 }
 
 
@@ -148,33 +148,33 @@ void Application::shutdownImGui()
 
 void Application::initDriver()
 {
-	//global_device = new RHI::GlobalDevice("Kawaii", "Excalubur");
+	global_device = new RHI::GlobalDevice("Kawaii", "Excalubur");
 }
 
 void Application::shutdownDriver()
 {
-	//delete global_device;
-	//global_device = nullptr;
+	delete global_device;
+	global_device = nullptr;
 }
 
 
 void Application::initSwapChain()
 {
-	/*void* nativeWindow = glfwGetWin32Window(window);
+	void* nativeWindow = glfwGetWin32Window(window);
 	swap_chain = new RHI::SwapChain(global_device->getDevice(), nativeWindow);
 
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 
-	swap_chain->init(static_cast<uint32_t>(width), static_cast<uint32_t>(height));*/
+	swap_chain->init(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }
 
 void Application::shutdownSwapChain()
 {
-	
+
 }
 
 void Application::recreateSwapChain()
 {
-	
+
 }
