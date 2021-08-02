@@ -5,9 +5,13 @@
 #include "Common/Logger.h"
 #include <GLFW/glfw3.h>
 
+#include "RHI/Device.h"
 
 int main(void)
 {
+	RHI::Device* DEV = new RHI::Device();
+	DEV->init("SS", "No Engine");
+
 	if (!glfwInit())
 		return EXIT_FAILURE;
 

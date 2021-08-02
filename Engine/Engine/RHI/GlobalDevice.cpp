@@ -10,6 +10,11 @@ namespace RHI
 		device->init(application_name, engine_name);
 	}
 
+	void GlobalDevice::wait()
+	{
+		vkDeviceWaitIdle(device->getDevice());
+	}
+
 	GlobalDevice::~GlobalDevice()
 	{
 		if (device)

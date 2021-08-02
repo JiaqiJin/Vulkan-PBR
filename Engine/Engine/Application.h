@@ -5,6 +5,12 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 
+namespace RHI
+{
+	class SwapChain;
+	class GlobalDevice;
+}
+
 struct GLFWwindow;
 
 struct UniformBuffer
@@ -61,5 +67,7 @@ private:
 	GLFWwindow* window{ nullptr };
 	bool windowResized{ false };
 
+	RHI::SwapChain* swap_chain{ nullptr };
+	//RHI::GlobalDevice* global_device{ nullptr };
 };
 

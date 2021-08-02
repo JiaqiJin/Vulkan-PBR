@@ -14,6 +14,10 @@ namespace RHI
 		GlobalDevice(const char* application_name, const char* engine_name);
 		~GlobalDevice();
 
+		inline const Device* getDevice() const { return device; }
+
+		void wait();
+
 	private:
 		Device* device{ nullptr };
 	};

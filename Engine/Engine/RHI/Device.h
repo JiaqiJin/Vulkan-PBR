@@ -15,10 +15,7 @@ namespace RHI
 		void wait();
 
 	public:
-		const char* getInstanceExtension();
-		VkSurfaceKHR createSurface(void* native_window);
-		void destroySurface(VkSurfaceKHR surface);
-
+		
 		// Getters
 		inline VkInstance getInstance() const { return instance; }
 		inline VkDevice getDevice() const { return device; }

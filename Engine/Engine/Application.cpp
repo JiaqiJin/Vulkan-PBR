@@ -1,7 +1,13 @@
+#define VK_USE_PLATFORM_WIN32_KHR
 #include "Application.h"
 
 #include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WGL
+#define GLFW_EXPOSE_NATIVE_WIN32 
 #include <GLFW/glfw3native.h>
+
+#include "RHI/GlobalDevice.h"
+#include "RHI/SwapChain.h"
 
 #include "Vendor/imgui/imgui.h"
 #include "Vendor/imgui/imgui_impl_glfw.h"
@@ -54,6 +60,7 @@ void Application::mainloop()
 		glfwPollEvents();
 	}
 
+	//global_device->wait();
 }
 
 
@@ -138,23 +145,28 @@ void Application::shutdownImGui()
 	ImGui::DestroyContext();
 }
 
-/*
- */
+
 void Application::initDriver()
 {
-	
+	//global_device = new RHI::GlobalDevice("Kawaii", "Excalubur");
 }
 
 void Application::shutdownDriver()
 {
-
+	//delete global_device;
+	//global_device = nullptr;
 }
 
-/*
- */
+
 void Application::initSwapChain()
 {
+	/*void* nativeWindow = glfwGetWin32Window(window);
+	swap_chain = new RHI::SwapChain(global_device->getDevice(), nativeWindow);
 
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+
+	swap_chain->init(static_cast<uint32_t>(width), static_cast<uint32_t>(height));*/
 }
 
 void Application::shutdownSwapChain()
