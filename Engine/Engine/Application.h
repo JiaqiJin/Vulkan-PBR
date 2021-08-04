@@ -5,6 +5,8 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 
+#include <memory>
+
 namespace RHI
 {
 	class SwapChain;
@@ -67,6 +69,6 @@ private:
 	GLFWwindow* window{ nullptr };
 	bool windowResized{ false };
 
-	RHI::SwapChain* swap_chain;
-	RHI::GlobalDevice* global_device;
+	std::shared_ptr<RHI::SwapChain> swap_chain;
+	std::shared_ptr<RHI::GlobalDevice> global_device;
 };

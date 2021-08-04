@@ -2,7 +2,7 @@
 #include "Device.h"
 #include "VulkanUtils.h"
 #include "../Vendor/vma/vk_mem_alloc.h"
-#include "Platform.h"
+#include "../Common/Logger.h"
 
 #include <array>
 #include <vector>
@@ -33,7 +33,7 @@ namespace RHI
 	void Device::init(const char* applicationName, const char* engineName)
 	{
 		// Check required instance extensions
-		requiredInstanceExtensions.push_back(Platform::getInstanceExtension());
+		requiredInstanceExtensions.push_back(getInstanceExtension());
 		if (!Utils::checkInstanceExtensions(requiredInstanceExtensions, true))
 			throw std::runtime_error("This device doesn't have required Vulkan extensions");
 
@@ -224,6 +224,30 @@ namespace RHI
 			estimate++;
 
 		return estimate;
+	}
+
+	const char* Device::getInstanceExtension()
+	{
+		return "VK_KHR_win32_surface";
+	}
+
+	VkSurfaceKHR Device::createSurface(void* native_window)
+	{
+		VkSurfaceKHR surface = VK_NULL_HANDLE;
+
+		VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
+		surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+		surfaceInfo.hwnd = reinterpret_cast<HWND>(native_window);
+		surfaceInfo.hinstance = GetModuleHandle(nullptr);
+
+		if (vkCreateWin32SurfaceKHR(instance, &surfaceInfo, nullptr, &surface) != VK_SUCCESS)
+			K_ERROR("Platform::createSurface(): vkCreateWin32SurfaceKHR failed");
+		return surface;
+	}
+
+	void Device::destroySurface(VkSurfaceKHR surface)
+	{
+		vkDestroySurfaceKHR(instance, surface, nullptr);
 	}
 
 }

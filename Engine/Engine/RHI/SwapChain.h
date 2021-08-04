@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <memory>
 #include "GlobalDevice.h"
 
 namespace RHI
@@ -11,7 +12,7 @@ namespace RHI
 	class SwapChain
 	{
 	public:
-		SwapChain(const Device* device, void* native_window);
+		SwapChain(const std::shared_ptr<Device> device, void* native_window);
 		~SwapChain();
 
 		void init(uint32_t width, uint32_t height, uint32_t ubo_size = 0);
@@ -19,10 +20,10 @@ namespace RHI
 		void shutdown();
 
 	private:
-		void selectOptimalSwapChainSettings(const Device* device, uint32_t width, uint32_t height);
+		void selectOptimalSwapChainSettings(const std::shared_ptr<Device> device, uint32_t width, uint32_t height);
 
 	private:
-		const Device* device = nullptr;
+		const std::shared_ptr<Device> device;
 		void* native_window = nullptr;
 
 		// Swap Chain objects

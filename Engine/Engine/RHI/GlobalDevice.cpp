@@ -6,7 +6,7 @@ namespace RHI
 {
 	GlobalDevice::GlobalDevice(const char* application_name, const char* engine_name)
 	{
-		device = new Device();
+		device = std::make_shared<Device>();
 		device->init(application_name, engine_name);
 	}
 
@@ -22,8 +22,5 @@ namespace RHI
 			device->wait();
 			device->shutdown();
 		}
-
-		delete device;
-		device = nullptr;
 	}
 }

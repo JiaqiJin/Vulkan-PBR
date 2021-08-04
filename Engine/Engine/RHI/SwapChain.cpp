@@ -1,6 +1,5 @@
 #include "SwapChain.h"
 #include "Device.h"
-#include "Platform.h"
 #include "VulkanUtils.h"
 
 #include "../Common/Logger.h"
@@ -9,7 +8,7 @@
 
 namespace RHI
 {
-	SwapChain::SwapChain(const Device* device, void* native_window)
+	SwapChain::SwapChain(const std::shared_ptr<Device> device, void* native_window)
 		: device(device), native_window(native_window)
 	{
 		assert(native_window != nullptr && "Invalid window");
@@ -23,7 +22,7 @@ namespace RHI
 	void SwapChain::init(uint32_t width, uint32_t height, uint32_t ubo_size)
 	{
 		// Create surface
-		surface = Platform::createSurface(device, native_window);
+		surface = device->createSurface(native_window);
 		if (surface == VK_NULL_HANDLE)
 		{
 			K_ERROR("Can't create platform surface");
@@ -118,7 +117,7 @@ namespace RHI
 		swap_chain = nullptr;
 	}
 
-	void SwapChain::selectOptimalSwapChainSettings(const Device* device, uint32_t width, uint32_t height)
+	void SwapChain::selectOptimalSwapChainSettings(const std::shared_ptr<Device> device, uint32_t width, uint32_t height)
 	{
 		// Get surface capabilities
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->getPhysicalDevice(), surface, &surface_capabilities);

@@ -156,7 +156,6 @@
     <ClCompile Include="Common\RenderScene.cpp" />
     <ClCompile Include="RHI\Device.cpp" />
     <ClCompile Include="RHI\GlobalDevice.cpp" />
-    <ClCompile Include="RHI\Platform.cpp" />
     <ClCompile Include="RHI\SwapChain.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Renderer\CubemapRenderer.cpp" />
@@ -189,7 +188,6 @@
     <ClInclude Include="Common\RenderScene.h" />
     <ClInclude Include="RHI\Device.h" />
     <ClInclude Include="RHI\GlobalDevice.h" />
-    <ClInclude Include="RHI\Platform.h" />
     <ClInclude Include="RHI\SwapChain.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Renderer\CubemapRenderer.h" />

@@ -105,9 +105,6 @@
     <ClCompile Include="RHI\GlobalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RHI\Platform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\Texture.h">
@@ -201,9 +198,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RHI\GlobalDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RHI\Platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Common\GraphicsEnums.h">

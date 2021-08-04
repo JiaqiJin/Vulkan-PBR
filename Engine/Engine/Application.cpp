@@ -148,20 +148,19 @@ void Application::shutdownImGui()
 
 void Application::initDriver()
 {
-	global_device = new RHI::GlobalDevice("Kawaii", "Excalubur");
+	global_device = std::make_shared<RHI::GlobalDevice>("Kawaii", "Excalubur");
 }
 
 void Application::shutdownDriver()
 {
-	delete global_device;
-	global_device = nullptr;
+	
 }
 
 
 void Application::initSwapChain()
 {
 	void* nativeWindow = glfwGetWin32Window(window);
-	swap_chain = new RHI::SwapChain(global_device->getDevice(), nativeWindow);
+	swap_chain = std::make_shared<RHI::SwapChain>(global_device->getDevice(), nativeWindow);
 
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);

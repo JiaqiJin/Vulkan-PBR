@@ -4,6 +4,8 @@
 #include "../Common/GraphicsEnums.h"
 #include "../Vendor/vma/vk_mem_alloc.h"
 
+#include <memory>
+
 namespace RHI
 {
 	class Device;
@@ -14,11 +16,11 @@ namespace RHI
 		GlobalDevice(const char* application_name, const char* engine_name);
 		~GlobalDevice();
 
-		inline const Device* getDevice() const { return device; }
+		inline const std::shared_ptr<Device> getDevice() const { return device; }
 
 		void wait();
 
 	private:
-		Device* device{ nullptr };
+		std::shared_ptr<Device> device{ nullptr };
 	};
 }
