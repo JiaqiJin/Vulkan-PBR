@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 #include "../Vendor/vma/vk_mem_alloc.h"
 #include <vector>
+#include <memory>
 
 namespace RHI
 {
@@ -41,7 +42,7 @@ namespace RHI
 		static uint32_t getPresentQueueFamily( VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, uint32_t graphicsQueueFamily);
 
 		static void createBuffer(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VkDeviceSize size,
 			VkBufferUsageFlags usage,
 			VkMemoryPropertyFlags memoryProperties,
@@ -49,24 +50,24 @@ namespace RHI
 			VmaAllocation& memory);
 
 		static void fillDeviceLocalBuffer(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VkBuffer buffer,
 			VkDeviceSize size,
 			const void* data);
 
 		static void fillHostVisibleBuffer(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VmaAllocation memory,
 			VkDeviceSize size,
 			const void* data);
 
 		static VkShaderModule createShaderModule(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			const uint32_t* bytecode,
 			size_t bytecodeSize);
 
 		static void createImage(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VkImageType type,
 			uint32_t width,
 			uint32_t height,
@@ -83,7 +84,7 @@ namespace RHI
 			VmaAllocation& memory);
 
 		static void createImageCube(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			uint32_t width,
 			uint32_t height,
 			uint32_t mipLevels,
@@ -96,7 +97,7 @@ namespace RHI
 			VmaAllocation& memory);
 
 		static void createImage2D(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			uint32_t width,
 			uint32_t height,
 			uint32_t mipLevels,
@@ -109,7 +110,7 @@ namespace RHI
 			VmaAllocation& memory);
 
 		static void createImage2D(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			uint32_t width,
 			uint32_t height,
 			uint32_t mipLevels,
@@ -123,7 +124,7 @@ namespace RHI
 			VmaAllocation& memory);
 
 		static VkImageView createImageView(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VkImage image,
 			VkFormat format,
 			VkImageAspectFlags aspectFlags,
@@ -134,12 +135,12 @@ namespace RHI
 			uint32_t numLayers = 1);
 
 		static VkSampler createSampler(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			uint32_t minMipLevel,
 			uint32_t maxMipLevel);
 
 		static void fillImage(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VkImage image,
 			uint32_t width,
 			uint32_t height,
@@ -153,7 +154,7 @@ namespace RHI
 			uint32_t dataArrayLayers);
 
 		static void generateImage2DMipmaps(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VkImage image,
 			VkFormat imageFormat,
 			uint32_t width,
@@ -163,7 +164,7 @@ namespace RHI
 			VkFilter filter);
 
 		static void transitionImageLayout(
-			const Device* device,
+			const std::shared_ptr<Device> device,
 			VkImage image,
 			VkFormat format,
 			VkImageLayout oldLayout,
@@ -173,8 +174,8 @@ namespace RHI
 			uint32_t baseLayer = 0,
 			uint32_t numLayers = 1);
 
-		static VkCommandBuffer beginSingleTimeCommands(const Device* context);
+		static VkCommandBuffer beginSingleTimeCommands(const std::shared_ptr<Device> device);
 
-		static void endSingleTimeCommands(const Device* device, VkCommandBuffer commandBuffer);
+		static void endSingleTimeCommands(const std::shared_ptr<Device> device, VkCommandBuffer commandBuffer);
 	};
 }

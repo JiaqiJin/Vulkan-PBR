@@ -1,6 +1,5 @@
 #include "Shader.h"
 #include "VulkanUtils.h"
-#include "VulkanContext.h"
 #include "Device.h"
 
 #include <fstream>
@@ -9,16 +8,16 @@
 
 namespace RHI
 {
-	static shaderc_shader_kind vulkan_to_shaderc_kind(ShaderKind kind)
+	static shaderc_shader_kind vulkan_to_shaderc_kind(ShaderType type)
 	{
-		switch (kind)
+		switch (type)
 		{
-		case ShaderKind::Vertex: return shaderc_vertex_shader;
-		case ShaderKind::Fragment: return shaderc_fragment_shader;
-		case ShaderKind::Compute: return shaderc_compute_shader;
-		case ShaderKind::Geometry: return shaderc_geometry_shader;
-		case ShaderKind::TessellationControl: return shaderc_tess_control_shader;
-		case ShaderKind::TessellationEvaulation: return shaderc_tess_evaluation_shader;
+		case ShaderType::VERTEX: return shaderc_vertex_shader;
+		case ShaderType::FRAGMENT: return shaderc_fragment_shader;
+		case ShaderType::COMPUTE: return shaderc_compute_shader;
+		case ShaderType::GEOMETRY: return shaderc_geometry_shader;
+		case ShaderType::TESSELLATION_CONTROL: return shaderc_tess_control_shader;
+		case ShaderType::TESSELLATION_EVALUATION: return shaderc_tess_evaluation_shader;
 		}
 
 		throw std::runtime_error("Unsupported shader kind");
@@ -97,6 +96,12 @@ namespace RHI
 
 	// -------------------- Shader --------------------
 
+	Shader::Shader(const std::shared_ptr<Device> device)
+		: device(device)
+	{
+
+	}
+
 	Shader::~Shader()
 	{
 		clear();
@@ -122,7 +127,7 @@ namespace RHI
 		return compileFromSourceInternal(path, buffer.data(), buffer.size(), shaderc_glsl_infer_from_source);
 	}
 
-	bool Shader::compileFromFile(const char* path, ShaderKind kind)
+	bool Shader::compileFromFile(const char* path, ShaderType type)
 	{
 		std::ifstream file(path, std::ios::ate | std::ios::binary);
 
@@ -139,7 +144,7 @@ namespace RHI
 		file.read(buffer.data(), fileSize);
 		file.close();
 
-		return compileFromSourceInternal(path, buffer.data(), buffer.size(), vulkan_to_shaderc_kind(kind));
+		return compileFromSourceInternal(path, buffer.data(), buffer.size(), vulkan_to_shaderc_kind(type));
 	}
 
 	bool Shader::compileFromSourceInternal(const char* path, const char* sourceData, size_t sourceSize, shaderc_shader_kind kind)
@@ -182,14 +187,15 @@ namespace RHI
 		shaderc_compile_options_release(options);
 		shaderc_compiler_release(compiler);
 
-		shaderPath = path;
+		Shaderpath = path;
 
 		return true;
 	}
 
+
 	bool Shader::reload()
 	{
-		return compileFromFile(shaderPath.c_str());
+		return compileFromFile(Shaderpath.c_str());
 	}
 
 	void Shader::clear()

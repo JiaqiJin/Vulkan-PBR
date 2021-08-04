@@ -1,34 +1,24 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include "../Common/GraphicsEnums.h"
 #include <string>
-
+#include <memory>
 #include <shaderc/shaderc.h>
 
 namespace RHI
 {
-	enum class ShaderKind
-	{
-		Vertex = 0,
-		Fragment,
-		Compute,
-		Geometry,
-		TessellationControl,
-		TessellationEvaulation,
-	};
-
 	class Device;
 
 	class Shader
 	{
 	public:
-		Shader(const Device* device)
-			: device(device) { }
+		Shader(const std::shared_ptr<Device> device);
 
 		~Shader();
 
 		bool compileFromFile(const char* path);
-		bool compileFromFile(const char* path, ShaderKind kind);
+		bool compileFromFile(const char* path, ShaderType type);
 		bool reload();
 		void clear();
 
@@ -38,10 +28,12 @@ namespace RHI
 		bool compileFromSourceInternal(const char* path, const char* sourceData, size_t sourceSize, shaderc_shader_kind kind);
 
 	private:
-		const Device* device;
+		const std::shared_ptr<Device> device;
 
-		std::string shaderPath;
+		ShaderType type;
 		VkShaderModule shaderModule{ VK_NULL_HANDLE };
+
+		std::string Shaderpath;
 	};
 
 }

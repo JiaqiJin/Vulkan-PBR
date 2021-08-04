@@ -278,7 +278,7 @@ namespace RHI
 
 
 	void Utils::createBuffer(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VkDeviceSize size,
 		VkBufferUsageFlags usage,
 		VkMemoryPropertyFlags memoryProperties,
@@ -302,7 +302,7 @@ namespace RHI
 	}
 
 	void Utils::fillDeviceLocalBuffer(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VkBuffer buffer,
 		VkDeviceSize size,
 		const void* data)
@@ -345,7 +345,7 @@ namespace RHI
 	}
 
 	void Utils::fillHostVisibleBuffer(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VmaAllocation memory,
 		VkDeviceSize size,
 		const void* data)
@@ -358,7 +358,7 @@ namespace RHI
 	}
 
 	VkShaderModule Utils::createShaderModule(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		const uint32_t* bytecode,
 		size_t bytecodeSize)
 	{
@@ -375,7 +375,7 @@ namespace RHI
 	}
 
 	void Utils::createImage(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VkImageType type,
 		uint32_t width,
 		uint32_t height,
@@ -418,7 +418,7 @@ namespace RHI
 	}
 
 	void Utils::createImageCube(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		uint32_t width,
 		uint32_t height,
 		uint32_t mipLevels,
@@ -443,7 +443,7 @@ namespace RHI
 	}
 
 	void Utils::createImage2D(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		uint32_t width,
 		uint32_t height,
 		uint32_t mipLevels,
@@ -467,7 +467,7 @@ namespace RHI
 	}
 
 	VkImageView Utils::createImageView(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VkImage image,
 		VkFormat format,
 		VkImageAspectFlags aspectFlags,
@@ -497,7 +497,7 @@ namespace RHI
 	}
 
 	VkSampler Utils::createSampler(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		uint32_t minMipLevel,
 		uint32_t maxMipLevel)
 	{
@@ -526,7 +526,7 @@ namespace RHI
 	}
 
 	void Utils::fillImage(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VkImage image,
 		uint32_t width,
 		uint32_t height,
@@ -619,7 +619,7 @@ namespace RHI
 	}
 
 	void Utils::generateImage2DMipmaps(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VkImage image,
 		VkFormat imageFormat,
 		uint32_t width,
@@ -719,7 +719,7 @@ namespace RHI
 
 
 	void Utils::transitionImageLayout(
-		const Device* device,
+		const std::shared_ptr<Device> device,
 		VkImage image,
 		VkFormat format,
 		VkImageLayout old_layout,
@@ -802,7 +802,7 @@ namespace RHI
 	}
 
 
-	VkCommandBuffer Utils::beginSingleTimeCommands(const Device* device)
+	VkCommandBuffer Utils::beginSingleTimeCommands(const std::shared_ptr<Device> device)
 	{
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -822,7 +822,7 @@ namespace RHI
 		return commandBuffer;
 	}
 
-	void Utils::endSingleTimeCommands(const Device* device, VkCommandBuffer commandBuffer)
+	void Utils::endSingleTimeCommands(const std::shared_ptr<Device> device, VkCommandBuffer commandBuffer)
 	{
 		vkEndCommandBuffer(commandBuffer);
 
