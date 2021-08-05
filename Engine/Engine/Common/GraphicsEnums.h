@@ -143,3 +143,15 @@ enum class ShaderType : uint8_t
 
 	MAX,
 };
+
+enum FrameBufferAttachmentType : uint8_t
+{
+	COLOR = 0,
+	DEPTH,
+	SWAP_CHAIN_COLOR,
+};
+
+struct FrameBufferAttachment
+{
+
+};
