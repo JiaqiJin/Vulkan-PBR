@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <memory>
 
 #include "../Common/GraphicsEnums.h"
 
@@ -8,23 +9,25 @@
 
 namespace RHI
 {
+	class Device;
+
 	class FrameBuffer
 	{
 	public:
-		FrameBuffer(const FrameBufferAttachment* attachments);
-		~FrameBuffer();
+		FrameBuffer(std::shared_ptr<Device> device);
 
-	private:
-		VkFramebuffer framebuffer{ VK_NULL_HANDLE };
-		VkExtent2D sizes{ 0, 0 };
-
-		VkRenderPass dummy_render_pass{ VK_NULL_HANDLE }; // TODO: move to render pass cache
+		void Init(int width, int height, VkRenderPass renderPass, uint32_t num_attachments, const VkImageView* attachments);
 
 		uint8_t num_attachments{ 0 };
+
+	private:
+		std::shared_ptr<Device> device;
+		VkFramebuffer framebuffer{ VK_NULL_HANDLE };
+
 		VkImageView attachments[MAX_ATTACHMENTS];
-		FrameBufferAttachmentType attachment_types[MAX_ATTACHMENTS];
 		VkFormat attachment_formats[MAX_ATTACHMENTS];
 		VkSampleCountFlagBits attachment_samples[MAX_ATTACHMENTS];
 		bool attachment_resolve[MAX_ATTACHMENTS];
+
 	};
 }

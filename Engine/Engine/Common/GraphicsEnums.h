@@ -153,5 +153,5 @@ enum FrameBufferAttachmentType : uint8_t
 
 struct FrameBufferAttachment
 {
-
+	FrameBufferAttachmentType type{ FrameBufferAttachmentType::COLOR };
 };

@@ -62,7 +62,7 @@ namespace RHI
 		void wait();
 
 		// Object Initialization
-		std::shared_ptr<FrameBuffer> createFramebuffer(const FrameBufferAttachment* attachments);
+		std::shared_ptr<FrameBuffer> createFramebuffer(const FrameBufferAttachment* attachments, uint8_t num_attachments);
 
 	private:
 		std::shared_ptr<Device> device;
