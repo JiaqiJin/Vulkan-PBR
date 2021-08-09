@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 #include "../Vendor/vma/vk_mem_alloc.h"
+#include "../Common/GraphicsEnums.h"
 #include <vector>
 #include <memory>
 
@@ -12,6 +13,11 @@ namespace RHI
 	class Utils
 	{
 	public:
+		static VkFormat getFormat(Format format);
+		static VkSampleCountFlagBits getSamples(Multisample samples);
+
+		static uint8_t getPixelSize(Format format);
+
 		static VkImageUsageFlags getImageUsageFlags(VkFormat format);
 
 		static VkImageAspectFlags getImageAspectFlags(VkFormat format);

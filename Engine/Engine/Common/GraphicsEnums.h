@@ -144,6 +144,19 @@ enum class ShaderType : uint8_t
 	MAX,
 };
 
+enum class Multisample : uint8_t
+{
+	COUNT_1 = 0,
+	COUNT_2,
+	COUNT_4,
+	COUNT_8,
+	COUNT_16,
+	COUNT_32,
+	COUNT_64,
+
+	MAX,
+};
+
 enum FrameBufferAttachmentType : uint8_t
 {
 	COLOR = 0,

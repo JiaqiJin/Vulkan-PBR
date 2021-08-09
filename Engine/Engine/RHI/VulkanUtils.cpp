@@ -9,6 +9,85 @@
 
 namespace RHI
 {
+	VkFormat Utils::getFormat(Format format)
+	{
+		static VkFormat supported_formats[static_cast<int>(Format::MAX)] =
+		{
+			VK_FORMAT_UNDEFINED,
+
+			// 8-bit formats
+			VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R8_UINT, VK_FORMAT_R8_SINT,
+			VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R8G8_UINT, VK_FORMAT_R8G8_SINT,
+			VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R8G8B8_UINT, VK_FORMAT_R8G8B8_SINT,
+			VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_B8G8R8_SNORM, VK_FORMAT_B8G8R8_UINT, VK_FORMAT_B8G8R8_SINT,
+			VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_UINT, VK_FORMAT_R8G8B8A8_SINT,
+			VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SNORM, VK_FORMAT_B8G8R8A8_UINT, VK_FORMAT_B8G8R8A8_SINT,
+
+			// 16-bit formats
+			VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_UINT, VK_FORMAT_R16_SINT, VK_FORMAT_R16_SFLOAT,
+			VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_UINT, VK_FORMAT_R16G16_SINT, VK_FORMAT_R16G16_SFLOAT,
+			VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_UINT, VK_FORMAT_R16G16B16_SINT, VK_FORMAT_R16G16B16_SFLOAT,
+			VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_UINT, VK_FORMAT_R16G16B16A16_SINT, VK_FORMAT_R16G16B16A16_SFLOAT,
+
+			// 32-bit formats
+			VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT, VK_FORMAT_R32_SFLOAT,
+			VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32_SFLOAT,
+			VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32_SFLOAT,
+			VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT, VK_FORMAT_R32G32B32A32_SFLOAT,
+
+			// depth formats
+			VK_FORMAT_D16_UNORM, VK_FORMAT_D16_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+		};
+
+		return supported_formats[static_cast<int>(format)];
+	}
+
+	VkSampleCountFlagBits Utils::getSamples(Multisample samples)
+	{
+		static VkSampleCountFlagBits supported_samples[static_cast<int>(Multisample::MAX)] =
+		{
+			VK_SAMPLE_COUNT_1_BIT, VK_SAMPLE_COUNT_2_BIT,
+			VK_SAMPLE_COUNT_4_BIT, VK_SAMPLE_COUNT_8_BIT,
+			VK_SAMPLE_COUNT_16_BIT, VK_SAMPLE_COUNT_32_BIT,
+			VK_SAMPLE_COUNT_64_BIT,
+		};
+
+		return supported_samples[static_cast<int>(samples)];
+	}
+
+	uint8_t Utils::getPixelSize(Format format)
+	{
+		static uint8_t supported_formats[static_cast<int>(Format::MAX)] =
+		{
+			0,
+
+			// 8-bit formats
+			1, 1, 1, 1,
+			2, 2, 2, 2,
+			3, 3, 3, 3,
+			3, 3, 3, 3,
+			4, 4, 4, 4,
+			4, 4, 4, 4,
+
+			// 16-bit formats
+			2, 2, 2, 2, 2,
+			4, 4, 4, 4, 4,
+			6, 6, 6, 6, 6,
+			8, 8, 8, 8, 8,
+
+			// 32-bit formats
+			4, 4, 4,
+			8, 8, 8,
+			12, 12, 12,
+			16, 16, 16,
+
+			// depth formats
+			2, 3, 4, 4, 5,
+		};
+
+		return supported_formats[static_cast<int>(format)];
+	}
+
 	VkImageUsageFlags Utils::getImageUsageFlags(VkFormat format)
 	{
 		if (format == VK_FORMAT_UNDEFINED)

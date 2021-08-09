@@ -28,6 +28,5 @@ namespace RHI
 		VkFormat attachment_formats[MAX_ATTACHMENTS];
 		VkSampleCountFlagBits attachment_samples[MAX_ATTACHMENTS];
 		bool attachment_resolve[MAX_ATTACHMENTS];
-
 	};
 }

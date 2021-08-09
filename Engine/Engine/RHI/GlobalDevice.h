@@ -64,6 +64,8 @@ namespace RHI
 		// Object Initialization
 		std::shared_ptr<FrameBuffer> createFramebuffer(const FrameBufferAttachment* attachments, uint8_t num_attachments);
 
+		// Texture
+
 	private:
 		std::shared_ptr<Device> device;
 	};
