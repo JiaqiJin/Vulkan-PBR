@@ -119,10 +119,9 @@ void Texture::create2D(Format format, int w, int h, int mips)
 	height = h;
 	mip_levels = mips;
 	layers = 1;
-	//textureFormat = RHI::Utils::getFormat(format);
+	textureFormat = RHI::Utils::getFormat(format);
 
 	createTexture2D(format, w, h, mips);
-	//sampler = RHI::Utils::createSampler(device, 0, mip_levels);
 }
 
 void Texture::createCube(Format format, int w, int h, int mips)
@@ -132,10 +131,10 @@ void Texture::createCube(Format format, int w, int h, int mips)
 	mip_levels = mips;
 	layers = 6;
 
-
+	createTextureCube(width, height, mips, format);
 }
 
-bool Texture::import(const char* path)
+bool Texture::importTexture(const char* path)
 {
 	if (stbi_info(path, nullptr, nullptr, nullptr) == 0)
 	{
@@ -225,19 +224,19 @@ void Texture::createTexture2D(Format format,
 	uint32_t num_data_mipmaps)
 {
 	VkImageUsageFlags usage_flags = RHI::Utils::getImageUsageFlags(textureFormat);
+	samplesBits = RHI::Utils::getSamples(samples);
 
 	RHI::Utils::createImage(
 		device,
 		VK_IMAGE_TYPE_2D,
 		width, height, 1,
 		num_mips, 1,
-		samplesBits, textureFormat, tiling,
+		samplesBits, textureFormat, VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | usage_flags,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		0,
 		image,
-		memory
-	);
+		memory);
 
 	VkImageLayout source_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
@@ -251,8 +250,7 @@ void Texture::createTexture2D(Format format,
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			0, num_mips,
-			0, 1
-		);
+			0, 1);
 
 		// transfer data to GPU
 		RHI::Utils::fillImage(
@@ -280,7 +278,7 @@ void Texture::createTexture2D(Format format,
 		0, 1);
 
 	// create base sampler
-	sampler = RHI::Utils::createSampler(device, 0, num_mips);
+	imageSampler = RHI::Utils::createSampler(device, 0, num_mips);
 }
 
 void Texture::generateTexture2DMipmaps(int w, int h)
@@ -317,10 +315,80 @@ void Texture::generateTexture2DMipmaps(int w, int h)
 		mip_levels);
 }
 
+void Texture::createTextureCube(uint32_t width, uint32_t height, uint32_t num_mipmaps,
+	Format format, const void* data, uint32_t num_data_mipmaps)
+{
+	VkImageUsageFlags usage_flags = RHI::Utils::getImageUsageFlags(textureFormat);
+
+	RHI::Utils::createImage(
+		device,
+		VK_IMAGE_TYPE_2D,
+		width, height, 1,
+		num_mipmaps, 1,
+		VK_SAMPLE_COUNT_1_BIT, textureFormat, VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | usage_flags,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		0,
+		image,
+		memory);
+
+	VkImageLayout source_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	if (data != nullptr)
+	{
+		// prepare for transfer
+		RHI::Utils::transitionImageLayout(
+			device,
+			image,
+			textureFormat,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			0, num_mipmaps,
+			0, 1);
+
+		// transfer data to GPU
+		RHI::Utils::fillImage(
+			device,
+			image,
+			width, height, 1,
+			num_mipmaps, 1,
+			RHI::Utils::getPixelSize(format),
+			textureFormat,
+			data,
+			num_data_mipmaps,
+			1);
+
+		source_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	}
+
+	// prepare for shader access
+	RHI::Utils::transitionImageLayout(
+		device,
+		image,
+		textureFormat,
+		source_layout,
+		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		0, num_mipmaps,
+		0, 1);
+
+	// create base sampler
+	imageSampler = RHI::Utils::createSampler(device, 0, num_mipmaps);
+}
+
 void Texture::clearGPUData()
 {
+	vmaDestroyImage(device->getVRAMAllocator(), image, memory);
+
+	vkDestroySampler(device->getDevice(), imageSampler, nullptr);
+	imageSampler = nullptr;
+
+	textureFormat = VK_FORMAT_UNDEFINED;
 }
 
 void Texture::clearCPUData()
 {
+	delete[] pixels;
+	pixels = nullptr;
+
+	width = height = 0;
 }

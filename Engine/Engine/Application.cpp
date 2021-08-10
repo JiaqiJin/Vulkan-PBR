@@ -16,6 +16,10 @@
 #include <iostream>
 #include <chrono>
 
+// 
+#include "Common/Texture.h"
+static const char* texturePath = "Assert/Texture/Default_albedo.jpg";
+
 void Application::run()
 {
 	initWindow();
@@ -149,6 +153,8 @@ void Application::shutdownImGui()
 void Application::initDriver()
 {
 	global_device = std::make_shared<RHI::GlobalDevice>("Kawaii", "Excalubur");
+	testTexture = std::make_shared<Texture>(global_device->getDevice());
+	testTexture->importTexture(texturePath);
 }
 
 void Application::shutdownDriver()

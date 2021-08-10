@@ -7,6 +7,9 @@
 
 #include <memory>
 
+// Test
+class Texture;
+
 namespace RHI
 {
 	class SwapChain;
@@ -71,4 +74,7 @@ private:
 
 	std::shared_ptr<RHI::SwapChain> swap_chain;
 	std::shared_ptr<RHI::GlobalDevice> global_device;
+
+private:
+	std::shared_ptr<Texture> testTexture;
 };
