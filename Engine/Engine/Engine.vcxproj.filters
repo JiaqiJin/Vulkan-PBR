@@ -18,9 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Common\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Common\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -28,9 +25,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Common\RenderScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\CubemapRenderer.cpp">
@@ -87,11 +81,17 @@
     <ClCompile Include="Vulkan\Surface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vulkan\DeviceCreateInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vulkan\Queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vulkan\QueueSelector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Common\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -99,9 +99,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Common\RenderScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\CubemapRenderer.h">
@@ -165,6 +162,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\Surface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\DeviceCreateInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\Queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\DeviceObjectBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\QueueSelector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

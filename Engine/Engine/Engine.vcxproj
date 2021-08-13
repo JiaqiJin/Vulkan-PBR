@@ -154,11 +154,9 @@
     <ClCompile Include="GUI\ImGuiRenderer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Common\RenderScene.cpp" />
-    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Renderer\CubemapRenderer.cpp" />
     <ClCompile Include="Common\Mesh.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
-    <ClCompile Include="Common\Texture.cpp" />
     <ClCompile Include="Vendor\imgui\imgui.cpp" />
     <ClCompile Include="Vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="Vendor\imgui\imgui_draw.cpp" />
@@ -167,8 +165,11 @@
     <ClCompile Include="Vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp" />
     <ClCompile Include="Vulkan\Device.cpp" />
+    <ClCompile Include="Vulkan\DeviceCreateInfo.cpp" />
     <ClCompile Include="Vulkan\Instance.cpp" />
     <ClCompile Include="Vulkan\PhysicalDevice.cpp" />
+    <ClCompile Include="Vulkan\Queue.cpp" />
+    <ClCompile Include="Vulkan\QueueSelector.cpp" />
     <ClCompile Include="Vulkan\Surface.cpp" />
     <ClCompile Include="Vulkan\Vulkan.cpp" />
   </ItemGroup>
@@ -180,11 +181,9 @@
     <ClInclude Include="Renderer\Texture2DRenderer.h" />
     <ClInclude Include="GUI\ImGuiRenderer.h" />
     <ClInclude Include="Common\RenderScene.h" />
-    <ClInclude Include="Application.h" />
     <ClInclude Include="Renderer\CubemapRenderer.h" />
     <ClInclude Include="Common\Mesh.h" />
     <ClInclude Include="Renderer\Renderer.h" />
-    <ClInclude Include="Common\Texture.h" />
     <ClInclude Include="Vendor\imgui\imconfig.h" />
     <ClInclude Include="Vendor\imgui\imgui.h" />
     <ClInclude Include="Vendor\imgui\imgui_impl_glfw.h" />
@@ -195,8 +194,12 @@
     <ClInclude Include="Vendor\imgui\imstb_truetype.h" />
     <ClInclude Include="Vendor\vma\vk_mem_alloc.h" />
     <ClInclude Include="Vulkan\Device.h" />
+    <ClInclude Include="Vulkan\DeviceCreateInfo.h" />
+    <ClInclude Include="Vulkan\DeviceObjectBase.h" />
     <ClInclude Include="Vulkan\Instance.h" />
     <ClInclude Include="Vulkan\PhysicalDevice.h" />
+    <ClInclude Include="Vulkan\Queue.h" />
+    <ClInclude Include="Vulkan\QueueSelector.h" />
     <ClInclude Include="Vulkan\Surface.h" />
     <ClInclude Include="Vulkan\Vulkan.h" />
   </ItemGroup>
