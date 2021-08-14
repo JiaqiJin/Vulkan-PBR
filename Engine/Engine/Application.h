@@ -7,10 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "Vulkan/Device.h"
-#include "Vulkan/Instance.h"
-#include "Vulkan/Surface.h"
-#include "Vulkan/Queue.h"
+#include "Vulkan/GlobalDevice.h"
 
 class Application
 {
@@ -31,10 +28,5 @@ private:
 private:
 	GLFWwindow* m_window{ nullptr };
 
-	// base
-	std::shared_ptr<Vulkan::Instance> m_instance;
-	std::shared_ptr<Vulkan::Surface> m_surface;
-	std::shared_ptr<Vulkan::Device> m_device;
-	std::shared_ptr<Vulkan::Queue> m_main_queue, m_loader_queue;
-	std::shared_ptr<Vulkan::PresentQueue> m_present_queue;
+	std::shared_ptr<Vulkan::GlobalDevice> m_global_device;
 };

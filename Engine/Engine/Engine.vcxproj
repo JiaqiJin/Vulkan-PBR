@@ -172,7 +172,7 @@
     <ClCompile Include="Vulkan\Queue.cpp" />
     <ClCompile Include="Vulkan\QueueSelector.cpp" />
     <ClCompile Include="Vulkan\Surface.cpp" />
-    <ClCompile Include="Vulkan\Vulkan.cpp" />
+    <ClCompile Include="Vulkan\GlobalDevice.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -204,7 +204,7 @@
     <ClInclude Include="Vulkan\Queue.h" />
     <ClInclude Include="Vulkan\QueueSelector.h" />
     <ClInclude Include="Vulkan\Surface.h" />
-    <ClInclude Include="Vulkan\Vulkan.h" />
+    <ClInclude Include="Vulkan\GlobalDevice.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assert\Shader\bakeBRDF.frag" />

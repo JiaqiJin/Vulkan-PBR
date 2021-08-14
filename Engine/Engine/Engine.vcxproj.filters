@@ -66,7 +66,7 @@
     <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\Vulkan.cpp">
+    <ClCompile Include="Vulkan\GlobalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vulkan\Device.cpp">
@@ -152,7 +152,7 @@
     <ClInclude Include="Common\GraphicsEnums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\Vulkan.h">
+    <ClInclude Include="Vulkan\GlobalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\Device.h">
