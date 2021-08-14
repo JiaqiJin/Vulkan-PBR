@@ -14,24 +14,8 @@ int main(void)
 
 	Log::Init();
 	K_INFO("Init Kawaii Vulkan");
-	
-	//if (!glfwInit())
-	//	return EXIT_FAILURE;
-
-	//try
-	//{
-	//	Application app;
-	//	app.run();
-	//}
-	//catch (const std::exception& e)
-	//{
-	//	std::cerr << e.what() << std::endl;
-	//	glfwTerminate();
-	//	return EXIT_FAILURE;
-	//}
-
-	//glfwTerminate();
-	//return EXIT_SUCCESS;
+	Application app{};
+	app.Run();
 }
 
 // https://github.com/Drawoceans/vulkan_tutorial_zhcn
