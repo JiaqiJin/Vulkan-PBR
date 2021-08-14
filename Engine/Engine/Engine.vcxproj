@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Common\Camera.cpp" />
     <ClCompile Include="Common\Logger.cpp" />
     <ClCompile Include="Common\ResourceManager.cpp" />
@@ -174,7 +175,9 @@
     <ClCompile Include="Vulkan\Vulkan.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
     <ClInclude Include="Common\Camera.h" />
+    <ClInclude Include="Common\Config.h" />
     <ClInclude Include="Common\GraphicsEnums.h" />
     <ClInclude Include="Common\Logger.h" />
     <ClInclude Include="Common\ResourceManager.h" />

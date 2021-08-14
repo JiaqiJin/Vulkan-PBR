@@ -30,7 +30,7 @@ namespace Vulkan
 	}
 
 	VkResult Device::create_device(const std::vector<VkDeviceQueueCreateInfo>& queue_create_infos,
-		const std::vector<const char*>& extensions, void* p_next) 
+		const std::vector<const char*>& extensions, void* p_next)
 	{
 		VkDeviceCreateInfo create_info = {};
 		create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -45,7 +45,7 @@ namespace Vulkan
 		return vkCreateDevice(m_physical_device->GetHandle(), &create_info, nullptr, &m_device);
 	}
 
-	VkResult Device::create_allocator() 
+	VkResult Device::create_allocator()
 	{
 		VmaVulkanFunctions vk_funcs = {
 			vkGetPhysicalDeviceProperties,
@@ -75,7 +75,7 @@ namespace Vulkan
 		return vmaCreateAllocator(&create_info, &m_allocator);
 	}
 
-	VkResult Device::create_pipeline_cache() 
+	VkResult Device::create_pipeline_cache()
 	{
 		VkPipelineCacheCreateInfo create_info = {};
 		create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
