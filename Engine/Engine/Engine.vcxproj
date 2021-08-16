@@ -167,6 +167,7 @@
     <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp" />
     <ClCompile Include="Vulkan\Device.cpp" />
     <ClCompile Include="Vulkan\DeviceCreateInfo.cpp" />
+    <ClCompile Include="Vulkan\Fence.cpp" />
     <ClCompile Include="Vulkan\Instance.cpp" />
     <ClCompile Include="Vulkan\PhysicalDevice.cpp" />
     <ClCompile Include="Vulkan\Queue.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="Vulkan\Device.h" />
     <ClInclude Include="Vulkan\DeviceCreateInfo.h" />
     <ClInclude Include="Vulkan\DeviceObjectBase.h" />
+    <ClInclude Include="Vulkan\Fence.h" />
     <ClInclude Include="Vulkan\Instance.h" />
     <ClInclude Include="Vulkan\PhysicalDevice.h" />
     <ClInclude Include="Vulkan\Queue.h" />
