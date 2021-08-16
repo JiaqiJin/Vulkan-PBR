@@ -20,7 +20,7 @@ namespace Vulkan
 		~GlobalDevice();
 
 	private:
-		// base
+		// Base
 		std::shared_ptr<Instance> m_instance;
 		std::shared_ptr<Surface> m_surface;
 		std::shared_ptr<Device> m_device;

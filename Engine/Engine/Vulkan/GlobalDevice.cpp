@@ -14,6 +14,7 @@ namespace Vulkan
 {
 	GlobalDevice::GlobalDevice(GLFWwindow* m_window)
 	{
+		// Instance
 		m_instance = std::make_shared<Vulkan::Instance>();
 
 		if (!m_instance)
@@ -22,6 +23,7 @@ namespace Vulkan
 			exit(EXIT_FAILURE);
 		}
 
+		// Physical Device
 		std::vector<std::shared_ptr<Vulkan::PhysicalDevice>> physical_devices = Vulkan::PhysicalDevice::Fetch(m_instance);
 		if (physical_devices.empty())
 		{
@@ -29,6 +31,7 @@ namespace Vulkan
 			exit(EXIT_FAILURE);
 		}
 
+		// Surface
 		m_surface = std::make_shared<Vulkan::Surface>(m_instance, m_window);
 		if (!m_surface)
 		{
@@ -36,6 +39,7 @@ namespace Vulkan
 			exit(EXIT_FAILURE);
 		}
 
+		// Device 
 		Vulkan::DeviceCreateInfo device_create_info;
 		device_create_info.Initialize(
 			physical_devices[0],
@@ -97,14 +101,15 @@ namespace Vulkan
 					(~present_queue.family);
 			},
 			{ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
+
 		if (!device_create_info.QueueSupport())
 		{
-			spdlog::error("Failed to find queues!");
+			K_ERROR("Failed to find queues!");
 			exit(EXIT_FAILURE);
 		}
 		if (!device_create_info.ExtensionSupport())
 		{
-			spdlog::error("Failed to find extension support!");
+			K_ERROR("Failed to find extension support!");
 			exit(EXIT_FAILURE);
 		}
 		VkPhysicalDeviceDescriptorIndexingFeatures descriptor_indexing_features = {};
@@ -114,7 +119,7 @@ namespace Vulkan
 		m_device = Vulkan::Device::Create(device_create_info, &descriptor_indexing_features);
 		if (!m_device)
 		{
-			spdlog::error("Failed to create logical device!");
+			K_ERROR("Failed to create logical device!");
 			exit(EXIT_FAILURE);
 		}
 	}

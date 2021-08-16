@@ -28,14 +28,11 @@ namespace Vulkan
 		VkResult WaitIdle() const;
 
 	private:
-
-
-	private:
-		std::shared_ptr<PhysicalDevice> m_physical_device;
-
 		VkDevice m_device{ VK_NULL_HANDLE };
 		VkPipelineCache m_pipeline_cache{ VK_NULL_HANDLE };
 		VmaAllocator m_allocator{ VK_NULL_HANDLE };
+
+		std::shared_ptr<PhysicalDevice> m_physical_device;
 
 		VkResult create_allocator();
 
