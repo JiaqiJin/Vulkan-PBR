@@ -9,7 +9,6 @@
 
 namespace Vulkan
 {
-	
 	class Fence : public DeviceObjectBase
 	{
 	public:

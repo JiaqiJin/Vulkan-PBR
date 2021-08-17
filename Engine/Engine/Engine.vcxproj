@@ -165,6 +165,8 @@
     <ClCompile Include="Vendor\imgui\imgui_impl_vulkan.cpp" />
     <ClCompile Include="Vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp" />
+    <ClCompile Include="Vulkan\Buffer.cpp" />
+    <ClCompile Include="Vulkan\BufferBase.cpp" />
     <ClCompile Include="Vulkan\Device.cpp" />
     <ClCompile Include="Vulkan\DeviceCreateInfo.cpp" />
     <ClCompile Include="Vulkan\Fence.cpp" />
@@ -197,6 +199,8 @@
     <ClInclude Include="Vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="Vendor\imgui\imstb_truetype.h" />
     <ClInclude Include="Vendor\vma\vk_mem_alloc.h" />
+    <ClInclude Include="Vulkan\Buffer.h" />
+    <ClInclude Include="Vulkan\BufferBase.h" />
     <ClInclude Include="Vulkan\Device.h" />
     <ClInclude Include="Vulkan\DeviceCreateInfo.h" />
     <ClInclude Include="Vulkan\DeviceObjectBase.h" />
