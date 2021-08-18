@@ -174,13 +174,21 @@
     <ClCompile Include="Vulkan\Device.cpp" />
     <ClCompile Include="Vulkan\DeviceCreateInfo.cpp" />
     <ClCompile Include="Vulkan\Fence.cpp" />
+    <ClCompile Include="Vulkan\ImageView.cpp" />
     <ClCompile Include="Vulkan\Instance.cpp" />
     <ClCompile Include="Vulkan\PhysicalDevice.cpp" />
+    <ClCompile Include="Vulkan\PipelineBase.cpp" />
+    <ClCompile Include="Vulkan\PipelineLayout.cpp" />
     <ClCompile Include="Vulkan\Queue.cpp" />
     <ClCompile Include="Vulkan\QueueSelector.cpp" />
+    <ClCompile Include="Vulkan\RenderPass.cpp" />
+    <ClCompile Include="Vulkan\Sampler.cpp" />
     <ClCompile Include="Vulkan\Semaphore.cpp" />
+    <ClCompile Include="Vulkan\ShaderModule.cpp" />
     <ClCompile Include="Vulkan\Surface.cpp" />
     <ClCompile Include="Vulkan\GlobalDevice.cpp" />
+    <ClCompile Include="Vulkan\Swapchain.cpp" />
+    <ClCompile Include="Vulkan\SwapchainImage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -214,13 +222,21 @@
     <ClInclude Include="Vulkan\DeviceCreateInfo.h" />
     <ClInclude Include="Vulkan\DeviceObjectBase.h" />
     <ClInclude Include="Vulkan\Fence.h" />
+    <ClInclude Include="Vulkan\ImageView.h" />
     <ClInclude Include="Vulkan\Instance.h" />
     <ClInclude Include="Vulkan\PhysicalDevice.h" />
+    <ClInclude Include="Vulkan\PipelineBase.h" />
+    <ClInclude Include="Vulkan\PipelineLayout.h" />
     <ClInclude Include="Vulkan\Queue.h" />
     <ClInclude Include="Vulkan\QueueSelector.h" />
+    <ClInclude Include="Vulkan\RenderPass.h" />
+    <ClInclude Include="Vulkan\Sampler.h" />
     <ClInclude Include="Vulkan\Semaphore.h" />
+    <ClInclude Include="Vulkan\ShaderModule.h" />
     <ClInclude Include="Vulkan\Surface.h" />
     <ClInclude Include="Vulkan\GlobalDevice.h" />
+    <ClInclude Include="Vulkan\Swapchain.h" />
+    <ClInclude Include="Vulkan\SwapchainImage.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assert\Shader\bakeBRDF.frag" />

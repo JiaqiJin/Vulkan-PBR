@@ -29,6 +29,7 @@ namespace Vulkan
 		create_info.compareOp = VK_COMPARE_OP_NEVER;
 		create_info.minLod = 0.0f;
 		create_info.maxLod = (float)mipmap_level;
+
 		if (m_device->GetPhysicalDevicePtr()->GetFeatures().samplerAnisotropy)
 		{
 			create_info.anisotropyEnable = request_anisotropy ? VK_TRUE : VK_FALSE;
@@ -39,6 +40,7 @@ namespace Vulkan
 			create_info.anisotropyEnable = VK_FALSE;
 			create_info.maxAnisotropy = 1.0;
 		}
+
 		create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		if (vkCreateSampler(device->GetHandle(), &create_info, nullptr, &m_sampler) != VK_SUCCESS)
 			K_ERROR("Failed to create RenderPass");
