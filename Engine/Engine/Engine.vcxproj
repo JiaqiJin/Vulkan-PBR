@@ -167,6 +167,10 @@
     <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp" />
     <ClCompile Include="Vulkan\Buffer.cpp" />
     <ClCompile Include="Vulkan\BufferBase.cpp" />
+    <ClCompile Include="Vulkan\CommandPool.cpp" />
+    <ClCompile Include="Vulkan\DescriptorPool.cpp" />
+    <ClCompile Include="Vulkan\DescriptorSet.cpp" />
+    <ClCompile Include="Vulkan\DescriptorSetLayout.cpp" />
     <ClCompile Include="Vulkan\Device.cpp" />
     <ClCompile Include="Vulkan\DeviceCreateInfo.cpp" />
     <ClCompile Include="Vulkan\Fence.cpp" />
@@ -174,6 +178,7 @@
     <ClCompile Include="Vulkan\PhysicalDevice.cpp" />
     <ClCompile Include="Vulkan\Queue.cpp" />
     <ClCompile Include="Vulkan\QueueSelector.cpp" />
+    <ClCompile Include="Vulkan\Semaphore.cpp" />
     <ClCompile Include="Vulkan\Surface.cpp" />
     <ClCompile Include="Vulkan\GlobalDevice.cpp" />
   </ItemGroup>
@@ -201,6 +206,10 @@
     <ClInclude Include="Vendor\vma\vk_mem_alloc.h" />
     <ClInclude Include="Vulkan\Buffer.h" />
     <ClInclude Include="Vulkan\BufferBase.h" />
+    <ClInclude Include="Vulkan\CommandPool.h" />
+    <ClInclude Include="Vulkan\DescriptorPool.h" />
+    <ClInclude Include="Vulkan\DescriptorSet.h" />
+    <ClInclude Include="Vulkan\DescriptorSetLayout.h" />
     <ClInclude Include="Vulkan\Device.h" />
     <ClInclude Include="Vulkan\DeviceCreateInfo.h" />
     <ClInclude Include="Vulkan\DeviceObjectBase.h" />
@@ -209,6 +218,7 @@
     <ClInclude Include="Vulkan\PhysicalDevice.h" />
     <ClInclude Include="Vulkan\Queue.h" />
     <ClInclude Include="Vulkan\QueueSelector.h" />
+    <ClInclude Include="Vulkan\Semaphore.h" />
     <ClInclude Include="Vulkan\Surface.h" />
     <ClInclude Include="Vulkan\GlobalDevice.h" />
   </ItemGroup>
