@@ -11,7 +11,7 @@ namespace Vulkan
 	class RenderPass : public DeviceObjectBase
 	{
 	public:
-		RenderPass(const std::shared_ptr<Device>& device,const VkRenderPassCreateInfo& create_info);
+		RenderPass(const std::shared_ptr<Device>& device, const VkRenderPassCreateInfo& create_info);
 		~RenderPass();
 		VkRenderPass GetHandle() const { return m_render_pass; }
 		const std::shared_ptr<Device>& GetDevicePtr() const override { return m_device; }
