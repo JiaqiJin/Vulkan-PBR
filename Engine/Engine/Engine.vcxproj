@@ -174,6 +174,8 @@
     <ClCompile Include="Vulkan\Device.cpp" />
     <ClCompile Include="Vulkan\DeviceCreateInfo.cpp" />
     <ClCompile Include="Vulkan\Fence.cpp" />
+    <ClCompile Include="Vulkan\Image.cpp" />
+    <ClCompile Include="Vulkan\ImageBase.cpp" />
     <ClCompile Include="Vulkan\ImageView.cpp" />
     <ClCompile Include="Vulkan\Instance.cpp" />
     <ClCompile Include="Vulkan\PhysicalDevice.cpp" />
@@ -222,6 +224,8 @@
     <ClInclude Include="Vulkan\DeviceCreateInfo.h" />
     <ClInclude Include="Vulkan\DeviceObjectBase.h" />
     <ClInclude Include="Vulkan\Fence.h" />
+    <ClInclude Include="Vulkan\Image.h" />
+    <ClInclude Include="Vulkan\ImageBase.h" />
     <ClInclude Include="Vulkan\ImageView.h" />
     <ClInclude Include="Vulkan\Instance.h" />
     <ClInclude Include="Vulkan\PhysicalDevice.h" />
