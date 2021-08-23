@@ -4,9 +4,16 @@
 #include <memory>
 #include <vector>
 
-#include "DeviceObjectBase.h"
+#include "ImageBase.h"
+#include "Swapchain.h"
 
 namespace Vulkan
 {
+	class SwapchainImage : public ImageBase
+	{
+	public:
 
+	private:
+
+	};
 }
