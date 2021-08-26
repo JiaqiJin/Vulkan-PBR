@@ -56,9 +56,7 @@ namespace Vulkan
 		VkFormat GetFormat() const { return m_format; }
 		uint32_t GetMipLevels() const { return m_mip_levels; }
 		uint32_t GetArrayLayers() const { return m_array_layers; }
-		VkImageSubresourceRange GetSubresourceRange(VkImageAspectFlags aspect_mask) const  { 
-			return { aspect_mask, 0, m_mip_levels, 0, m_array_layers };
-		}
+		VkImageSubresourceRange GetSubresourceRange(VkImageAspectFlags aspect_mask) const  { return { aspect_mask, 0, m_mip_levels, 0, m_array_layers }; }
 	protected:
 		VkImage m_image{ VK_NULL_HANDLE };
 
