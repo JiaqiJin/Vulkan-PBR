@@ -43,7 +43,7 @@ namespace Vulkan
 
 		create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		if (vkCreateSampler(device->GetHandle(), &create_info, nullptr, &m_sampler) != VK_SUCCESS)
-			K_ERROR("Failed to create RenderPass");
+			K_ERROR("Failed to create Sampler");
 	}
 
 	Sampler::~Sampler()
