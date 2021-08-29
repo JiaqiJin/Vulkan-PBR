@@ -18,4 +18,40 @@ namespace Vulkan
 		if (m_semaphore)
 			vkDestroySemaphore(m_device->GetHandle(), m_semaphore, nullptr);
 	}
+
+	SemaphoreGroup::SemaphoreGroup(const std::initializer_list<std::shared_ptr<Semaphore>>& semaphores)
+	{
+		Initialize(semaphores);
+	}
+
+	SemaphoreGroup::SemaphoreGroup(const std::vector<std::shared_ptr<Semaphore>>& semaphores) { Initialize(semaphores); }
+
+	void SemaphoreGroup::Initialize(const std::vector<std::shared_ptr<Semaphore>>& semaphores) 
+	{
+		m_semaphores.clear();
+		for (const auto& i : semaphores)
+			m_semaphores.push_back(i->GetHandle());
+	}
+
+	SemaphoreStageGroup::SemaphoreStageGroup(const std::initializer_list<std::pair<std::shared_ptr<Semaphore>, 
+		VkPipelineStageFlags>>& stage_semaphores)
+	{
+		Initialize(stage_semaphores);
+	}
+
+	SemaphoreStageGroup::SemaphoreStageGroup(const std::vector<std::pair<std::shared_ptr<Semaphore>, VkPipelineStageFlags>>& stage_semaphores)
+	{
+		Initialize(stage_semaphores);
+	}
+
+	void SemaphoreStageGroup::Initialize(const std::vector<std::pair<std::shared_ptr<Semaphore>, VkPipelineStageFlags>>& stage_semaphores)
+	{
+		m_semaphores.clear();
+		m_stages.clear();
+		for (const auto& i : stage_semaphores)
+		{
+			m_semaphores.push_back(i.first->GetHandle());
+			m_stages.push_back(i.second);
+		}
+	}
 }

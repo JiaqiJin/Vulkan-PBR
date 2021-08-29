@@ -21,9 +21,16 @@ namespace Vulkan
 	class CommandBuffer : public DeviceObjectBase
 	{
 	public:
+		CommandBuffer(const std::shared_ptr<CommandPool>& command_pool, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+		~CommandBuffer();
 
+		VkResult Submit(const SemaphoreStageGroup& wait_semaphores = SemaphoreStageGroup(),
+			const SemaphoreGroup& signal_semaphores = SemaphoreGroup(),
+			const std::shared_ptr<Fence>& fence = nullptr) const;
+
+		VkResult Submit(const std::shared_ptr<Fence>& fence = nullptr) const;
 	private:
 		VkCommandBuffer m_command_buffer{ VK_NULL_HANDLE };
-		std::shared_ptr<class CommandPool> m_command_pool;
+		std::shared_ptr<CommandPool> m_command_pool;
 	};
 }
