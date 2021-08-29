@@ -167,6 +167,7 @@
     <ClCompile Include="Vendor\vma\vk_mem_alloc.cpp" />
     <ClCompile Include="Vulkan\Buffer.cpp" />
     <ClCompile Include="Vulkan\BufferBase.cpp" />
+    <ClCompile Include="Vulkan\CommandBuffer.cpp" />
     <ClCompile Include="Vulkan\CommandPool.cpp" />
     <ClCompile Include="Vulkan\DescriptorPool.cpp" />
     <ClCompile Include="Vulkan\DescriptorSet.cpp" />
@@ -216,6 +217,7 @@
     <ClInclude Include="Vendor\vma\vk_mem_alloc.h" />
     <ClInclude Include="Vulkan\Buffer.h" />
     <ClInclude Include="Vulkan\BufferBase.h" />
+    <ClInclude Include="Vulkan\CommandBuffer.h" />
     <ClInclude Include="Vulkan\CommandPool.h" />
     <ClInclude Include="Vulkan\DescriptorPool.h" />
     <ClInclude Include="Vulkan\DescriptorSet.h" />

@@ -6,6 +6,15 @@
 #include <map>
 
 #include "DeviceObjectBase.h"
+#include "BufferBase.h"
+#include "CommandPool.h"
+#include "DescriptorSet.h"
+#include "Fence.h"
+#include "Framebuffer.h"
+#include "PipelineBase.h"
+#include "QueryPool.h"
+#include "RenderPass.h"
+#include "Semaphore.h"
 
 namespace Vulkan
 {
