@@ -53,7 +53,7 @@ namespace Vulkan
 			fence ? fence->GetHandle() : VK_NULL_HANDLE);
 	}
 
-	VkResult CommandBuffer::Submit(const std::shared_ptr<Fence>& fence = nullptr) const
+	VkResult CommandBuffer::Submit(const std::shared_ptr<Fence>& fence) const
 	{
 		VkSubmitInfo info = {};
 		info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

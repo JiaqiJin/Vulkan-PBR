@@ -169,17 +169,4 @@ namespace Vulkan
 		m_create_info.dynamicStateCount = m_dynamic_states.size();
 		m_create_info.pDynamicStates = m_dynamic_states.data();
 	}
-
-	void GraphicsPipelineState::SetGraphicsPipelineCreateInfo(VkGraphicsPipelineCreateInfo* info) const
-	{
-		info->pRasterizationState = &m_rasterization_state.m_create_info;
-		info->pVertexInputState = m_vertex_input_state.m_enable ? &m_vertex_input_state.m_create_info : nullptr;
-		info->pInputAssemblyState = m_input_assembly_state.m_enable ? &m_input_assembly_state.m_create_info : nullptr;
-		info->pTessellationState = m_tessellation_state.m_enable ? &m_tessellation_state.m_create_info : nullptr;
-		info->pViewportState = m_viewport_state.m_enable ? &m_viewport_state.m_create_info : nullptr;
-		info->pMultisampleState = m_multisample_state.m_enable ? &m_multisample_state.m_create_info : nullptr;
-		info->pDepthStencilState = m_depth_stencil_state.m_enable ? &m_depth_stencil_state.m_create_info : nullptr;
-		info->pColorBlendState = m_color_blend_state.m_enable ? &m_color_blend_state.m_create_info : nullptr;
-		info->pDynamicState = m_dynamic_state.m_enable ? &m_dynamic_state.m_create_info : nullptr;
-	}
 }

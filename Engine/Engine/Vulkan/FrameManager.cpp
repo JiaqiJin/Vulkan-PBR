@@ -51,7 +51,7 @@ namespace Vulkan
 
 		for (const auto& i : m_frame_fences)
 			i->Wait();
-		m_swapchain = std::make_shared<Swapchain>(m_swapchain->GetGraphicsQueuePtr(), m_swapchain->GetPresentQueuePtr(), false);
+		m_swapchain->recreate(m_swapchain);
 
 		m_swapchain_images = SwapchainImage::Create(m_swapchain);
 		m_swapchain_image_views.clear();

@@ -19,12 +19,14 @@ namespace Vulkan
 		~Swapchain();
 
 		//static std::shared_ptr<Swapchain> CreateNewSwapChain(const std::shared_ptr<Swapchain>& old_swapchain);
+		void recreate(const std::shared_ptr<Swapchain>& old_swapchain);
 
 		uint32_t GetImageCount() const { return m_image_count; }
 		VkSwapchainKHR GetHandle() const { return m_swapchain; };
 		VkFormat GetImageFormat() const { return m_swapchain_create_info.imageFormat; }
 		VkColorSpaceKHR GetImageColorSpace() const { return m_swapchain_create_info.imageColorSpace; }
 		VkExtent2D GetExtent() const { return m_swapchain_create_info.imageExtent; }
+		VkSwapchainCreateInfoKHR GetCreateInfo() const { return m_swapchain_create_info; }
 		const std::shared_ptr<Queue>& GetGraphicsQueuePtr() const { return m_graphics_queue; }
 		const std::shared_ptr<PresentQueue>& GetPresentQueuePtr() const { return m_present_queue; }
 		const std::shared_ptr<Device>& GetDevicePtr() const override { return m_graphics_queue->GetDevicePtr(); }

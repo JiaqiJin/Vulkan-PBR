@@ -33,7 +33,7 @@ namespace Vulkan
 
 		void Initialize(const std::vector<std::shared_ptr<Semaphore>>& semaphores);
 
-		uint32_t GetCount() const { return m_semaphores.size(); }
+		uint32_t GetCount() const { return (uint32_t)m_semaphores.size(); }
 
 		const VkSemaphore* GetSemaphoresPtr() const { return m_semaphores.data(); }
 	private:
@@ -52,7 +52,7 @@ namespace Vulkan
 
 		void Initialize(const std::vector<std::pair<std::shared_ptr<Semaphore>, VkPipelineStageFlags>>& stage_semaphores);
 
-		uint32_t GetCount() const { return m_semaphores.size(); }
+		uint32_t GetCount() const { return (uint32_t)m_semaphores.size(); }
 		const VkSemaphore* GetSemaphoresPtr() const { return m_semaphores.data(); }
 		const VkPipelineStageFlags* GetWaitStagesPtr() const { return m_stages.data(); }
 	private:

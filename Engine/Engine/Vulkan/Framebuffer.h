@@ -5,10 +5,10 @@
 #include <vector>
 
 #include "DeviceObjectBase.h"
+#include "RenderPass.h"
 
 namespace Vulkan
 {
-	class RenderPass;
 	class ImageView;
 
 	class Framebuffer : public DeviceObjectBase

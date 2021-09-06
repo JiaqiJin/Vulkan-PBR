@@ -125,47 +125,44 @@ namespace Vulkan
 		vkGetSwapchainImagesKHR(graphics_queue->GetDevicePtr()->GetHandle(), m_swapchain, &m_image_count, nullptr);
 	}
 
-	//std::shared_ptr<Swapchain> Swapchain::CreateNewSwapChain(const std::shared_ptr<Swapchain>& old_swapchain)
-	//{
-	//	std::shared_ptr<Swapchain> ret = std::make_shared<Swapchain>();
-	//	ret->m_graphics_queue = old_swapchain->m_graphics_queue;
-	//	ret->m_present_queue = old_swapchain->m_present_queue;
-	//	ret->m_swapchain_create_info = old_swapchain->m_swapchain_create_info;
+	void Swapchain::recreate(const std::shared_ptr<Swapchain>& old_swapchain)
+	{
+		m_graphics_queue = old_swapchain->m_graphics_queue;
+		m_present_queue = old_swapchain->m_present_queue;
+		m_swapchain_create_info = old_swapchain->m_swapchain_create_info;
 
-	//	VkPhysicalDevice physical_device = old_swapchain->GetDevicePtr()->GetPhysicalDevicePtr()->GetHandle();
+		VkPhysicalDevice physical_device = old_swapchain->GetDevicePtr()->GetPhysicalDevicePtr()->GetHandle();
 
-	//	VkSurfaceCapabilitiesKHR capabilities;
-	//	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, ret->m_present_queue->GetSurfacePtr()->GetHandle(),
-	//		&capabilities);
+		VkSurfaceCapabilitiesKHR capabilities;
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, m_present_queue->GetSurfacePtr()->GetHandle(),
+			&capabilities);
 
-	//	// query extent
-	//	VkExtent2D extent = capabilities.currentExtent;
-	//	if (capabilities.currentExtent.width == UINT32_MAX)
-	//	{
-	//		int width, height;
-	//		glfwGetWindowSize(ret->m_present_queue->GetSurfacePtr()->GetGlfwWindow(), &width, &height);
-	//		extent = { (uint32_t)width, (uint32_t)height };
+		// query extent
+		VkExtent2D extent = capabilities.currentExtent;
+		if (capabilities.currentExtent.width == UINT32_MAX)
+		{
+			int width, height;
+			glfwGetWindowSize(m_present_queue->GetSurfacePtr()->GetGlfwWindow(), &width, &height);
+			extent = { (uint32_t)width, (uint32_t)height };
 
-	//		extent.width =
-	//			std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, extent.width));
-	//		extent.height =
-	//			std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, extent.height));
-	//	}
+			extent.width =
+				std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, extent.width));
+			extent.height =
+				std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, extent.height));
+		}
 
-	//	// create swapchain
-	//	VkSwapchainCreateInfoKHR& create_info = ret->m_swapchain_create_info;
-	//	create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	//	create_info.imageExtent = extent;
-	//	create_info.oldSwapchain = old_swapchain->GetHandle();
+		// create swapchain
+		VkSwapchainCreateInfoKHR& create_info = m_swapchain_create_info;
+		create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		create_info.imageExtent = extent;
+		create_info.oldSwapchain = old_swapchain->GetHandle();
 
-	//	if (vkCreateSwapchainKHR(old_swapchain->GetDevicePtr()->GetHandle(), &create_info, nullptr, &ret->m_swapchain) != VK_SUCCESS)
-	//		return nullptr;
+		if (vkCreateSwapchainKHR(old_swapchain->GetDevicePtr()->GetHandle(), &create_info, nullptr, &m_swapchain) != VK_SUCCESS)
+			K_ERROR("Failed to Recreate Swap Chain class");
 
-	//	// get image count
-	//	vkGetSwapchainImagesKHR(old_swapchain->GetDevicePtr()->GetHandle(), ret->m_swapchain, &ret->m_image_count, nullptr);
-
-	//	return ret;
-	//}
+		// get image count
+		vkGetSwapchainImagesKHR(old_swapchain->GetDevicePtr()->GetHandle(), m_swapchain, &m_image_count, nullptr);
+	}
 
 	Swapchain::~Swapchain() 
 	{
