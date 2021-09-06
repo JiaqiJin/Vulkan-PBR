@@ -31,7 +31,7 @@ namespace Vulkan
 		create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		create_info.flags = flags;
 		create_info.renderPass = m_render_pass->GetHandle();
-		create_info.attachmentCount = attachments.size();
+		create_info.attachmentCount = (uint32_t)attachments.size();
 		create_info.pAttachments = attachments.data();
 		create_info.width = extent.width;
 		create_info.height = extent.height;

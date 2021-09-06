@@ -97,7 +97,7 @@ namespace Vulkan
 		render_begin_info.framebuffer = framebuffer->GetHandle();
 		render_begin_info.renderArea.offset = offset;
 		render_begin_info.renderArea.extent = extent;
-		render_begin_info.clearValueCount = clear_values.size();
+		render_begin_info.clearValueCount = (uint32_t)clear_values.size();
 		render_begin_info.pClearValues = clear_values.data();
 
 		vkCmdBeginRenderPass(m_command_buffer, &render_begin_info, subpass_contents);
@@ -114,7 +114,7 @@ namespace Vulkan
 		render_begin_info.framebuffer = framebuffer->GetHandle();
 		render_begin_info.renderArea.offset = { 0, 0 };
 		render_begin_info.renderArea.extent = framebuffer->GetExtent();
-		render_begin_info.clearValueCount = clear_values.size();
+		render_begin_info.clearValueCount = (uint32_t)clear_values.size();
 		render_begin_info.pClearValues = clear_values.data();
 
 		vkCmdBeginRenderPass(m_command_buffer, &render_begin_info, subpass_contents);
