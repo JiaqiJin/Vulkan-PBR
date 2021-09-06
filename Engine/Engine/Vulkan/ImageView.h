@@ -10,14 +10,16 @@
 
 namespace Vulkan
 {
+	class SwapchainImage;
+
 	class ImageView : public DeviceObjectBase
 	{
 	public:
 		ImageView(const std::shared_ptr<ImageBase>& image, const VkImageViewCreateInfo& create_info);
 		ImageView(const std::shared_ptr<ImageBase>& image, VkImageViewType view_type,
 			VkFormat format, VkImageAspectFlags aspect_mask, uint32_t base_mip_level,
-			uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count,
-			const VkComponentMapping& components);
+			uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count, const VkComponentMapping& components);
+		ImageView(const std::shared_ptr<SwapchainImage>& swapchain_image);
 		~ImageView();
 
 		const std::shared_ptr<Device>& GetDevicePtr() const override { return m_image->GetDevicePtr(); };

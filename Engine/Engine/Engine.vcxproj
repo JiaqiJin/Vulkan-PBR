@@ -176,6 +176,7 @@
     <ClCompile Include="Vulkan\DeviceCreateInfo.cpp" />
     <ClCompile Include="Vulkan\Fence.cpp" />
     <ClCompile Include="Vulkan\Framebuffer.cpp" />
+    <ClCompile Include="Vulkan\FrameManager.cpp" />
     <ClCompile Include="Vulkan\GraphicsPipeline.cpp" />
     <ClCompile Include="Vulkan\Image.cpp" />
     <ClCompile Include="Vulkan\ImageBase.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="Vulkan\DeviceObjectBase.h" />
     <ClInclude Include="Vulkan\Fence.h" />
     <ClInclude Include="Vulkan\Framebuffer.h" />
+    <ClInclude Include="Vulkan\FrameManager.h" />
     <ClInclude Include="Vulkan\GraphicsPipeline.h" />
     <ClInclude Include="Vulkan\Image.h" />
     <ClInclude Include="Vulkan\ImageBase.h" />
