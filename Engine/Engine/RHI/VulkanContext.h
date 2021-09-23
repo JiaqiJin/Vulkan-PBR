@@ -4,6 +4,8 @@
 #include <vector>
 #include <optional>
 
+#include <vk_mem_alloc.h>
+
 struct GLFWwindow;
 
 namespace RHI
@@ -26,6 +28,7 @@ namespace RHI
 		inline VkQueue getGraphicsQueue() const { return graphicsQueue; }
 		inline VkQueue getPresentQueue() const { return presentQueue; }
 		inline VkSampleCountFlagBits getMaxMSAASamples() const { return maxMSAASamples; }
+		inline VmaAllocator GetAllocatorHandle() const { return m_allocator; }
 
 	private:
 		// Check which queue families are supported by the device and which one of these supports the commands
@@ -41,6 +44,10 @@ namespace RHI
 		QueueFamilyIndices fetchQueueFamilyIndices(VkPhysicalDevice device) const;
 		bool checkInstanceValidationLayers(const std::vector<const char*>& requiredLayers, bool verbose = false);
 		bool checkInstanceExtensions(const std::vector<const char*>& requiredExtensions, bool verbose = false);
+
+	private:
+		VkResult create_allocator();
+
 	private:
 		VkInstance instance{ VK_NULL_HANDLE };
 		VkSurfaceKHR surface{ VK_NULL_HANDLE };
@@ -58,5 +65,8 @@ namespace RHI
 		VkQueue presentQueue{ VK_NULL_HANDLE };
 
 		VkSampleCountFlagBits maxMSAASamples{ VK_SAMPLE_COUNT_1_BIT };
+
+		// Vma
+		VmaAllocator m_allocator{ VK_NULL_HANDLE };
 	};
 }

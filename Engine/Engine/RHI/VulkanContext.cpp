@@ -179,6 +179,8 @@ namespace RHI
 
 		maxMSAASamples = VulkanUtils::getMaxUsableSampleCount(physicalDevice);
 
+		if (create_allocator() != VK_SUCCESS)
+			throw std::runtime_error("Can't create Vma");
 	}
 
 	void VulkanContext::shutdown()
@@ -203,6 +205,9 @@ namespace RHI
 
 		maxMSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		physicalDevice = VK_NULL_HANDLE;
+
+		if (m_allocator)
+			vmaDestroyAllocator(m_allocator);
 	}
 
 	void VulkanContext::wait()
@@ -211,6 +216,36 @@ namespace RHI
 	}
 
 	// ----------------------------- Helper functions ---------------------------
+	VkResult VulkanContext::create_allocator()
+	{
+		VmaVulkanFunctions vk_funcs = {
+		vkGetPhysicalDeviceProperties,
+		vkGetPhysicalDeviceMemoryProperties,
+		vkAllocateMemory,
+		vkFreeMemory,
+		vkMapMemory,
+		vkUnmapMemory,
+		vkFlushMappedMemoryRanges,
+		vkInvalidateMappedMemoryRanges,
+		vkBindBufferMemory,
+		vkBindImageMemory,
+		vkGetBufferMemoryRequirements,
+		vkGetImageMemoryRequirements,
+		vkCreateBuffer,
+		vkDestroyBuffer,
+		vkCreateImage,
+		vkDestroyImage,
+		vkCmdCopyBuffer
+		};
+
+		VmaAllocatorCreateInfo create_info = {};
+		create_info.device = device;
+		create_info.physicalDevice = physicalDevice;
+		create_info.pVulkanFunctions = &vk_funcs;
+
+		return vmaCreateAllocator(&create_info, &m_allocator);
+	}
+
 	int VulkanContext::examinePhysicalDevice(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) const
 	{
 		QueueFamilyIndices indices = fetchQueueFamilyIndices(physicalDevice);

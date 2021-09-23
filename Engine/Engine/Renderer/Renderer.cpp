@@ -313,7 +313,6 @@ void Renderer::render(const RenderScene* scene, const VulkanRenderFrame& frame)
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
 	
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 

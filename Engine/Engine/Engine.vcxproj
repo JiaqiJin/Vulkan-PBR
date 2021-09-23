@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC ;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -166,6 +166,7 @@
     <ClCompile Include="RHI\RenderPass.cpp" />
     <ClCompile Include="RHI\Shader.cpp" />
     <ClCompile Include="Common\Texture.cpp" />
+    <ClCompile Include="RHI\vmaAllocator.cpp" />
     <ClCompile Include="RHI\VulkanContext.cpp" />
     <ClCompile Include="RHI\VulkanUtils.cpp" />
     <ClCompile Include="Vendor\imgui\imgui.cpp" />
