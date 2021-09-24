@@ -170,7 +170,7 @@ void Texture::create2D(VkFormat format, int w, int h, int mips)
 		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		image,
-		imageMemory);
+		memory);
 
 	// Prepare the image for shader access
 	VulkanUtils::transitionImageLayout(
@@ -219,7 +219,7 @@ void Texture::createCube(VkFormat format, int width_, int height_, int numMipLev
 		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		image,
-		imageMemory);
+		memory);
 
 	// Prepare the image for shader access
 	VulkanUtils::transitionImageLayout(
@@ -250,7 +250,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 	imageFormat = format;
 
 	VkBuffer stagingBuffer = VK_NULL_HANDLE;
-	VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
+	VmaAllocation stagingBufferMemory = VK_NULL_HANDLE;
 
 	VulkanUtils::createBuffer(
 		context,
@@ -262,9 +262,9 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 
 	// Fill staging buffer
 	void* data = nullptr;
-	vkMapMemory(context->getDevice(), stagingBufferMemory, 0, static_cast<VkDeviceSize>(imageSize), 0, &data);
+	vmaMapMemory(context->GetAllocatorHandle(), stagingBufferMemory, &data);
 	memcpy(data, pixels, imageSize);
-	vkUnmapMemory(context->getDevice(), stagingBufferMemory);
+	vmaUnmapMemory(context->GetAllocatorHandle(), stagingBufferMemory);
 
 	VulkanUtils::createImage2D(
 		context,
@@ -277,7 +277,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		image,
-		imageMemory);
+		memory);
 
 	// Prepare the image for transfer
 	VulkanUtils::transitionImageLayout(
@@ -319,7 +319,7 @@ void Texture::uploadToGPU(VkFormat format, VkImageTiling tiling, size_t imageSiz
 
 	// Destroy staging buffer
 	vkDestroyBuffer(context->getDevice(), stagingBuffer, nullptr);
-	vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
+	//vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
 
 	// Create image view & sampler
 	imageView = VulkanUtils::createImageView(

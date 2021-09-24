@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
+#include <vk_mem_alloc.h>
+
 namespace RHI
 {
 	class VulkanContext;
@@ -60,7 +62,7 @@ namespace RHI
 			VkImageUsageFlags usage,
 			VkMemoryPropertyFlags memoryProperties,
 			VkImage& image,
-			VkDeviceMemory& memory);
+			VmaAllocation& memory);
 
 		static void createImage2D(const VulkanContext* context,
 			uint32_t width,
@@ -72,14 +74,14 @@ namespace RHI
 			VkImageUsageFlags usage,
 			VkMemoryPropertyFlags memoryProperties,
 			VkImage& image,
-			VkDeviceMemory& memory);
+			VmaAllocation& memory);
 
 		static void createBuffer(const VulkanContext* context,
 			VkDeviceSize size,
 			VkBufferUsageFlags usage,
 			VkMemoryPropertyFlags memoryProperties,
 			VkBuffer& buffer,
-			VkDeviceMemory& memory);
+			VmaAllocation& memory);
 
 		// Helper functions recording and excuting a command buffer
 		static void transitionImageLayout(

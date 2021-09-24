@@ -157,7 +157,7 @@ namespace RHI
 
 		// Fill uniform buffer
 		CubemapFaceOrientationData* ubo = nullptr;
-		vkMapMemory(context->getDevice(), uniformBufferMemory, 0, sizeof(CubemapFaceOrientationData), 0, reinterpret_cast<void**>(&ubo));
+		vmaMapMemory(context->GetAllocatorHandle(), uniformBufferMemory, reinterpret_cast<void**>(&ubo));
 
 		const glm::mat4& translateZ = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -191,7 +191,7 @@ namespace RHI
 		for (int i = 0; i < 6; i++)
 			ubo->faces[i] = faceRotations[i] * glm::lookAtRH(glm::vec3(0.0f), faceDirs[i], faceUps[i]) * translateZ;
 
-		vkUnmapMemory(context->getDevice(), uniformBufferMemory);
+		vmaUnmapMemory(context->GetAllocatorHandle(), uniformBufferMemory);
 
 		// Bind data to descriptor set
 		VulkanUtils::bindUniformBuffer(
@@ -216,7 +216,7 @@ namespace RHI
 		vkDestroyBuffer(context->getDevice(), uniformBuffer, nullptr);
 		uniformBuffer = VK_NULL_HANDLE;
 
-		vkFreeMemory(context->getDevice(), uniformBufferMemory, nullptr);
+		//vkFreeMemory(context->getDevice(), uniformBufferMemory, nullptr);
 		uniformBufferMemory = VK_NULL_HANDLE;
 
 		vkDestroyFramebuffer(context->getDevice(), frameBuffer, nullptr);

@@ -70,9 +70,9 @@ bool SwapChain::acquire(void* ubo, VulkanRenderFrame& frame)
 
 	// copy render state to ubo
 	void* data = nullptr;
-	vkMapMemory(context->getDevice(), frame.uniformBufferMemory, 0, uboSize, 0, &data);
+	vmaMapMemory(context->GetAllocatorHandle(), frame.uniformBufferMemory, &data);
 	memcpy(data, ubo, static_cast<size_t>(uboSize));
-	vkUnmapMemory(context->getDevice(), frame.uniformBufferMemory);
+	vmaUnmapMemory(context->GetAllocatorHandle(), frame.uniformBufferMemory);
 
 	// reset command buffer
 	if (vkResetCommandBuffer(frame.commandBuffer, 0) != VK_SUCCESS)
@@ -278,7 +278,7 @@ void SwapChain::shutdownTransient()
 	vkDestroyImage(context->getDevice(), colorImage, nullptr);
 	colorImage = VK_NULL_HANDLE;
 
-	vkFreeMemory(context->getDevice(), colorImageMemory, nullptr);
+	//vkFreeMemory(context->getDevice(), colorImageMemory, nullptr);
 	colorImageMemory = VK_NULL_HANDLE;
 
 	vkDestroyImageView(context->getDevice(), depthImageView, nullptr);
@@ -287,7 +287,7 @@ void SwapChain::shutdownTransient()
 	vkDestroyImage(context->getDevice(), depthImage, nullptr);
 	depthImage = VK_NULL_HANDLE;
 
-	vkFreeMemory(context->getDevice(), depthImageMemory, nullptr);
+	//vkFreeMemory(context->getDevice(), depthImageMemory, nullptr);
 	depthImageMemory = VK_NULL_HANDLE;
 
 	for (auto imageView : swapChainImageViews)
@@ -452,7 +452,7 @@ void SwapChain::shutdownFrames()
 		vkFreeCommandBuffers(context->getDevice(), context->getCommandPool(), 1, &frame.commandBuffer);
 		vkFreeDescriptorSets(context->getDevice(), context->getDescriptorPool(), 1, &frame.descriptorSet);
 		vkDestroyBuffer(context->getDevice(), frame.uniformBuffer, nullptr);
-		vkFreeMemory(context->getDevice(), frame.uniformBufferMemory, nullptr);
+		//vkFreeMemory(context->getDevice(), frame.uniformBufferMemory, nullptr);
 		vkDestroyFramebuffer(context->getDevice(), frame.frameBuffer, nullptr);
 	}
 	frames.clear();
