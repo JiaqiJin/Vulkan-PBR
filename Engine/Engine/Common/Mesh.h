@@ -7,8 +7,6 @@
 #include <vector>
 #include <string>
 
-#include <vk_mem_alloc.h>
-
 namespace RHI
 {
 	class VulkanContext;
@@ -63,9 +61,9 @@ private:
 
 	// Vertex buffer
 	VkBuffer vertexBuffer{ VK_NULL_HANDLE };
-	VmaAllocation vertexBufferMemory{ VK_NULL_HANDLE };
+	VkDeviceMemory vertexBufferMemory{ VK_NULL_HANDLE };
 
 	// Index buffer
 	VkBuffer indexBuffer{ VK_NULL_HANDLE };
-	VmaAllocation indexBufferMemory{ VK_NULL_HANDLE };
+	VkDeviceMemory indexBufferMemory{ VK_NULL_HANDLE };
 };

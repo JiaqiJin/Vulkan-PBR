@@ -20,6 +20,7 @@
 #include <GLM/gtc/matrix_transform.hpp>
 
 #include <chrono>	
+#include <stdexcept>
 
 using namespace RHI;
 

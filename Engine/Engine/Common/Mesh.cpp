@@ -196,7 +196,7 @@ void Mesh::createVertexBuffer()
 
 	// StagingBuffer definition
 	VkBuffer stagingBuffer = VK_NULL_HANDLE;
-	VmaAllocation stagingBufferMemory = VK_NULL_HANDLE;
+	VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
 
 	VulkanUtils::createBuffer(
 		context,
@@ -217,16 +217,16 @@ void Mesh::createVertexBuffer()
 
 	// Fill staging buffer
 	void* data = nullptr;
-	vmaMapMemory(context->GetAllocatorHandle(), stagingBufferMemory, &data);
+	vkMapMemory(context->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 	memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-	vmaUnmapMemory(context->GetAllocatorHandle(), stagingBufferMemory);
+	vkUnmapMemory(context->getDevice(), stagingBufferMemory);
 
 	// Transfer to GPU local memory
 	VulkanUtils::copyBuffer(context, stagingBuffer, vertexBuffer, bufferSize);
 
 	// Destroy staging buffer
 	vkDestroyBuffer(context->getDevice(), stagingBuffer, nullptr);
-	//vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
+	vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
 }
 
 void Mesh::createIndexBuffer()
@@ -234,7 +234,7 @@ void Mesh::createIndexBuffer()
 	VkDeviceSize bufferSize = sizeof(uint32_t) * indices.size();
 
 	VkBuffer stagingBuffer = VK_NULL_HANDLE;
-	VmaAllocation stagingBufferMemory = VK_NULL_HANDLE;
+	VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
 
 	VulkanUtils::createBuffer(
 		context,
@@ -255,16 +255,16 @@ void Mesh::createIndexBuffer()
 
 	// Fill staging buffer
 	void* data = nullptr;
-	vmaMapMemory(context->GetAllocatorHandle(), stagingBufferMemory, &data);
-	memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-	vmaUnmapMemory(context->GetAllocatorHandle(), stagingBufferMemory);
+	vkMapMemory(context->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
+	vkUnmapMemory(context->getDevice(), stagingBufferMemory);
 
 	// Transfer to GPU local memory
 	VulkanUtils::copyBuffer(context, stagingBuffer, indexBuffer, bufferSize);
 
 	// Destroy staging buffer
 	vkDestroyBuffer(context->getDevice(), stagingBuffer, nullptr);
-	//vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
+	vkFreeMemory(context->getDevice(), stagingBufferMemory, nullptr);
 }
 
 void Mesh::uploadToGPU()
@@ -278,13 +278,13 @@ void Mesh::clearGPUData()
 	vkDestroyBuffer(context->getDevice(), vertexBuffer, nullptr);
 	vertexBuffer = VK_NULL_HANDLE;
 
-	//vkFreeMemory(context->getDevice(), vertexBufferMemory, nullptr);
+	vkFreeMemory(context->getDevice(), vertexBufferMemory, nullptr);
 	vertexBufferMemory = VK_NULL_HANDLE;
 
 	vkDestroyBuffer(context->getDevice(), indexBuffer, nullptr);
 	indexBuffer = VK_NULL_HANDLE;
 
-	//vkFreeMemory(context->getDevice(), indexBufferMemory, nullptr);
+	vkFreeMemory(context->getDevice(), indexBufferMemory, nullptr);
 	indexBufferMemory = VK_NULL_HANDLE;
 }
 

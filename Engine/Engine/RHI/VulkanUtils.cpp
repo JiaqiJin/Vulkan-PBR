@@ -182,7 +182,7 @@ namespace RHI
 		VkImageUsageFlags usage,
 		VkMemoryPropertyFlags memoryProperties,
 		VkImage& image,
-		VmaAllocation& memory)
+		VkDeviceMemory& memory)
 	{
 		// Create buffer
 		VkImageCreateInfo imageInfo = {};
@@ -201,26 +201,23 @@ namespace RHI
 		imageInfo.samples = numSamples;
 		imageInfo.flags = 0; // Optional
 
-		VmaAllocationCreateInfo allocInfo = {};
-		allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+		if (vkCreateImage(context->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS)
+			throw std::runtime_error("Can't create image");
 
-		VkResult result = vmaCreateImage(context->GetAllocatorHandle(), &imageInfo, &allocInfo, &image, &memory, nullptr);
-		assert((result == VK_SUCCESS) && "Can't create image");
+		// Allocate memory for the image
+		VkMemoryRequirements memoryRequirements = {};
+		vkGetImageMemoryRequirements(context->getDevice(), image, &memoryRequirements);
 
-		//// Allocate memory for the image
-		//VkMemoryRequirements memoryRequirements = {};
-		//vkGetImageMemoryRequirements(context->getDevice(), image, &memoryRequirements);
+		VkMemoryAllocateInfo memoryAllocateInfo = {};
+		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memoryAllocateInfo.allocationSize = memoryRequirements.size;
+		memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
 
-		//VkMemoryAllocateInfo memoryAllocateInfo = {};
-		//memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		//memoryAllocateInfo.allocationSize = memoryRequirements.size;
-		//memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
+		if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
+			throw std::runtime_error("Can't allocate image memory");
 
-		//if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
-		//	throw std::runtime_error("Can't allocate image memory");
-
-		//if (vkBindImageMemory(context->getDevice(), image, memory, 0) != VK_SUCCESS)
-		//	throw std::runtime_error("Can't bind image memory");
+		if (vkBindImageMemory(context->getDevice(), image, memory, 0) != VK_SUCCESS)
+			throw std::runtime_error("Can't bind image memory");
 	}
 
 	void VulkanUtils::createImageCube(
@@ -234,7 +231,7 @@ namespace RHI
 		VkImageUsageFlags usage,
 		VkMemoryPropertyFlags memoryProperties,
 		VkImage& image,
-		VmaAllocation& memory)
+		VkDeviceMemory& memory)
 	{
 		// Create buffer
 		VkImageCreateInfo imageInfo = {};
@@ -253,26 +250,23 @@ namespace RHI
 		imageInfo.samples = numSamples;
 		imageInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
-		VmaAllocationCreateInfo allocInfo = {};
-		allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+		if (vkCreateImage(context->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS)
+			throw std::runtime_error("Can't create image");
 
-		VkResult result = vmaCreateImage(context->GetAllocatorHandle(), &imageInfo, &allocInfo, &image, &memory, nullptr);
-		assert((result == VK_SUCCESS) && "Can't create image");
+		// Allocate memory for the buffer
+		VkMemoryRequirements memoryRequirements = {};
+		vkGetImageMemoryRequirements(context->getDevice(), image, &memoryRequirements);
 
-		//// Allocate memory for the buffer
-		//VkMemoryRequirements memoryRequirements = {};
-		//vkGetImageMemoryRequirements(context->getDevice(), image, &memoryRequirements);
+		VkMemoryAllocateInfo memoryAllocateInfo = {};
+		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memoryAllocateInfo.allocationSize = memoryRequirements.size;
+		memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
 
-		//VkMemoryAllocateInfo memoryAllocateInfo = {};
-		//memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		//memoryAllocateInfo.allocationSize = memoryRequirements.size;
-		//memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
+		if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
+			throw std::runtime_error("Can't allocate image memory");
 
-		//if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
-		//	throw std::runtime_error("Can't allocate image memory");
-
-		//if (vkBindImageMemory(context->getDevice(), image, memory, 0) != VK_SUCCESS)
-		//	throw std::runtime_error("Can't bind image memory");
+		if (vkBindImageMemory(context->getDevice(), image, memory, 0) != VK_SUCCESS)
+			throw std::runtime_error("Can't bind image memory");
 	}
 
 	void VulkanUtils::createBuffer(
@@ -281,7 +275,7 @@ namespace RHI
 		VkBufferUsageFlags usage,
 		VkMemoryPropertyFlags memoryProperties,
 		VkBuffer& buffer,
-		VmaAllocation& memory)
+		VkDeviceMemory& memory)
 	{
 		VkBufferCreateInfo bufferInfo = {};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -289,26 +283,23 @@ namespace RHI
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		VmaAllocationCreateInfo allocInfo = {};
-		allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-
-		if (vmaCreateBuffer(context->GetAllocatorHandle(), &bufferInfo, &allocInfo, &buffer, &memory, nullptr) != VK_SUCCESS)
+		if (vkCreateBuffer(context->getDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
 			throw std::runtime_error("Can't create buffer");
 
-		//// Allocate memory for the buffer
-		//VkMemoryRequirements memoryRequirements = {};
-		//vkGetBufferMemoryRequirements(context->getDevice(), buffer, &memoryRequirements);
+		// Allocate memory for the buffer
+		VkMemoryRequirements memoryRequirements = {};
+		vkGetBufferMemoryRequirements(context->getDevice(), buffer, &memoryRequirements);
 
-		//VkMemoryAllocateInfo memoryAllocateInfo = {};
-		//memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		//memoryAllocateInfo.allocationSize = memoryRequirements.size;
-		//memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
+		VkMemoryAllocateInfo memoryAllocateInfo = {};
+		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memoryAllocateInfo.allocationSize = memoryRequirements.size;
+		memoryAllocateInfo.memoryTypeIndex = findMemoryType(context, memoryRequirements.memoryTypeBits, memoryProperties);
 
-		//if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
-		//	throw std::runtime_error("Can't allocate buffer memory");
+		if (vkAllocateMemory(context->getDevice(), &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS)
+			throw std::runtime_error("Can't allocate buffer memory");
 
-		//if (vkBindBufferMemory(context->getDevice(), buffer, memory, 0) != VK_SUCCESS)
-		//	throw std::runtime_error("Can't bind buffer memory");
+		if (vkBindBufferMemory(context->getDevice(), buffer, memory, 0) != VK_SUCCESS)
+			throw std::runtime_error("Can't bind buffer memory");
 	}
 
 	void VulkanUtils::copyBuffer(

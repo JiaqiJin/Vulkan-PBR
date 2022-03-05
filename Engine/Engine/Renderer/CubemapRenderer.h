@@ -8,8 +8,6 @@
 #include "../Common/Texture.h"
 #include "../Common/Mesh.h"
 
-#include <vk_mem_alloc.h>
-
 namespace RHI
 {
 	class VulkanContext;
@@ -45,7 +43,7 @@ namespace RHI
 		VkDescriptorSet descriptorSet{ VK_NULL_HANDLE }; // Descriptor set
 
 		VkBuffer uniformBuffer{ VK_NULL_HANDLE }; // Uniform Buffer
-		VmaAllocation uniformBufferMemory{ VK_NULL_HANDLE }; // Uniform buffer Memory
+		VkDeviceMemory uniformBufferMemory{ VK_NULL_HANDLE }; // Uniform buffer Memory
 
 		VkFence fence{ VK_NULL_HANDLE }; // Fence
 	};

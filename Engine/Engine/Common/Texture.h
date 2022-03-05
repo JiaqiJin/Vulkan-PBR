@@ -3,8 +3,6 @@
 #include <vulkan/vulkan.h>
 #include <string>
 
-#include <vk_mem_alloc.h>
-
 namespace RHI
 {
 	class VulkanContext;
@@ -55,5 +53,4 @@ private:
 	VkDeviceMemory imageMemory{ VK_NULL_HANDLE };
 	VkImageView imageView{ VK_NULL_HANDLE };
 	VkSampler imageSampler{ VK_NULL_HANDLE };
-	VmaAllocation memory{ VK_NULL_HANDLE };
 };

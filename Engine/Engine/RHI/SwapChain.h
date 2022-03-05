@@ -3,8 +3,6 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include <vk_mem_alloc.h>
-
 namespace RHI
 {
 	class VulkanContext;
@@ -17,7 +15,7 @@ namespace RHI
 		VkCommandBuffer commandBuffer{ VK_NULL_HANDLE };
 
 		VkBuffer uniformBuffer{ VK_NULL_HANDLE };
-		VmaAllocation uniformBufferMemory{ VK_NULL_HANDLE };
+		VkDeviceMemory uniformBufferMemory{ VK_NULL_HANDLE };
 	};
 
 	class SwapChain
@@ -83,11 +81,11 @@ namespace RHI
 
 		VkImage colorImage{ VK_NULL_HANDLE };
 		VkImageView colorImageView{ VK_NULL_HANDLE };
-		VmaAllocation colorImageMemory{ VK_NULL_HANDLE };
+		VkDeviceMemory colorImageMemory{ VK_NULL_HANDLE };
 
 		VkImage depthImage{ VK_NULL_HANDLE };
 		VkImageView depthImageView{ VK_NULL_HANDLE };
-		VmaAllocation depthImageMemory{ VK_NULL_HANDLE };
+		VkDeviceMemory depthImageMemory{ VK_NULL_HANDLE };
 
 		VkFormat depthFormat;
 
