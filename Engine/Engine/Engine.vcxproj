@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC ;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;$(VULKAN_SDK)\Include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\Engine\Engine;E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;$(VULKAN_SDK)\Include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -134,7 +134,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC ;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;$(VULKAN_SDK)\Include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\VisualStudio\Vulkan-Engine\Engine\Engine;E:\VisualStudio\Vulkan-Engine\dependencies\Logger\include;E:\VisualStudio\Vulkan-Engine\dependencies\vma;E:\VisualStudio\Vulkan-Engine\dependencies\stb_image;E:\VisualStudio\Vulkan-Engine\dependencies\glm;E:\VisualStudio\Vulkan-Engine\dependencies\glfw-3.3.2.bin.WIN64\include;E:\VisualStudio\Vulkan-Engine\dependencies\glew-2.1.0\include;$(VULKAN_SDK)\Include;E:\VisualStudio\Vulkan-Engine\dependencies\assimp\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -169,6 +169,9 @@
     <ClCompile Include="RHI\vmaAllocator.cpp" />
     <ClCompile Include="RHI\VulkanContext.cpp" />
     <ClCompile Include="RHI\VulkanUtils.cpp" />
+    <ClCompile Include="RHI\Vulkan\Platform.cpp" />
+    <ClCompile Include="RHI\Vulkan\VulkanContext.cpp" />
+    <ClCompile Include="RHI\Vulkan\VulkanUtils.cpp" />
     <ClCompile Include="Vendor\imgui\imgui.cpp" />
     <ClCompile Include="Vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="Vendor\imgui\imgui_draw.cpp" />
@@ -197,6 +200,9 @@
     <ClInclude Include="Common\Texture.h" />
     <ClInclude Include="RHI\VulkanContext.h" />
     <ClInclude Include="RHI\VulkanUtils.h" />
+    <ClInclude Include="RHI\Vulkan\Platform.h" />
+    <ClInclude Include="RHI\Vulkan\VulkanContext.h" />
+    <ClInclude Include="RHI\Vulkan\VulkanUtils.h" />
     <ClInclude Include="Vendor\imgui\imconfig.h" />
     <ClInclude Include="Vendor\imgui\imgui.h" />
     <ClInclude Include="Vendor\imgui\imgui_impl_glfw.h" />
